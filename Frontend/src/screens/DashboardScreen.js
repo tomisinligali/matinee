@@ -113,8 +113,21 @@ function DiscoverView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('All Films');
+  const [detailSubTab, setDetailSubTab] = useState('overview');
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   const scrollRef = useRef(null);
+
+  const CATEGORIES = ['All Films', 'Top Rated ★', 'Trending', 'Popular'];
+
+  const SAMPLE_CAST = [
+    { id: '1', name: "Lupita Nyong'o", role: 'Roz (Voice)', initials: 'LN' },
+    { id: '2', name: 'Pedro Pascal', role: 'Fink (Voice)', initials: 'PP' },
+    { id: '3', name: "Catherine O'Hara", role: 'Pinktail (Voice)', initials: 'CO' },
+    { id: '4', name: 'Bill Nighy', role: 'Longneck (Voice)', initials: 'BN' },
+    { id: '5', name: 'Kit Connor', role: 'Brightbill (Voice)', initials: 'KC' }
+  ];
 
   async function loadMovies(pageToLoad = 1, append = false) {
     try {
@@ -166,9 +179,16 @@ function DiscoverView() {
     }
   };
 
-  const filteredMovies = searchQuery.trim()
-    ? movies.filter(m => m.title?.toLowerCase().includes(searchQuery.trim().toLowerCase()))
-    : movies;
+  let filteredMovies = movies;
+  if (searchQuery.trim()) {
+    filteredMovies = filteredMovies.filter(m => m.title?.toLowerCase().includes(searchQuery.trim().toLowerCase()));
+  } else if (selectedCategory === 'Top Rated ★') {
+    filteredMovies = [...filteredMovies].filter(m => (parseFloat(m.rating) || 0) >= 7.0);
+  } else if (selectedCategory === 'Trending') {
+    filteredMovies = [...filteredMovies].sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0));
+  } else if (selectedCategory === 'Popular') {
+    filteredMovies = [...filteredMovies].filter(m => (parseFloat(m.rating) || 0) >= 6.5);
+  }
 
   return (
     <View style={styles.discoverContainer}>
@@ -211,7 +231,25 @@ function DiscoverView() {
           </View>
         </View>
 
-        {/* Index 2: Featured Banner (Consumer Facing) */}
+        {/* Index 2: Category Filter Pills (Steam Store / JioHotstar Inspired) */}
+        {!searchQuery.trim() && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryPillsScroll}>
+            {CATEGORIES.map(cat => (
+              <TouchableOpacity
+                key={cat}
+                style={[styles.categoryPill, selectedCategory === cat && styles.activeCategoryPill]}
+                onPress={() => setSelectedCategory(cat)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.categoryPillText, selectedCategory === cat && styles.activeCategoryPillText]}>
+                  {cat}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
+
+        {/* Index 3: Featured Banner (Letterboxd / Funflix Inspired) */}
         {!searchQuery.trim() && (
           <View style={styles.bannerCard}>
             <View style={styles.bannerBadge}>
@@ -255,7 +293,10 @@ function DiscoverView() {
                 <TouchableOpacity
                   key={movie.id}
                   style={styles.movieCard}
-                  onPress={() => setSelectedMovie(movie)}
+                  onPress={() => {
+                    setSelectedMovie(movie);
+                    setDetailSubTab('overview');
+                  }}
                   activeOpacity={0.8}
                 >
                   {movie.posterUrl ? (
@@ -310,49 +351,182 @@ function DiscoverView() {
           </Text>
         </View>
 
-        {/* Movie Details Modal */}
+        {/* Full-Screen Movie Details Page (Funflix & Letterboxd inspired) */}
         <Modal
           visible={Boolean(selectedMovie)}
           animationType="slide"
-          transparent={true}
+          presentationStyle="fullScreen"
           onRequestClose={() => setSelectedMovie(null)}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              {selectedMovie?.backdropUrl ? (
-                <Image
-                  source={{ uri: selectedMovie.backdropUrl }}
-                  style={styles.modalBackdrop}
-                  resizeMode="cover"
-                />
-              ) : null}
+          <View style={styles.fullScreenContainer}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.fullScreenScroll}>
+              {/* Hero Backdrop with Top Scrim & Floating Bar */}
+              <View style={styles.fullScreenBackdropWrapper}>
+                {selectedMovie?.backdropUrl || selectedMovie?.posterUrl ? (
+                  <Image
+                    source={{ uri: selectedMovie.backdropUrl || selectedMovie.posterUrl }}
+                    style={styles.fullScreenBackdrop}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.fullScreenBackdropPlaceholder}>
+                    <Ionicons name="film-outline" size={60} color={Colors.outline} />
+                  </View>
+                )}
+                {/* Dark gradient scrim */}
+                <View style={styles.backdropScrim} />
 
-              <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
-                <View style={styles.modalHeaderRow}>
-                  <Text style={styles.modalTitle}>{selectedMovie?.title}</Text>
-                  <TouchableOpacity onPress={() => setSelectedMovie(null)} style={styles.closeBtn}>
-                    <Ionicons name="close" size={22} color={Colors.onSurface} />
+                {/* Floating Top Controls */}
+                <SafeAreaView style={styles.fullScreenTopNav}>
+                  <TouchableOpacity
+                    onPress={() => setSelectedMovie(null)}
+                    style={styles.circleIconBtn}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="arrow-back" size={22} color={Colors.onSurface} />
+                  </TouchableOpacity>
+
+                  <View style={styles.topNavRightActions}>
+                    <TouchableOpacity
+                      onPress={() => setIsBookmarked(prev => !prev)}
+                      style={styles.circleIconBtn}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons
+                        name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
+                        size={20}
+                        color={isBookmarked ? Colors.primary : Colors.onSurface}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.circleIconBtn}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="share-social-outline" size={20} color={Colors.onSurface} />
+                    </TouchableOpacity>
+                  </View>
+                </SafeAreaView>
+              </View>
+
+              {/* Main Content Body */}
+              <View style={styles.fullScreenBody}>
+                {/* Title */}
+                <Text style={styles.fullScreenTitle}>{selectedMovie?.title}</Text>
+
+                {/* Metadata Pills */}
+                <View style={styles.fullScreenMetaRow}>
+                  <View style={styles.ratingPill}>
+                    <Ionicons name="star" size={13} color="#FFD700" style={{ marginRight: Spacing.xxs }} />
+                    <Text style={styles.ratingPillText}>{selectedMovie?.rating} / 10</Text>
+                  </View>
+                  <View style={styles.metaPill}>
+                    <Text style={styles.metaPillText}>
+                      {selectedMovie?.releaseDate ? new Date(selectedMovie.releaseDate).getFullYear() : '2024'}
+                    </Text>
+                  </View>
+                  <View style={styles.metaPill}>
+                    <Text style={styles.metaPillText}>PG-13</Text>
+                  </View>
+                  <View style={styles.metaPill}>
+                    <Text style={styles.metaPillText}>IMAX • 2D</Text>
+                  </View>
+                </View>
+
+                {/* Primary Booking Call-To-Action */}
+                <TouchableOpacity
+                  style={styles.primaryBookButton}
+                  onPress={() => setSelectedMovie(null)}
+                  activeOpacity={0.85}
+                >
+                  <Ionicons name="ticket" size={20} color={Colors.onPrimary} style={{ marginRight: Spacing.xs }} />
+                  <Text style={styles.primaryBookButtonText}>Select Showtime & Book Seats</Text>
+                </TouchableOpacity>
+
+                {/* Sub Tabs: Overview | Cast & Crew | Showtimes */}
+                <View style={styles.detailTabsRow}>
+                  <TouchableOpacity
+                    style={[styles.detailTabItem, detailSubTab === 'overview' && styles.activeDetailTabItem]}
+                    onPress={() => setDetailSubTab('overview')}
+                  >
+                    <Text style={[styles.detailTabText, detailSubTab === 'overview' && styles.activeDetailTabText]}>
+                      Overview
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.detailTabItem, detailSubTab === 'cast' && styles.activeDetailTabItem]}
+                    onPress={() => setDetailSubTab('cast')}
+                  >
+                    <Text style={[styles.detailTabText, detailSubTab === 'cast' && styles.activeDetailTabText]}>
+                      Cast & Crew
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.detailTabItem, detailSubTab === 'showtimes' && styles.activeDetailTabItem]}
+                    onPress={() => setDetailSubTab('showtimes')}
+                  >
+                    <Text style={[styles.detailTabText, detailSubTab === 'showtimes' && styles.activeDetailTabText]}>
+                      Showtimes
+                    </Text>
                   </TouchableOpacity>
                 </View>
 
-                <View style={styles.modalMetaRow}>
-                  <Ionicons name="star" size={14} color="#FFD700" style={{ marginRight: Spacing.xxs }} />
-                  <Text style={styles.modalRating}>{selectedMovie?.rating} / 10</Text>
-                  <Text style={styles.modalReleaseDate}>• Released: {selectedMovie?.releaseDate}</Text>
-                </View>
+                {detailSubTab === 'overview' && (
+                  <View style={styles.subTabContent}>
+                    <Text style={styles.fullScreenSectionHeader}>Synopsis</Text>
+                    <Text style={styles.fullScreenSynopsis}>
+                      {selectedMovie?.synopsis || 'No overview available for this screening.'}
+                    </Text>
 
-                <Text style={styles.modalSectionTitle}>Synopsis</Text>
-                <Text style={styles.modalSynopsis}>{selectedMovie?.synopsis}</Text>
+                    <Text style={styles.fullScreenSectionHeader}>Key Information</Text>
+                    <View style={styles.metaGrid}>
+                      <View style={styles.metaGridItem}>
+                        <Text style={styles.metaGridLabel}>Cinema Release</Text>
+                        <Text style={styles.metaGridValue}>{selectedMovie?.releaseDate || 'Now In Theatres'}</Text>
+                      </View>
+                      <View style={styles.metaGridItem}>
+                        <Text style={styles.metaGridLabel}>Formats Available</Text>
+                        <Text style={styles.metaGridValue}>IMAX Laser • Standard 2D</Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
 
-                <TouchableOpacity
-                  style={styles.selectSeatsBtn}
-                  onPress={() => setSelectedMovie(null)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.selectSeatsBtnText}>Select Showtime & Seats</Text>
-                </TouchableOpacity>
-              </ScrollView>
-            </View>
+                {detailSubTab === 'cast' && (
+                  <View style={styles.subTabContent}>
+                    <Text style={styles.fullScreenSectionHeader}>Top Billed Cast</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.castScroll}>
+                      {SAMPLE_CAST.map(actor => (
+                        <View key={actor.id} style={styles.castCard}>
+                          <View style={styles.castAvatarCircle}>
+                            <Text style={styles.castAvatarInitial}>{actor.initials}</Text>
+                          </View>
+                          <Text style={styles.castActorName} numberOfLines={1}>{actor.name}</Text>
+                          <Text style={styles.castRoleName} numberOfLines={1}>{actor.role}</Text>
+                        </View>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
+
+                {detailSubTab === 'showtimes' && (
+                  <View style={styles.subTabContent}>
+                    <Text style={styles.fullScreenSectionHeader}>Today's Schedules</Text>
+                    <View style={styles.showtimeCard}>
+                      <View style={styles.showtimeHeader}>
+                        <Text style={styles.showtimeCinema}>Filmhouse Cinemas (Lekki)</Text>
+                        <Text style={styles.showtimePrice}>₦4,500</Text>
+                      </View>
+                      <Text style={styles.showtimeScreen}>Screen 1 • IMAX Laser</Text>
+                      <View style={styles.timePillsRow}>
+                        <View style={styles.timePill}><Text style={styles.timePillText}>2:30 PM</Text></View>
+                        <View style={[styles.timePill, styles.activeTimePill]}><Text style={styles.activeTimePillText}>5:15 PM</Text></View>
+                        <View style={styles.timePill}><Text style={styles.timePillText}>8:00 PM</Text></View>
+                      </View>
+                    </View>
+                  </View>
+                )}
+              </View>
+            </ScrollView>
           </View>
         </Modal>
       </ScrollView>
@@ -529,22 +703,136 @@ function CinemasView() {
 }
 
 function TicketsView() {
+  const [ticketTab, setTicketTab] = useState('upcoming');
+
+  const DEMO_TICKET = {
+    bookingRef: 'MTN-9482-LKK',
+    movieTitle: 'The Wild Robot',
+    cinema: 'Filmhouse Cinemas, Lekki Phase 1',
+    screen: 'Screen 1 (IMAX Laser)',
+    date: 'Today, Oct 19',
+    time: '7:45 PM',
+    row: 'Row F',
+    seats: 'Seats 12, 13',
+    format: 'IMAX 2D',
+    status: 'CONFIRMED'
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
       <View style={styles.topHeader}>
-        <Text style={styles.brandSubtitle}>MATINEE</Text>
-        <Text style={styles.pageTitle}>My Bookings</Text>
+        <Text style={styles.brandSubtitle}>MATINEE DIGITAL PASS</Text>
+        <Text style={styles.pageTitle}>My Tickets</Text>
       </View>
 
-      <View style={styles.emptyStateBox}>
-        <View style={styles.emptyStateIconCircle}>
-          <Ionicons name="ticket-outline" size={44} color={Colors.primary} />
-        </View>
-        <Text style={styles.emptyStateTitle}>No Active Tickets</Text>
-        <Text style={styles.emptyStateSubtitle}>
-          When you book tickets, your confirmed bookings and gate QR codes will appear right here.
-        </Text>
+      {/* Segment Switcher */}
+      <View style={styles.ticketSegmentWrapper}>
+        <TouchableOpacity
+          style={[styles.ticketSegmentBtn, ticketTab === 'upcoming' && styles.activeTicketSegmentBtn]}
+          onPress={() => setTicketTab('upcoming')}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.ticketSegmentText, ticketTab === 'upcoming' && styles.activeTicketSegmentText]}>
+            Upcoming Passes (1)
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.ticketSegmentBtn, ticketTab === 'past' && styles.activeTicketSegmentBtn]}
+          onPress={() => setTicketTab('past')}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.ticketSegmentText, ticketTab === 'past' && styles.activeTicketSegmentText]}>
+            Past Bookings
+          </Text>
+        </TouchableOpacity>
       </View>
+
+      {ticketTab === 'upcoming' ? (
+        <View style={styles.ticketPassContainer}>
+          {/* Authentic Physical Cinema Notch Ticket Pass */}
+          <View style={styles.notchTicketCard}>
+            {/* Semicircular Ticket Notches on Left and Right edges */}
+            <View style={styles.notchLeft} />
+            <View style={styles.notchRight} />
+
+            {/* Top Ticket Header: Movie Details */}
+            <View style={styles.ticketTopSection}>
+              <View style={styles.ticketHeaderBadgeRow}>
+                <View style={styles.ticketStatusBadge}>
+                  <Ionicons name="checkmark-circle" size={14} color={Colors.onSuccessContainer} style={{ marginRight: Spacing.xxs }} />
+                  <Text style={styles.ticketStatusBadgeText}>{DEMO_TICKET.status}</Text>
+                </View>
+                <Text style={styles.ticketFormatText}>{DEMO_TICKET.format}</Text>
+              </View>
+
+              <Text style={styles.ticketMovieTitle}>{DEMO_TICKET.movieTitle}</Text>
+              <View style={styles.ticketVenueRow}>
+                <Ionicons name="location-outline" size={13} color={Colors.primary} style={{ marginRight: Spacing.xxs }} />
+                <Text style={styles.ticketCinemaVenue}>{DEMO_TICKET.cinema}</Text>
+              </View>
+            </View>
+
+            {/* Perforated Divider with dashed dots */}
+            <View style={styles.perforatedDivider}>
+              <View style={styles.perforatedDashes} />
+            </View>
+
+            {/* Bottom Ticket Stub: Screening & Seating Matrix */}
+            <View style={styles.ticketStubSection}>
+              <View style={styles.ticketDataGrid}>
+                <View style={styles.ticketDataCol}>
+                  <Text style={styles.ticketDataLabel}>DATE</Text>
+                  <Text style={styles.ticketDataValue}>{DEMO_TICKET.date}</Text>
+                </View>
+                <View style={styles.ticketDataCol}>
+                  <Text style={styles.ticketDataLabel}>TIME</Text>
+                  <Text style={styles.ticketDataValue}>{DEMO_TICKET.time}</Text>
+                </View>
+                <View style={styles.ticketDataCol}>
+                  <Text style={styles.ticketDataLabel}>HALL</Text>
+                  <Text style={styles.ticketDataValue}>Screen 1</Text>
+                </View>
+                <View style={styles.ticketDataCol}>
+                  <Text style={styles.ticketDataLabel}>SEATS</Text>
+                  <Text style={styles.ticketDataValueHighlight}>{DEMO_TICKET.row} • 12, 13</Text>
+                </View>
+              </View>
+
+              {/* Barcode Graphic & Turnstile Scan Prompt */}
+              <View style={styles.barcodeWrapper}>
+                <View style={styles.barcodeBars}>
+                  {[3, 1, 2, 4, 1, 3, 2, 1, 4, 2, 3, 1, 2, 4, 1, 3, 2, 1, 3, 2, 4, 1, 2, 3, 1, 2, 4].map((w, idx) => (
+                    <View
+                      key={idx}
+                      style={{
+                        width: w * 2,
+                        height: 44,
+                        backgroundColor: Colors.onSurface,
+                        marginRight: Spacing.xxs
+                      }}
+                    />
+                  ))}
+                </View>
+                <Text style={styles.barcodeBookingRef}>BOOKING REF: {DEMO_TICKET.bookingRef}</Text>
+                <View style={styles.barcodePromptRow}>
+                  <Ionicons name="scan-outline" size={14} color={Colors.primary} style={{ marginRight: Spacing.xxs }} />
+                  <Text style={styles.barcodePromptText}>Scan this digital barcode at cinema turnstile</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <View style={styles.emptyStateBox}>
+          <View style={styles.emptyStateIconCircle}>
+            <Ionicons name="time-outline" size={44} color={Colors.outline} />
+          </View>
+          <Text style={styles.emptyStateTitle}>No Past Bookings</Text>
+          <Text style={styles.emptyStateSubtitle}>
+            Completed movie bookings from previous visits will be archived here.
+          </Text>
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -868,92 +1156,480 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 16
   },
-  modalOverlay: {
+  // Category Filter Pills (Steam Store / JioHotstar)
+  categoryPillsScroll: {
+    marginBottom: Spacing.md
+  },
+  categoryPill: {
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    marginRight: Spacing.xs
+  },
+  activeCategoryPill: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary
+  },
+  categoryPillText: {
+    ...Typography.labelSmall,
+    color: Colors.onSurface,
+    fontWeight: '600'
+  },
+  activeCategoryPillText: {
+    color: Colors.onPrimary,
+    fontWeight: '700'
+  },
+
+  // Full-Screen Movie Details Page (Funflix & Letterboxd)
+  fullScreenContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'flex-end'
+    backgroundColor: Colors.surface
   },
-  modalContent: {
-    backgroundColor: Colors.surface,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    maxHeight: '85%',
-    overflow: 'hidden'
+  fullScreenScroll: {
+    paddingBottom: Spacing.huge
   },
-  modalBackdrop: {
+  fullScreenBackdropWrapper: {
     width: '100%',
-    height: 180,
+    height: 320,
+    position: 'relative'
+  },
+  fullScreenBackdrop: {
+    width: '100%',
+    height: '100%',
     backgroundColor: Colors.surfaceContainer
   },
-  modalScroll: {
-    padding: Spacing.lg
-  },
-  modalHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: Spacing.xs
-  },
-  modalTitle: {
-    ...Typography.headlineMedium,
-    color: Colors.onSurface,
-    fontWeight: '700',
-    flex: 1,
-    marginRight: Spacing.sm
-  },
-  closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surfaceContainerHigh,
+  fullScreenBackdropPlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center'
   },
-  closeBtnText: {
-    fontSize: 16,
+  backdropScrim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(13, 13, 18, 0.45)'
+  },
+  fullScreenTopNav: {
+    position: 'absolute',
+    top: Spacing.sm,
+    left: Spacing.md,
+    right: Spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  topNavRightActions: {
+    flexDirection: 'row',
+    gap: Spacing.sm
+  },
+  circleIconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: BorderRadius.full,
+    backgroundColor: 'rgba(13, 13, 18, 0.75)',
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  fullScreenBody: {
+    padding: Spacing.lg,
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+    marginTop: -Spacing.xl
+  },
+  fullScreenTitle: {
+    ...Typography.headlineLarge,
+    color: Colors.onSurface,
+    fontWeight: '700',
+    marginBottom: Spacing.sm
+  },
+  fullScreenMetaRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.xs,
+    alignItems: 'center',
+    marginBottom: Spacing.md
+  },
+  ratingPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: Spacing.xxs
+  },
+  ratingPillText: {
+    color: '#FFD700',
+    fontSize: 12,
+    fontWeight: '700'
+  },
+  metaPill: {
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: Spacing.xxs
+  },
+  metaPillText: {
+    ...Typography.labelSmall,
+    color: Colors.onSurface,
+    opacity: 0.8
+  },
+  primaryBookButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.lg,
+    paddingVertical: Spacing.md,
+    marginBottom: Spacing.lg,
+    ...Shadows.medium
+  },
+  primaryBookButtonText: {
+    ...Typography.labelLarge,
+    color: Colors.onPrimary,
+    fontWeight: '700'
+  },
+  detailTabsRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outlineVariant,
+    marginBottom: Spacing.md
+  },
+  detailTabItem: {
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent'
+  },
+  activeDetailTabItem: {
+    borderBottomColor: Colors.primary
+  },
+  detailTabText: {
+    ...Typography.labelMedium,
+    color: Colors.onSurface,
+    opacity: 0.6
+  },
+  activeDetailTabText: {
+    color: Colors.primary,
+    fontWeight: '700',
+    opacity: 1
+  },
+  subTabContent: {
+    gap: Spacing.sm
+  },
+  fullScreenSectionHeader: {
+    ...Typography.titleMedium,
+    color: Colors.onSurface,
+    fontWeight: '700',
+    marginTop: Spacing.xs
+  },
+  fullScreenSynopsis: {
+    ...Typography.bodyMedium,
+    color: Colors.onSurface,
+    opacity: 0.85,
+    lineHeight: 22
+  },
+  metaGrid: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    marginTop: Spacing.xs
+  },
+  metaGridItem: {
+    flex: 1,
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant
+  },
+  metaGridLabel: {
+    ...Typography.labelSmall,
+    color: Colors.onSurface,
+    opacity: 0.6
+  },
+  metaGridValue: {
+    ...Typography.bodySmall,
+    color: Colors.onSurface,
+    fontWeight: '600',
+    marginTop: Spacing.xxs
+  },
+  castScroll: {
+    paddingVertical: Spacing.xs
+  },
+  castCard: {
+    alignItems: 'center',
+    width: 76,
+    marginRight: Spacing.sm
+  },
+  castAvatarCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.primaryContainer,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.xxs
+  },
+  castAvatarInitial: {
+    ...Typography.titleSmall,
+    color: Colors.onPrimaryContainer,
+    fontWeight: '700'
+  },
+  castActorName: {
+    ...Typography.labelSmall,
+    color: Colors.onSurface,
+    textAlign: 'center',
+    fontWeight: '600'
+  },
+  castRoleName: {
+    ...Typography.labelSmall,
+    color: Colors.onSurface,
+    opacity: 0.6,
+    fontSize: 9,
+    textAlign: 'center'
+  },
+  showtimeCard: {
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant
+  },
+  showtimeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  showtimeCinema: {
+    ...Typography.titleSmall,
     color: Colors.onSurface,
     fontWeight: '700'
   },
-  modalMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    marginBottom: Spacing.md
-  },
-  modalRating: {
+  showtimePrice: {
     ...Typography.labelMedium,
     color: Colors.primary,
     fontWeight: '700'
   },
-  modalReleaseDate: {
+  showtimeScreen: {
     ...Typography.bodySmall,
     color: Colors.onSurface,
-    opacity: 0.6
+    opacity: 0.6,
+    marginTop: Spacing.xxs,
+    marginBottom: Spacing.sm
   },
-  modalSectionTitle: {
-    ...Typography.titleMedium,
-    color: Colors.onSurface,
-    fontWeight: '700',
-    marginBottom: Spacing.xs
+  timePillsRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm
   },
-  modalSynopsis: {
-    ...Typography.bodyMedium,
+  timePill: {
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xxs
+  },
+  activeTimePill: {
+    backgroundColor: Colors.primaryContainer,
+    borderWidth: 1,
+    borderColor: Colors.primary
+  },
+  timePillText: {
+    ...Typography.labelSmall,
     color: Colors.onSurface,
-    opacity: 0.8,
-    lineHeight: 22,
+    opacity: 0.7
+  },
+  activeTimePillText: {
+    ...Typography.labelSmall,
+    color: Colors.onPrimaryContainer,
+    fontWeight: '700'
+  },
+
+  // Ticket Pass & Notch Cinema Pass Styling (Mobile Ticket Inspired)
+  ticketSegmentWrapper: {
+    flexDirection: 'row',
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.xxs,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
     marginBottom: Spacing.lg
   },
-  selectSeatsBtn: {
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.md,
-    paddingVertical: Spacing.md,
+  ticketSegmentBtn: {
+    flex: 1,
+    paddingVertical: Spacing.xs,
     alignItems: 'center',
-    marginBottom: Spacing.xl
+    borderRadius: BorderRadius.md
   },
-  selectSeatsBtnText: {
-    ...Typography.labelLarge,
+  activeTicketSegmentBtn: {
+    backgroundColor: Colors.primary
+  },
+  ticketSegmentText: {
+    ...Typography.labelMedium,
+    color: Colors.onSurface,
+    opacity: 0.7
+  },
+  activeTicketSegmentText: {
     color: Colors.onPrimary,
+    fontWeight: '700',
+    opacity: 1
+  },
+  ticketPassContainer: {
+    alignItems: 'center',
+    paddingVertical: Spacing.xs
+  },
+  notchTicketCard: {
+    width: '100%',
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+    overflow: 'hidden',
+    position: 'relative',
+    ...Shadows.medium
+  },
+  notchLeft: {
+    position: 'absolute',
+    top: 135,
+    left: -12,
+    width: 24,
+    height: 24,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.surface,
+    zIndex: 10,
+    borderRightWidth: 1,
+    borderRightColor: Colors.outlineVariant
+  },
+  notchRight: {
+    position: 'absolute',
+    top: 135,
+    right: -12,
+    width: 24,
+    height: 24,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.surface,
+    zIndex: 10,
+    borderLeftWidth: 1,
+    borderLeftColor: Colors.outlineVariant
+  },
+  ticketTopSection: {
+    backgroundColor: Colors.primaryContainer,
+    padding: Spacing.lg
+  },
+  ticketHeaderBadgeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.xs
+  },
+  ticketStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.successContainer,
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: Spacing.xxs
+  },
+  ticketStatusBadgeText: {
+    ...Typography.labelSmall,
+    color: Colors.onSuccessContainer,
     fontWeight: '700'
+  },
+  ticketFormatText: {
+    ...Typography.labelSmall,
+    color: Colors.onPrimaryContainer,
+    letterSpacing: 1,
+    fontWeight: '700'
+  },
+  ticketMovieTitle: {
+    ...Typography.headlineMedium,
+    color: Colors.onPrimaryContainer,
+    fontWeight: '700',
+    marginBottom: Spacing.xxs
+  },
+  ticketVenueRow: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  ticketCinemaVenue: {
+    ...Typography.bodySmall,
+    color: Colors.onPrimaryContainer,
+    opacity: 0.9
+  },
+  perforatedDivider: {
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: Colors.surfaceContainerLowest,
+    height: 1
+  },
+  perforatedDashes: {
+    borderStyle: 'dashed',
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant
+  },
+  ticketStubSection: {
+    padding: Spacing.lg
+  },
+  ticketDataGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.lg
+  },
+  ticketDataCol: {
+    alignItems: 'flex-start'
+  },
+  ticketDataLabel: {
+    ...Typography.labelSmall,
+    color: Colors.onSurface,
+    opacity: 0.5,
+    marginBottom: Spacing.xxs
+  },
+  ticketDataValue: {
+    ...Typography.bodyMedium,
+    color: Colors.onSurface,
+    fontWeight: '600'
+  },
+  ticketDataValueHighlight: {
+    ...Typography.bodyMedium,
+    color: Colors.primary,
+    fontWeight: '700'
+  },
+  barcodeWrapper: {
+    alignItems: 'center',
+    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant
+  },
+  barcodeBars: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 48,
+    marginBottom: Spacing.xs
+  },
+  barcodeBookingRef: {
+    ...Typography.labelMedium,
+    color: Colors.onSurface,
+    letterSpacing: 2,
+    fontWeight: '700',
+    marginBottom: Spacing.xxs
+  },
+  barcodePromptRow: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  barcodePromptText: {
+    ...Typography.labelSmall,
+    color: Colors.onSurface,
+    opacity: 0.7
   },
   infoCard: {
     backgroundColor: Colors.surfaceContainerLowest,

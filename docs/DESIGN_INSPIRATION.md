@@ -1,8 +1,5 @@
 # Design Inspirations & Comparative App Study
 
-This document fulfills the design research requirement:
-> **"Study 5 well-made apps you admire. Screenshot what you like and write one line on why each works. Include this in your docs."**
-
 Below are the 5 curated mobile design references, accompanied by the captured screenshots, core user observations, concise "why it works" rationales, and their direct applicability to **Matinee**.
 
 ---
