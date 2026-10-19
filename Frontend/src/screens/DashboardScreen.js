@@ -83,26 +83,45 @@ export default function DashboardScreen({ user, onLogout }) {
 function DiscoverView() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState('');
   const [selectedMovie, setSelectedMovie] = useState(null);
 
-  useEffect(() => {
-    let isMounted = true;
-    async function loadMovies() {
-      try {
+  async function loadMovies(pageToLoad = 1, append = false) {
+    try {
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
         setError('');
-        const data = await api.getNowPlaying(1);
-        if (isMounted && data?.movies) {
+      }
+
+      const data = await api.getNowPlaying(pageToLoad);
+      if (data?.movies) {
+        if (append) {
+          setMovies(prev => {
+            const existingIds = new Set(prev.map(m => m.id));
+            const newMovies = data.movies.filter(m => !existingIds.has(m.id));
+            return [...prev, ...newMovies];
+          });
+        } else {
           setMovies(data.movies);
         }
-      } catch (err) {
-        if (isMounted) setError(err.message || 'Unable to fetch movies.');
-      } finally {
-        if (isMounted) setLoading(false);
+        setPage(data.page || pageToLoad);
+        setTotalPages(data.totalPages || 1);
       }
+    } catch (err) {
+      setError(err.message || 'Unable to fetch movies.');
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
     }
-    loadMovies();
-    return () => { isMounted = false; };
+  }
+
+  useEffect(() => {
+    loadMovies(1, false);
   }, []);
 
   return (
@@ -117,10 +136,10 @@ function DiscoverView() {
         <Text style={styles.searchPlaceholderText}>Search films, genres, or cinemas...</Text>
       </View>
 
-      {/* Featured Banner */}
+      {/* Featured Banner (Consumer Facing) */}
       <View style={styles.bannerCard}>
         <View style={styles.bannerBadge}>
-          <Text style={styles.bannerBadgeText}>TMDB Powered</Text>
+          <Text style={styles.bannerBadgeText}>PREMIERES & BLOCKBUSTERS</Text>
         </View>
         <Text style={styles.bannerTitle}>Experience Cinema in High Definition</Text>
         <Text style={styles.bannerDesc}>
@@ -144,44 +163,63 @@ function DiscoverView() {
           <Text style={styles.errorText}>{error}</Text>
         </View>
       ) : (
-        <View style={styles.movieGrid}>
-          {movies.map(movie => (
+        <>
+          <View style={styles.movieGrid}>
+            {movies.map(movie => (
+              <TouchableOpacity
+                key={movie.id}
+                style={styles.movieCard}
+                onPress={() => setSelectedMovie(movie)}
+                activeOpacity={0.8}
+              >
+                {movie.posterUrl ? (
+                  <Image
+                    source={{ uri: movie.posterUrl }}
+                    style={styles.moviePoster}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.moviePosterPlaceholder}>
+                    <Text style={styles.posterEmoji}>🎬</Text>
+                  </View>
+                )}
+                <View style={styles.ratingBadge}>
+                  <Text style={styles.ratingBadgeText}>★ {movie.rating}</Text>
+                </View>
+                <Text style={styles.movieCardTitle} numberOfLines={2}>
+                  {movie.title}
+                </Text>
+                <Text style={styles.movieCardDate}>
+                  {movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 'Now Showing'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Pagination Controls */}
+          {page < totalPages && (
             <TouchableOpacity
-              key={movie.id}
-              style={styles.movieCard}
-              onPress={() => setSelectedMovie(movie)}
+              style={styles.loadMoreButton}
+              onPress={() => loadMovies(page + 1, true)}
+              disabled={loadingMore}
               activeOpacity={0.8}
             >
-              {movie.posterUrl ? (
-                <Image
-                  source={{ uri: movie.posterUrl }}
-                  style={styles.moviePoster}
-                  resizeMode="cover"
-                />
+              {loadingMore ? (
+                <ActivityIndicator size="small" color={Colors.onPrimary} />
               ) : (
-                <View style={styles.moviePosterPlaceholder}>
-                  <Text style={styles.posterEmoji}>🎬</Text>
-                </View>
+                <Text style={styles.loadMoreButtonText}>
+                  Load More Releases (Page {page} of {totalPages})
+                </Text>
               )}
-              <View style={styles.ratingBadge}>
-                <Text style={styles.ratingBadgeText}>★ {movie.rating}</Text>
-              </View>
-              <Text style={styles.movieCardTitle} numberOfLines={2}>
-                {movie.title}
-              </Text>
-              <Text style={styles.movieCardDate}>
-                {movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 'Now Showing'}
-              </Text>
             </TouchableOpacity>
-          ))}
-        </View>
+          )}
+        </>
       )}
 
-      {/* TMDB Attribution Banner (Required by TMDB API Terms) */}
-      <View style={styles.tmdbAttributionBox}>
-        <Text style={styles.tmdbLogoText}>THE MOVIE DATABASE</Text>
-        <Text style={styles.tmdbDisclaimerText}>
-          This product uses the TMDB API but is not endorsed or certified by TMDB.
+      {/* Discreet Legal & Attribution Footer */}
+      <View style={styles.footerAttribution}>
+        <Text style={styles.footerAttributionText}>
+          Film metadata provided by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.
         </Text>
       </View>
 
@@ -444,6 +482,22 @@ function AccountView({ user, onLogout }) {
         </View>
       </View>
 
+      {/* About & Attribution */}
+      <View style={styles.sectionCard}>
+        <Text style={styles.sectionCardTitle}>About & Legal</Text>
+        <View style={styles.accountRow}>
+          <Text style={styles.rowLabel}>App Version</Text>
+          <Text style={styles.rowValue}>1.0.0 (MVP)</Text>
+        </View>
+        <View style={styles.accountRow}>
+          <Text style={styles.rowLabel}>Movie Data</Text>
+          <Text style={styles.rowValue}>TMDB API</Text>
+        </View>
+        <Text style={styles.aboutDisclaimerText}>
+          Film posters, descriptions, and ratings provided by The Movie Database. This product uses the TMDB API but is not endorsed or certified by TMDB.
+        </Text>
+      </View>
+
       {/* Logout Action */}
       <TouchableOpacity style={styles.logoutButton} onPress={onLogout} activeOpacity={0.85}>
         <Text style={styles.logoutButtonText}>Log Out</Text>
@@ -621,26 +675,39 @@ const styles = StyleSheet.create({
     opacity: 0.6,
     marginTop: 2
   },
-  tmdbAttributionBox: {
-    backgroundColor: Colors.surfaceContainer,
+  loadMoreButton: {
+    backgroundColor: Colors.primary,
     borderRadius: 10,
-    padding: Spacing.md,
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.sm,
-    alignItems: 'center'
+    paddingVertical: Spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.md,
+    marginBottom: Spacing.xs
   },
-  tmdbLogoText: {
+  loadMoreButtonText: {
+    ...Typography.labelMedium,
+    color: Colors.onPrimary,
+    fontWeight: '700'
+  },
+  footerAttribution: {
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  footerAttributionText: {
     ...Typography.labelSmall,
-    color: Colors.primary,
-    letterSpacing: 1.5,
-    fontWeight: '800'
+    color: Colors.onSurface,
+    opacity: 0.45,
+    textAlign: 'center',
+    fontSize: 10,
+    lineHeight: 14
   },
-  tmdbDisclaimerText: {
+  aboutDisclaimerText: {
     ...Typography.bodySmall,
     color: Colors.onSurface,
-    opacity: 0.7,
-    textAlign: 'center',
-    marginTop: 4,
+    opacity: 0.6,
+    marginTop: Spacing.sm,
     fontSize: 11,
     lineHeight: 16
   },
