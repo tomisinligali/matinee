@@ -12,7 +12,7 @@ import {
   Modal
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Typography } from '../theme/tokens';
+import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../theme/tokens';
 import { api } from '../services/api';
 
 export default function DashboardScreen({ user, onLogout }) {
@@ -656,17 +656,13 @@ const styles = StyleSheet.create({
   stickySearchWrapperScrolled: {
     borderBottomWidth: 1,
     borderBottomColor: Colors.outlineVariant,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3
+    ...Shadows.soft
   },
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 10,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     paddingHorizontal: Spacing.md,
@@ -713,35 +709,25 @@ const styles = StyleSheet.create({
     right: Spacing.lg,
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: BorderRadius.full,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
+    ...Shadows.hard,
     zIndex: 99
-  },
-  backToTopIcon: {
-    color: Colors.onPrimary,
-    fontSize: 22,
-    fontWeight: '800',
-    marginTop: -2
   },
   bannerCard: {
     backgroundColor: Colors.primaryContainer,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.lg
   },
   bannerBadge: {
     alignSelf: 'flex-start',
     backgroundColor: Colors.primary,
-    borderRadius: 4,
+    borderRadius: BorderRadius.xs,
     paddingHorizontal: Spacing.xs,
-    paddingVertical: 2,
+    paddingVertical: Spacing.xxs,
     marginBottom: Spacing.xs
   },
   bannerBadgeText: {
@@ -796,7 +782,7 @@ const styles = StyleSheet.create({
   movieCard: {
     width: '47%',
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.xs,
@@ -806,28 +792,25 @@ const styles = StyleSheet.create({
   moviePoster: {
     width: '100%',
     height: 190,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     backgroundColor: Colors.surfaceContainer
   },
   moviePosterPlaceholder: {
     width: '100%',
     height: 190,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center'
-  },
-  posterEmoji: {
-    fontSize: 40
   },
   ratingBadge: {
     position: 'absolute',
     top: Spacing.sm,
     right: Spacing.sm,
     backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: Spacing.xxs,
     flexDirection: 'row',
     alignItems: 'center'
   },
@@ -847,11 +830,11 @@ const styles = StyleSheet.create({
     ...Typography.bodySmall,
     color: Colors.onSurface,
     opacity: 0.6,
-    marginTop: 2
+    marginTop: Spacing.xxs
   },
   loadMoreButton: {
     backgroundColor: Colors.primary,
-    borderRadius: 10,
+    borderRadius: BorderRadius.md,
     paddingVertical: Spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
@@ -892,8 +875,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: Colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
     maxHeight: '85%',
     overflow: 'hidden'
   },
@@ -921,7 +904,7 @@ const styles = StyleSheet.create({
   closeBtn: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: BorderRadius.full,
     backgroundColor: Colors.surfaceContainerHigh,
     alignItems: 'center',
     justifyContent: 'center'
@@ -962,7 +945,7 @@ const styles = StyleSheet.create({
   },
   selectSeatsBtn: {
     backgroundColor: Colors.primary,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     paddingVertical: Spacing.md,
     alignItems: 'center',
     marginBottom: Spacing.xl
@@ -974,7 +957,7 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
@@ -996,7 +979,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 10,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.md,
@@ -1005,14 +988,11 @@ const styles = StyleSheet.create({
   cinemaIconBox: {
     width: 44,
     height: 44,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.sm
-  },
-  cinemaItemIcon: {
-    fontSize: 20
   },
   cinemaDetails: {
     flex: 1
@@ -1025,7 +1005,7 @@ const styles = StyleSheet.create({
     ...Typography.bodySmall,
     color: Colors.onSurface,
     opacity: 0.6,
-    marginTop: 2
+    marginTop: Spacing.xxs
   },
   chipScroll: {
     marginBottom: Spacing.md
@@ -1033,7 +1013,7 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
-    borderRadius: 20,
+    borderRadius: BorderRadius.full,
     backgroundColor: Colors.surfaceContainer,
     marginRight: Spacing.xs
   },
@@ -1058,9 +1038,9 @@ const styles = StyleSheet.create({
   },
   screenCountBadge: {
     backgroundColor: Colors.surfaceContainer,
-    borderRadius: 6,
+    borderRadius: BorderRadius.sm,
     paddingHorizontal: Spacing.xs,
-    paddingVertical: 2
+    paddingVertical: Spacing.xxs
   },
   screenCountText: {
     ...Typography.labelSmall,
@@ -1074,9 +1054,9 @@ const styles = StyleSheet.create({
   },
   formatBadge: {
     backgroundColor: Colors.primaryContainer,
-    borderRadius: 4,
+    borderRadius: BorderRadius.xs,
     paddingHorizontal: Spacing.xs,
-    paddingVertical: 2
+    paddingVertical: Spacing.xxs
   },
   formatBadgeText: {
     ...Typography.labelSmall,
@@ -1093,7 +1073,7 @@ const styles = StyleSheet.create({
   emptyStateIconCircle: {
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: BorderRadius.full,
     backgroundColor: Colors.primaryContainer,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1115,7 +1095,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.md,
@@ -1124,7 +1104,7 @@ const styles = StyleSheet.create({
   avatarCircle: {
     width: 52,
     height: 52,
-    borderRadius: 26,
+    borderRadius: BorderRadius.full,
     backgroundColor: Colors.primaryContainer,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1150,7 +1130,7 @@ const styles = StyleSheet.create({
   },
   sectionCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.md,
@@ -1181,7 +1161,7 @@ const styles = StyleSheet.create({
   },
   badge: {
     backgroundColor: Colors.primaryContainer,
-    borderRadius: 12,
+    borderRadius: BorderRadius.full,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xxs
   },
@@ -1194,7 +1174,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.errorContainer,
     borderWidth: 1,
     borderColor: Colors.error,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     paddingVertical: Spacing.md,
     alignItems: 'center',
     justifyContent: 'center'
@@ -1219,17 +1199,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: Spacing.xxs,
-    borderRadius: 8
+    borderRadius: BorderRadius.md
   },
   activeNavItem: {
     backgroundColor: Colors.surfaceContainer
-  },
-  navIcon: {
-    fontSize: 20,
-    marginBottom: 2
-  },
-  activeNavIcon: {
-    transform: [{ scale: 1.1 }]
   },
   navLabel: {
     ...Typography.labelSmall,

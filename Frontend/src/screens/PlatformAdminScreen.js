@@ -8,7 +8,7 @@ import {
   SafeAreaView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Typography } from '../theme/tokens';
+import { Colors, Spacing, Typography, BorderRadius } from '../theme/tokens';
 
 export default function PlatformAdminScreen({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('cinemas'); // 'cinemas' | 'operators' | 'audit' | 'account'
@@ -277,32 +277,32 @@ const styles = StyleSheet.create({
   statBox: {
     flex: 1,
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 10,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.sm,
     alignItems: 'center'
   },
   statNum: { ...Typography.headlineMedium, color: Colors.primary, fontWeight: '700' },
-  statLabel: { ...Typography.labelSmall, color: Colors.onSurface, opacity: 0.7, marginTop: 2 },
+  statLabel: { ...Typography.labelSmall, color: Colors.onSurface, opacity: 0.7, marginTop: Spacing.xxs },
   cardList: { gap: Spacing.sm },
   networkCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.md
   },
   networkCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   networkName: { ...Typography.titleMedium, color: Colors.onSurface, fontWeight: '700' },
-  networkLoc: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.6, marginTop: 2 },
-  statusBadge: { paddingHorizontal: Spacing.xs, paddingVertical: 2, borderRadius: 6 },
+  networkLoc: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.6, marginTop: Spacing.xxs },
+  statusBadge: { paddingHorizontal: Spacing.xs, paddingVertical: Spacing.xxs, borderRadius: BorderRadius.sm },
   statusActive: { backgroundColor: Colors.successContainer },
   statusActiveText: { ...Typography.labelSmall, color: Colors.onSuccessContainer, fontWeight: '700' },
   statusSuspended: { backgroundColor: Colors.errorContainer },
   statusSuspendedText: { ...Typography.labelSmall, color: Colors.onErrorContainer, fontWeight: '700' },
   actionRow: { marginTop: Spacing.sm, alignItems: 'flex-end' },
-  toggleBtn: { paddingHorizontal: Spacing.sm, paddingVertical: 4, borderRadius: 6 },
+  toggleBtn: { paddingHorizontal: Spacing.sm, paddingVertical: Spacing.xxs, borderRadius: BorderRadius.sm },
   suspendBtn: { backgroundColor: Colors.errorContainer },
   suspendBtnText: { ...Typography.labelSmall, color: Colors.onErrorContainer, fontWeight: '700' },
   activateBtn: { backgroundColor: Colors.successContainer },
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.md
@@ -320,12 +320,12 @@ const styles = StyleSheet.create({
   staffMeta: { flex: 1 },
   staffName: { ...Typography.titleMedium, color: Colors.onSurface, fontWeight: '700' },
   staffEmail: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.7, marginTop: 1 },
-  staffVenue: { ...Typography.bodySmall, color: Colors.primary, fontWeight: '600', marginTop: 2 },
-  revokeBtn: { backgroundColor: Colors.surfaceContainerHigh, borderRadius: 6, paddingHorizontal: Spacing.sm, paddingVertical: 4 },
+  staffVenue: { ...Typography.bodySmall, color: Colors.primary, fontWeight: '600', marginTop: Spacing.xxs },
+  revokeBtn: { backgroundColor: Colors.surfaceContainerHigh, borderRadius: BorderRadius.sm, paddingHorizontal: Spacing.sm, paddingVertical: Spacing.xxs },
   revokeBtnText: { ...Typography.labelSmall, color: Colors.error, fontWeight: '700' },
   auditCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 10,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.md
@@ -333,13 +333,13 @@ const styles = StyleSheet.create({
   auditHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   auditAction: { ...Typography.labelMedium, color: Colors.primary, fontWeight: '700' },
   auditTime: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.5 },
-  auditActor: { ...Typography.bodySmall, color: Colors.onSurface, marginTop: 4 },
+  auditActor: { ...Typography.bodySmall, color: Colors.onSurface, marginTop: Spacing.xxs },
   auditTarget: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.7, marginTop: 1 },
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.md,
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   avatarBox: {
     width: 52,
     height: 52,
-    borderRadius: 26,
+    borderRadius: BorderRadius.full,
     backgroundColor: Colors.primaryContainer,
     alignItems: 'center',
     justifyContent: 'center',
@@ -362,24 +362,24 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: Colors.primaryContainer,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    borderRadius: 8,
-    marginTop: 4
+    paddingVertical: Spacing.xxs,
+    borderRadius: BorderRadius.full,
+    marginTop: Spacing.xxs
   },
   adminRoleBadgeText: { ...Typography.labelSmall, color: Colors.onPrimaryContainer, fontWeight: '700' },
   securityBox: {
     backgroundColor: Colors.surfaceContainer,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.lg
   },
-  securityTitle: { ...Typography.titleMedium, color: Colors.onSurface, fontWeight: '700', marginBottom: 4 },
+  securityTitle: { ...Typography.titleMedium, color: Colors.onSurface, fontWeight: '700', marginBottom: Spacing.xxs },
   securityDesc: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.8, lineHeight: 18 },
   logoutButton: {
     backgroundColor: Colors.errorContainer,
     borderWidth: 1,
     borderColor: Colors.error,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     paddingVertical: Spacing.md,
     alignItems: 'center'
   },
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.sm,
     paddingHorizontal: Spacing.xs
   },
-  navItem: { flex: 1, alignItems: 'center', paddingVertical: Spacing.xxs, borderRadius: 8 },
+  navItem: { flex: 1, alignItems: 'center', paddingVertical: Spacing.xxs, borderRadius: BorderRadius.md },
   activeNavItem: { backgroundColor: Colors.surfaceContainer },
   navIcon: { fontSize: 20, marginBottom: 2 },
   activeNavIcon: { transform: [{ scale: 1.1 }] },

@@ -8,7 +8,7 @@ import {
   SafeAreaView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Typography } from '../theme/tokens';
+import { Colors, Spacing, Typography, BorderRadius } from '../theme/tokens';
 
 export default function CinemaOperatorScreen({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('screens'); // 'screens' | 'showtimes' | 'scanner' | 'account'
@@ -249,32 +249,32 @@ const styles = StyleSheet.create({
   pageDescription: { ...Typography.bodyMedium, color: Colors.onSurface, opacity: 0.7, marginTop: 2 },
   venueBanner: {
     backgroundColor: Colors.primaryContainer,
-    borderRadius: 10,
+    borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.md
   },
   venueTitle: { ...Typography.titleMedium, color: Colors.onPrimaryContainer, fontWeight: '700' },
-  venueSubtitle: { ...Typography.bodySmall, color: Colors.onPrimaryContainer, opacity: 0.8, marginTop: 2 },
+  venueSubtitle: { ...Typography.bodySmall, color: Colors.onPrimaryContainer, opacity: 0.8, marginTop: Spacing.xxs },
   cardList: { gap: Spacing.md },
   screenCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.md
   },
   screenCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   screenCardTitle: { ...Typography.titleMedium, color: Colors.onSurface, fontWeight: '700' },
-  screenType: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.6, marginTop: 2 },
+  screenType: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.6, marginTop: Spacing.xxs },
   screenMetaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.sm },
   screenMetaText: { ...Typography.bodyMedium, color: Colors.onSurface },
-  manageBtn: { backgroundColor: Colors.surfaceContainer, borderRadius: 6, paddingHorizontal: Spacing.sm, paddingVertical: 4 },
+  manageBtn: { backgroundColor: Colors.surfaceContainer, borderRadius: BorderRadius.sm, paddingHorizontal: Spacing.sm, paddingVertical: Spacing.xxs },
   manageBtnText: { ...Typography.labelSmall, color: Colors.onSurface },
-  activeBadge: { backgroundColor: Colors.successContainer, paddingHorizontal: Spacing.xs, paddingVertical: 2, borderRadius: 6 },
+  activeBadge: { backgroundColor: Colors.successContainer, paddingHorizontal: Spacing.xs, paddingVertical: Spacing.xxs, borderRadius: BorderRadius.sm },
   activeBadgeText: { ...Typography.labelSmall, color: Colors.onSuccessContainer, fontWeight: '700' },
   showtimeCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.md
@@ -282,14 +282,14 @@ const styles = StyleSheet.create({
   showtimeHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   filmTitle: { ...Typography.titleMedium, color: Colors.onSurface, fontWeight: '700' },
   showtimePrice: { ...Typography.titleMedium, color: Colors.primary, fontWeight: '700' },
-  showtimeScreen: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.6, marginTop: 2 },
+  showtimeScreen: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.6, marginTop: Spacing.xxs },
   occupancyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.sm },
   occupancyLabel: { ...Typography.bodySmall, color: Colors.onSurface },
-  statusPill: { backgroundColor: Colors.primaryContainer, borderRadius: 6, paddingHorizontal: Spacing.xs, paddingVertical: 2 },
+  statusPill: { backgroundColor: Colors.primaryContainer, borderRadius: BorderRadius.sm, paddingHorizontal: Spacing.xs, paddingVertical: Spacing.xxs },
   statusPillText: { ...Typography.labelSmall, color: Colors.onPrimaryContainer, fontWeight: '700' },
   scannerBox: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.xl,
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 220,
     backgroundColor: Colors.surfaceContainer,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     borderWidth: 2,
     borderColor: Colors.primary,
     borderStyle: 'dashed',
@@ -309,12 +309,12 @@ const styles = StyleSheet.create({
   },
   cameraEmoji: { fontSize: 44, marginBottom: Spacing.xs },
   scannerTargetText: { ...Typography.headlineSmall, color: Colors.onSurface },
-  scannerInstruction: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.6, marginTop: 4 },
+  scannerInstruction: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.6, marginTop: Spacing.xxs },
   scannerButton: {
     backgroundColor: Colors.primary,
     width: '100%',
     paddingVertical: Spacing.md,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     alignItems: 'center'
   },
   scannerButtonText: { ...Typography.labelLarge, color: Colors.onPrimary },
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.md,
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   avatarBox: {
     width: 52,
     height: 52,
-    borderRadius: 26,
+    borderRadius: BorderRadius.full,
     backgroundColor: Colors.primaryContainer,
     alignItems: 'center',
     justifyContent: 'center',
@@ -345,14 +345,14 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: Colors.primaryContainer,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    borderRadius: 8,
-    marginTop: 4
+    paddingVertical: Spacing.xxs,
+    borderRadius: BorderRadius.full,
+    marginTop: Spacing.xxs
   },
   operatorRoleBadgeText: { ...Typography.labelSmall, color: Colors.onPrimaryContainer, fontWeight: '700' },
   membershipCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.md,
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.errorContainer,
     borderWidth: 1,
     borderColor: Colors.error,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     paddingVertical: Spacing.md,
     alignItems: 'center'
   },
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.sm,
     paddingHorizontal: Spacing.xs
   },
-  navItem: { flex: 1, alignItems: 'center', paddingVertical: Spacing.xxs, borderRadius: 8 },
+  navItem: { flex: 1, alignItems: 'center', paddingVertical: Spacing.xxs, borderRadius: BorderRadius.md },
   activeNavItem: { backgroundColor: Colors.surfaceContainer },
   navIcon: { fontSize: 20, marginBottom: 2 },
   activeNavIcon: { transform: [{ scale: 1.1 }] },

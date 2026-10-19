@@ -11,7 +11,7 @@ import {
   ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Typography } from '../theme/tokens';
+import { Colors, Spacing, Typography, BorderRadius } from '../theme/tokens';
 import { api } from '../services/api';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: Colors.surfaceContainer,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     padding: Spacing.xxs,
     marginBottom: Spacing.md
   },
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: Spacing.xs,
     alignItems: 'center',
-    borderRadius: 6
+    borderRadius: BorderRadius.sm
   },
   activeTab: {
     backgroundColor: Colors.primaryContainer
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.errorContainer,
     borderColor: Colors.error,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     padding: Spacing.sm,
     marginBottom: Spacing.md
   },
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceContainerLowest,
     borderWidth: 1.5,
     borderColor: Colors.outlineVariant,
-    borderRadius: 10,
+    borderRadius: BorderRadius.md,
     padding: Spacing.sm
   },
   activeRoleCard: {
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
   },
   roleIcon: {
     fontSize: 20,
-    marginBottom: 2
+    marginBottom: Spacing.xxs
   },
   roleTitle: {
     ...Typography.labelLarge,
@@ -344,13 +344,13 @@ const styles = StyleSheet.create({
     ...Typography.bodySmall,
     color: Colors.onSurface,
     opacity: 0.7,
-    marginTop: 2
+    marginTop: Spacing.xxs
   },
   input: {
     backgroundColor: Colors.surfaceContainerLowest,
     borderWidth: 1,
     borderColor: Colors.outline,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     fontSize: 16,
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   submitButton: {
     backgroundColor: Colors.primary,
     paddingVertical: Spacing.md,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
     marginTop: Spacing.xs,
     minHeight: 48,

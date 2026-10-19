@@ -167,3 +167,44 @@ export const Typography = {
     color: Colors.onSurface
   }
 };
+
+export const BorderRadius = {
+  none: 0,
+  xs: 4,      // micro badges, tags
+  sm: 6,      // chips, small badges
+  md: 8,      // buttons, input fields, posters
+  lg: 12,     // cards, hero banners, search bar
+  xl: 16,     // modal dialogs, sheets
+  full: 9999  // circular avatars, floating action buttons
+};
+
+export const Shadows = {
+  none: {
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0
+  },
+  soft: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 2
+  },
+  medium: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4
+  },
+  hard: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8
+  }
+};
