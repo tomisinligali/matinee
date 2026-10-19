@@ -265,6 +265,7 @@ function DiscoverView() {
                 accessibilityRole="button"
                 accessibilityLabel={`Filter by ${cat}`}
                 accessibilityState={{ selected: selectedCategory === cat }}
+                hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
               >
                 <Text style={[styles.categoryPillText, selectedCategory === cat && styles.activeCategoryPillText]}>
                   {cat}
@@ -734,6 +735,7 @@ function CinemasView() {
             accessibilityRole="button"
             accessibilityLabel={`Filter cinemas by ${st}`}
             accessibilityState={{ selected: selectedState === st }}
+            hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
           >
             <Text style={[styles.filterChipText, selectedState === st && styles.activeFilterChipText]}>
               {st}
@@ -1259,7 +1261,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.outlineVariant,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
-    minHeight: 44,
+    minHeight: 40,
     justifyContent: 'center',
     marginRight: Spacing.xs
   },
@@ -1790,7 +1792,7 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
-    minHeight: 44,
+    minHeight: 40,
     justifyContent: 'center',
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.surfaceContainer,
