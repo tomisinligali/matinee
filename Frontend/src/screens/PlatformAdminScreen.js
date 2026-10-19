@@ -146,36 +146,48 @@ function CinemasNetworkView() {
       </View>
 
       <View style={styles.cardList}>
-        {cinemas.map(c => (
-          <View key={c.id} style={styles.networkCard}>
-            <View style={styles.networkCardHeader}>
-              <View>
-                <Text style={styles.networkName}>{c.name}</Text>
-                <Text style={styles.networkLoc}>{c.location} • {c.screens} Screens</Text>
-              </View>
-              <View style={[styles.statusBadge, c.status === 'ACTIVE' ? styles.statusActive : styles.statusSuspended]}>
-                <Text style={[styles.statusBadgeText, c.status === 'ACTIVE' ? styles.statusActiveText : styles.statusSuspendedText]}>
-                  {c.status}
-                </Text>
-              </View>
+        {cinemas.length === 0 ? (
+          <View style={styles.emptyStateBox}>
+            <View style={styles.emptyStateIconCircle}>
+              <Ionicons name="business-outline" size={40} color={Colors.outline} />
             </View>
-
-            <View style={styles.actionRow}>
-              <TouchableOpacity
-                style={[styles.toggleBtn, c.status === 'ACTIVE' ? styles.suspendBtn : styles.activateBtn]}
-                onPress={() => toggleStatus(c.id)}
-                activeOpacity={0.7}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel={`${c.status === 'ACTIVE' ? 'Suspend' : 'Reinstate'} cinema ${c.name}`}
-              >
-                <Text style={[styles.toggleBtnText, c.status === 'ACTIVE' ? styles.suspendBtnText : styles.activateBtnText]}>
-                  {c.status === 'ACTIVE' ? 'Suspend Cinema' : 'Reinstate Cinema'}
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={styles.emptyStateTitle}>No Partner Cinemas</Text>
+            <Text style={styles.emptyStateSubtitle}>
+              Cinema venues enrolled in the Matinee network will appear here for operational management.
+            </Text>
           </View>
-        ))}
+        ) : (
+          cinemas.map(c => (
+            <View key={c.id} style={styles.networkCard}>
+              <View style={styles.networkCardHeader}>
+                <View>
+                  <Text style={styles.networkName}>{c.name}</Text>
+                  <Text style={styles.networkLoc}>{c.location} • {c.screens} Screens</Text>
+                </View>
+                <View style={[styles.statusBadge, c.status === 'ACTIVE' ? styles.statusActive : styles.statusSuspended]}>
+                  <Text style={[styles.statusBadgeText, c.status === 'ACTIVE' ? styles.statusActiveText : styles.statusSuspendedText]}>
+                    {c.status}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.actionRow}>
+                <TouchableOpacity
+                  style={[styles.toggleBtn, c.status === 'ACTIVE' ? styles.suspendBtn : styles.activateBtn]}
+                  onPress={() => toggleStatus(c.id)}
+                  activeOpacity={0.7}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${c.status === 'ACTIVE' ? 'Suspend' : 'Reinstate'} cinema ${c.name}`}
+                >
+                  <Text style={[styles.toggleBtnText, c.status === 'ACTIVE' ? styles.suspendBtnText : styles.activateBtnText]}>
+                    {c.status === 'ACTIVE' ? 'Suspend Cinema' : 'Reinstate Cinema'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
+        )}
       </View>
     </ScrollView>
   );
@@ -197,24 +209,36 @@ function OperatorMembershipsView() {
       </View>
 
       <View style={styles.cardList}>
-        {staff.map(s => (
-          <View key={s.id} style={styles.staffCard}>
-            <View style={styles.staffMeta}>
-              <Text style={styles.staffName}>{s.name}</Text>
-              <Text style={styles.staffEmail}>{s.email}</Text>
-              <Text style={styles.staffVenue}>Assigned to: {s.venue}</Text>
+        {staff.length === 0 ? (
+          <View style={styles.emptyStateBox}>
+            <View style={styles.emptyStateIconCircle}>
+              <Ionicons name="people-outline" size={40} color={Colors.outline} />
             </View>
-            <TouchableOpacity
-              style={styles.revokeBtn}
-              activeOpacity={0.7}
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel={`Revoke access for staff member ${s.name}`}
-            >
-              <Text style={styles.revokeBtnText}>Revoke</Text>
-            </TouchableOpacity>
+            <Text style={styles.emptyStateTitle}>No Cinema Staff Memberships</Text>
+            <Text style={styles.emptyStateSubtitle}>
+              Authorized operator accounts and assigned venues will be audited here.
+            </Text>
           </View>
-        ))}
+        ) : (
+          staff.map(s => (
+            <View key={s.id} style={styles.staffCard}>
+              <View style={styles.staffMeta}>
+                <Text style={styles.staffName}>{s.name}</Text>
+                <Text style={styles.staffEmail}>{s.email}</Text>
+                <Text style={styles.staffVenue}>Assigned to: {s.venue}</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.revokeBtn}
+                activeOpacity={0.7}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel={`Revoke access for staff member ${s.name}`}
+              >
+                <Text style={styles.revokeBtnText}>Revoke</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
       </View>
     </ScrollView>
   );
@@ -237,16 +261,28 @@ function AuditTrailView() {
       </View>
 
       <View style={styles.cardList}>
-        {auditLogs.map(log => (
-          <View key={log.id} style={styles.auditCard}>
-            <View style={styles.auditHeaderRow}>
-              <Text style={styles.auditAction}>{log.action}</Text>
-              <Text style={styles.auditTime}>{log.time}</Text>
+        {auditLogs.length === 0 ? (
+          <View style={styles.emptyStateBox}>
+            <View style={styles.emptyStateIconCircle}>
+              <Ionicons name="shield-checkmark-outline" size={40} color={Colors.outline} />
             </View>
-            <Text style={styles.auditActor}>Actor: {log.actor}</Text>
-            <Text style={styles.auditTarget}>Target: {log.target}</Text>
+            <Text style={styles.emptyStateTitle}>No Audit Events Logged</Text>
+            <Text style={styles.emptyStateSubtitle}>
+              Administrative actions, membership revocations, and status changes are permanently recorded here.
+            </Text>
           </View>
-        ))}
+        ) : (
+          auditLogs.map(log => (
+            <View key={log.id} style={styles.auditCard}>
+              <View style={styles.auditHeaderRow}>
+                <Text style={styles.auditAction}>{log.action}</Text>
+                <Text style={styles.auditTime}>{log.time}</Text>
+              </View>
+              <Text style={styles.auditActor}>Actor: {log.actor}</Text>
+              <Text style={styles.auditTarget}>Target: {log.target}</Text>
+            </View>
+          ))
+        )}
       </View>
     </ScrollView>
   );
@@ -456,5 +492,38 @@ const styles = StyleSheet.create({
   navIcon: { fontSize: 20, marginBottom: Spacing.xxs },
   activeNavIcon: { transform: [{ scale: 1.1 }] },
   navLabel: { ...Typography.labelSmall, color: Colors.onSurface, opacity: 0.8 },
-  activeNavLabel: { color: Colors.primary, fontWeight: '700', opacity: 1 }
+  activeNavLabel: { color: Colors.primary, fontWeight: '700', opacity: 1 },
+  emptyStateBox: {
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.md
+  },
+  emptyStateIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.surfaceContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.sm
+  },
+  emptyStateTitle: {
+    ...Typography.titleMedium,
+    color: Colors.onSurface,
+    fontWeight: '700',
+    marginBottom: Spacing.xxs
+  },
+  emptyStateSubtitle: {
+    ...Typography.bodyMedium,
+    color: Colors.onSurface,
+    opacity: 0.85,
+    textAlign: 'center',
+    lineHeight: 20
+  }
 });

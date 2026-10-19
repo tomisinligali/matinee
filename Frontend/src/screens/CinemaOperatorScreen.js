@@ -126,29 +126,41 @@ function ScreensManagementView() {
       </View>
 
       <View style={styles.cardList}>
-        {screens.map(scr => (
-          <View key={scr.id} style={styles.screenCard}>
-            <View style={styles.screenCardHeader}>
-              <Text style={styles.screenCardTitle}>{scr.name}</Text>
-              <View style={styles.activeBadge}>
-                <Text style={styles.activeBadgeText}>{scr.status}</Text>
+        {screens.length === 0 ? (
+          <View style={styles.emptyStateBox}>
+            <View style={styles.emptyStateIconCircle}>
+              <Ionicons name="film-outline" size={40} color={Colors.outline} />
+            </View>
+            <Text style={styles.emptyStateTitle}>No Configured Screens</Text>
+            <Text style={styles.emptyStateSubtitle}>
+              Configure your cinema screens and seating grids to begin scheduling screenings.
+            </Text>
+          </View>
+        ) : (
+          screens.map(scr => (
+            <View key={scr.id} style={styles.screenCard}>
+              <View style={styles.screenCardHeader}>
+                <Text style={styles.screenCardTitle}>{scr.name}</Text>
+                <View style={styles.activeBadge}>
+                  <Text style={styles.activeBadgeText}>{scr.status}</Text>
+                </View>
+              </View>
+              <Text style={styles.screenType}>{scr.type}</Text>
+              <View style={styles.screenMetaRow}>
+                <Text style={styles.screenMetaText}>Total Capacity: {scr.capacity} Seats</Text>
+                <TouchableOpacity
+                  style={styles.manageBtn}
+                  activeOpacity={0.7}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Manage layout grid for ${scr.name}`}
+                >
+                  <Text style={styles.manageBtnText}>Layout Grid</Text>
+                </TouchableOpacity>
               </View>
             </View>
-            <Text style={styles.screenType}>{scr.type}</Text>
-            <View style={styles.screenMetaRow}>
-              <Text style={styles.screenMetaText}>Total Capacity: {scr.capacity} Seats</Text>
-              <TouchableOpacity
-                style={styles.manageBtn}
-                activeOpacity={0.7}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel={`Manage layout grid for ${scr.name}`}
-              >
-                <Text style={styles.manageBtnText}>Layout Grid</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
+          ))
+        )}
       </View>
     </ScrollView>
   );
@@ -170,21 +182,33 @@ function ShowtimesManagementView() {
       </View>
 
       <View style={styles.cardList}>
-        {showtimes.map(st => (
-          <View key={st.id} style={styles.showtimeCard}>
-            <View style={styles.showtimeHeader}>
-              <Text style={styles.filmTitle}>{st.film}</Text>
-              <Text style={styles.showtimePrice}>{st.price}</Text>
+        {showtimes.length === 0 ? (
+          <View style={styles.emptyStateBox}>
+            <View style={styles.emptyStateIconCircle}>
+              <Ionicons name="calendar-outline" size={40} color={Colors.outline} />
             </View>
-            <Text style={styles.showtimeScreen}>{st.screen} • {st.time}</Text>
-            <View style={styles.occupancyRow}>
-              <Text style={styles.occupancyLabel}>Occupancy: {st.booked} seats sold</Text>
-              <View style={styles.statusPill}>
-                <Text style={styles.statusPillText}>Booking Open</Text>
+            <Text style={styles.emptyStateTitle}>No Active Schedules</Text>
+            <Text style={styles.emptyStateSubtitle}>
+              Publish screening time slots for configured auditoriums to open ticket reservations.
+            </Text>
+          </View>
+        ) : (
+          showtimes.map(st => (
+            <View key={st.id} style={styles.showtimeCard}>
+              <View style={styles.showtimeHeader}>
+                <Text style={styles.filmTitle}>{st.film}</Text>
+                <Text style={styles.showtimePrice}>{st.price}</Text>
+              </View>
+              <Text style={styles.showtimeScreen}>{st.screen} • {st.time}</Text>
+              <View style={styles.occupancyRow}>
+                <Text style={styles.occupancyLabel}>Occupancy: {st.booked} seats sold</Text>
+                <View style={styles.statusPill}>
+                  <Text style={styles.statusPillText}>Booking Open</Text>
+                </View>
               </View>
             </View>
-          </View>
-        ))}
+          ))
+        )}
       </View>
     </ScrollView>
   );
@@ -446,5 +470,38 @@ const styles = StyleSheet.create({
   navIcon: { fontSize: 20, marginBottom: Spacing.xxs },
   activeNavIcon: { transform: [{ scale: 1.1 }] },
   navLabel: { ...Typography.labelSmall, color: Colors.onSurface, opacity: 0.8 },
-  activeNavLabel: { color: Colors.primary, fontWeight: '700', opacity: 1 }
+  activeNavLabel: { color: Colors.primary, fontWeight: '700', opacity: 1 },
+  emptyStateBox: {
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.md
+  },
+  emptyStateIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.surfaceContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.sm
+  },
+  emptyStateTitle: {
+    ...Typography.titleMedium,
+    color: Colors.onSurface,
+    fontWeight: '700',
+    marginBottom: Spacing.xxs
+  },
+  emptyStateSubtitle: {
+    ...Typography.bodyMedium,
+    color: Colors.onSurface,
+    opacity: 0.85,
+    textAlign: 'center',
+    lineHeight: 20
+  }
 });

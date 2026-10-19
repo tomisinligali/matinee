@@ -30,7 +30,7 @@ export default function DashboardScreen({ user, onLogout }) {
         <View style={styles.contentArea}>
           {activeTab === 'discover' && <DiscoverView />}
           {activeTab === 'cinemas' && <CinemasView />}
-          {activeTab === 'tickets' && <TicketsView />}
+          {activeTab === 'tickets' && <TicketsView onBrowse={() => setActiveTab('discover')} />}
           {activeTab === 'account' && <AccountView user={user} onLogout={onLogout} />}
         </View>
 
@@ -354,10 +354,30 @@ function DiscoverView() {
       {/* Skeleton Loading State during fetch */}
       {loading && <MovieGridSkeleton count={6} />}
 
-      {/* Error Banner */}
+      {/* Designed Error State with Actionable Recovery CTA */}
       {Boolean(error) && (
-        <View style={styles.errorBox}>
-          <Text style={styles.errorText}>{error}</Text>
+        <View style={styles.errorCard}>
+          <View style={styles.errorIconCircle}>
+            <Ionicons name="cloud-offline-outline" size={32} color={Colors.onErrorContainer} />
+          </View>
+          <Text style={styles.errorCardTitle}>Unable to Load Schedules</Text>
+          <Text style={styles.errorCardSubtitle}>
+            {error || 'Could not connect to cinema scheduling servers. Please check your connection.'}
+          </Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => {
+              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+              loadMovies(1);
+            }}
+            activeOpacity={0.85}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Retry fetching movie schedules"
+          >
+            <Ionicons name="refresh" size={16} color={Colors.onPrimary} style={{ marginRight: Spacing.xs }} />
+            <Text style={styles.retryButtonText}>Retry Screening Fetch</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
@@ -367,16 +387,25 @@ function DiscoverView() {
     if (loading || error) return null;
     return (
       <View style={styles.emptySearchBox}>
-        <Text style={styles.emptySearchText}>No films match "{searchQuery}"</Text>
+        <View style={styles.emptySearchIconCircle}>
+          <Ionicons name="search-outline" size={32} color={Colors.outline} />
+        </View>
+        <Text style={styles.emptySearchTitle}>No Screening Matches Found</Text>
+        <Text style={styles.emptySearchText}>
+          We couldn't find any movie titled "{searchQuery}". Try searching by another keyword.
+        </Text>
         <TouchableOpacity
-          onPress={() => setSearchQuery('')}
+          onPress={() => {
+            try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+            setSearchQuery('');
+          }}
           activeOpacity={0.7}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Clear search filter"
+          accessibilityLabel="Reset search filter"
           style={{ minHeight: 44, justifyContent: 'center' }}
         >
-          <Text style={styles.clearSearchBtnText}>Clear Search Filter</Text>
+          <Text style={styles.clearSearchBtnText}>Reset Search Filters</Text>
         </TouchableOpacity>
       </View>
     );
@@ -837,7 +866,7 @@ function CinemasView() {
   );
 }
 
-function TicketsView() {
+function TicketsView({ onBrowse }) {
   const [ticketTab, setTicketTab] = useState('upcoming');
 
   const DEMO_TICKET = {
@@ -980,6 +1009,21 @@ function TicketsView() {
           <Text style={styles.emptyStateSubtitle}>
             Completed movie bookings from previous visits will be archived here.
           </Text>
+          {onBrowse && (
+            <TouchableOpacity
+              style={styles.emptyActionBtn}
+              onPress={() => {
+                try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+                onBrowse();
+              }}
+              activeOpacity={0.85}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Explore movies in theatres"
+            >
+              <Text style={styles.emptyActionBtnText}>Explore In Theatres</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </ScrollView>
@@ -1137,14 +1181,31 @@ const styles = StyleSheet.create({
   },
   emptySearchBox: {
     paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  emptySearchIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.surfaceContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.sm
+  },
+  emptySearchTitle: {
+    ...Typography.titleMedium,
+    color: Colors.onSurface,
+    fontWeight: '700',
+    marginBottom: Spacing.xxs
   },
   emptySearchText: {
     ...Typography.bodyMedium,
     color: Colors.onSurface,
     opacity: 0.85,
-    marginBottom: Spacing.sm
+    textAlign: 'center',
+    marginBottom: Spacing.md
   },
   clearSearchBtnText: {
     ...Typography.labelMedium,
@@ -1220,6 +1281,69 @@ const styles = StyleSheet.create({
     color: Colors.onSurface,
     opacity: 0.85,
     marginTop: Spacing.xs
+  },
+  errorCard: {
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.error,
+    padding: Spacing.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: Spacing.md
+  },
+  errorIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.errorContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.sm
+  },
+  errorCardTitle: {
+    ...Typography.titleMedium,
+    color: Colors.onSurface,
+    fontWeight: '700',
+    marginBottom: Spacing.xxs
+  },
+  errorCardSubtitle: {
+    ...Typography.bodyMedium,
+    color: Colors.onSurface,
+    opacity: 0.85,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: Spacing.md
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    minHeight: 44
+  },
+  retryButtonText: {
+    ...Typography.labelMedium,
+    color: Colors.onPrimary,
+    fontWeight: '700'
+  },
+  emptyActionBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.md
+  },
+  emptyActionBtnText: {
+    ...Typography.labelMedium,
+    color: Colors.onPrimary,
+    fontWeight: '700'
   },
   columnWrapper: {
     justifyContent: 'space-between',
