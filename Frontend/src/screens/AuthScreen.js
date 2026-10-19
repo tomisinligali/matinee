@@ -89,6 +89,10 @@ export default function AuthScreen({ onNavigate }) {
             style={[styles.tab, isLogin && styles.activeTab]}
             onPress={() => { setIsLogin(true); setErrorMessage(''); }}
             activeOpacity={0.8}
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityLabel="Sign In Tab"
+            accessibilityState={{ selected: isLogin }}
           >
             <Text style={[styles.tabText, isLogin && styles.activeTabText]}>Sign In</Text>
           </TouchableOpacity>
@@ -96,6 +100,10 @@ export default function AuthScreen({ onNavigate }) {
             style={[styles.tab, !isLogin && styles.activeTab]}
             onPress={() => { setIsLogin(false); setErrorMessage(''); }}
             activeOpacity={0.8}
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityLabel="Register Tab"
+            accessibilityState={{ selected: !isLogin }}
           >
             <Text style={[styles.tabText, !isLogin && styles.activeTabText]}>Register</Text>
           </TouchableOpacity>
@@ -103,7 +111,7 @@ export default function AuthScreen({ onNavigate }) {
 
         {/* Error Alert Banner */}
         {errorMessage ? (
-          <View style={styles.errorBox}>
+          <View style={styles.errorBox} accessible={true} accessibilityRole="alert">
             <Text style={styles.errorText}>{errorMessage}</Text>
           </View>
         ) : null}
@@ -119,6 +127,10 @@ export default function AuthScreen({ onNavigate }) {
                     style={[styles.roleCard, role === 'CUSTOMER' && styles.activeRoleCard]}
                     onPress={() => setRole('CUSTOMER')}
                     activeOpacity={0.7}
+                    accessible={true}
+                    accessibilityRole="radio"
+                    accessibilityLabel="Moviegoer role: Book films and seats"
+                    accessibilityState={{ selected: role === 'CUSTOMER' }}
                   >
                     <Ionicons
                       name="ticket-outline"
@@ -136,6 +148,10 @@ export default function AuthScreen({ onNavigate }) {
                     style={[styles.roleCard, role === 'CINEMA_OPERATOR' && styles.activeRoleCard]}
                     onPress={() => setRole('CINEMA_OPERATOR')}
                     activeOpacity={0.7}
+                    accessible={true}
+                    accessibilityRole="radio"
+                    accessibilityLabel="Cinema Operator role: Manage screens and showtimes"
+                    accessibilityState={{ selected: role === 'CINEMA_OPERATOR' }}
                   >
                     <Ionicons
                       name="business-outline"
@@ -153,6 +169,10 @@ export default function AuthScreen({ onNavigate }) {
                     style={[styles.roleCard, role === 'PLATFORM_ADMIN' && styles.activeRoleCard]}
                     onPress={() => setRole('PLATFORM_ADMIN')}
                     activeOpacity={0.7}
+                    accessible={true}
+                    accessibilityRole="radio"
+                    accessibilityLabel="Platform Admin role: Audits and network operations"
+                    accessibilityState={{ selected: role === 'PLATFORM_ADMIN' }}
                   >
                     <Ionicons
                       name="shield-checkmark-outline"
@@ -173,11 +193,13 @@ export default function AuthScreen({ onNavigate }) {
                 <TextInput
                   style={styles.input}
                   placeholder="Jane Doe"
-                  placeholderTextColor={Colors.onSurface}
+                  placeholderTextColor={Colors.onSurfaceVariant}
                   value={name}
                   onChangeText={setName}
                   autoCapitalize="words"
                   editable={!loading}
+                  accessible={true}
+                  accessibilityLabel="Full Name input"
                 />
               </View>
             </>
@@ -188,13 +210,15 @@ export default function AuthScreen({ onNavigate }) {
             <TextInput
               style={styles.input}
               placeholder="you@domain.com"
-              placeholderTextColor={Colors.onSurface}
+              placeholderTextColor={Colors.onSurfaceVariant}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
               editable={!loading}
+              accessible={true}
+              accessibilityLabel="Email Address input"
             />
           </View>
 
@@ -203,12 +227,14 @@ export default function AuthScreen({ onNavigate }) {
             <TextInput
               style={styles.input}
               placeholder="••••••••"
-              placeholderTextColor={Colors.onSurface}
+              placeholderTextColor={Colors.onSurfaceVariant}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
               autoCapitalize="none"
               editable={!loading}
+              accessible={true}
+              accessibilityLabel="Password input"
             />
           </View>
 
@@ -218,6 +244,9 @@ export default function AuthScreen({ onNavigate }) {
             onPress={handleSubmit}
             disabled={loading}
             activeOpacity={0.85}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={isLogin ? 'Sign In Button' : 'Create Account Button'}
           >
             {loading ? (
               <ActivityIndicator color={Colors.onPrimary} size="small" />
@@ -261,7 +290,7 @@ const styles = StyleSheet.create({
   formSubtitle: {
     ...Typography.bodyMedium,
     color: Colors.onSurface,
-    opacity: 0.7,
+    opacity: 0.85,
     textAlign: 'center',
     marginTop: Spacing.xxs
   },
@@ -274,6 +303,8 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
+    minHeight: 44,
+    justifyContent: 'center',
     paddingVertical: Spacing.xs,
     alignItems: 'center',
     borderRadius: BorderRadius.sm
@@ -318,6 +349,8 @@ const styles = StyleSheet.create({
   },
   roleCard: {
     flexDirection: 'column',
+    minHeight: 64,
+    justifyContent: 'center',
     backgroundColor: Colors.surfaceContainerLowest,
     borderWidth: 1.5,
     borderColor: Colors.outlineVariant,
@@ -343,7 +376,7 @@ const styles = StyleSheet.create({
   roleDesc: {
     ...Typography.bodySmall,
     color: Colors.onSurface,
-    opacity: 0.7,
+    opacity: 0.85,
     marginTop: Spacing.xxs
   },
   input: {
@@ -353,6 +386,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
+    minHeight: 48,
     fontSize: 16,
     color: Colors.onSurface
   },
@@ -366,7 +400,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   buttonDisabled: {
-    opacity: 0.6
+    opacity: 0.7
   },
   submitButtonText: {
     ...Typography.labelLarge,

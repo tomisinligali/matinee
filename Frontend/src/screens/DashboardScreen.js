@@ -35,12 +35,16 @@ export default function DashboardScreen({ user, onLogout }) {
             style={[styles.navItem, activeTab === 'discover' && styles.activeNavItem]}
             onPress={() => setActiveTab('discover')}
             activeOpacity={0.7}
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityLabel="Discover movies tab"
+            accessibilityState={{ selected: activeTab === 'discover' }}
           >
             <Ionicons
               name={activeTab === 'discover' ? 'film' : 'film-outline'}
               size={22}
               color={activeTab === 'discover' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'discover' ? 1 : 0.6, marginBottom: Spacing.xxs }}
+              style={{ opacity: activeTab === 'discover' ? 1 : 0.85, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'discover' && styles.activeNavLabel]}>
               Discover
@@ -51,12 +55,16 @@ export default function DashboardScreen({ user, onLogout }) {
             style={[styles.navItem, activeTab === 'cinemas' && styles.activeNavItem]}
             onPress={() => setActiveTab('cinemas')}
             activeOpacity={0.7}
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityLabel="Participating cinemas tab"
+            accessibilityState={{ selected: activeTab === 'cinemas' }}
           >
             <Ionicons
               name={activeTab === 'cinemas' ? 'business' : 'business-outline'}
               size={22}
               color={activeTab === 'cinemas' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'cinemas' ? 1 : 0.6, marginBottom: Spacing.xxs }}
+              style={{ opacity: activeTab === 'cinemas' ? 1 : 0.85, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'cinemas' && styles.activeNavLabel]}>
               Cinemas
@@ -67,12 +75,16 @@ export default function DashboardScreen({ user, onLogout }) {
             style={[styles.navItem, activeTab === 'tickets' && styles.activeNavItem]}
             onPress={() => setActiveTab('tickets')}
             activeOpacity={0.7}
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityLabel="My tickets tab"
+            accessibilityState={{ selected: activeTab === 'tickets' }}
           >
             <Ionicons
               name={activeTab === 'tickets' ? 'ticket' : 'ticket-outline'}
               size={22}
               color={activeTab === 'tickets' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'tickets' ? 1 : 0.6, marginBottom: Spacing.xxs }}
+              style={{ opacity: activeTab === 'tickets' ? 1 : 0.85, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'tickets' && styles.activeNavLabel]}>
               My Tickets
@@ -83,12 +95,16 @@ export default function DashboardScreen({ user, onLogout }) {
             style={[styles.navItem, activeTab === 'account' && styles.activeNavItem]}
             onPress={() => setActiveTab('account')}
             activeOpacity={0.7}
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityLabel="Account and profile tab"
+            accessibilityState={{ selected: activeTab === 'account' }}
           >
             <Ionicons
               name={activeTab === 'account' ? 'person' : 'person-outline'}
               size={22}
               color={activeTab === 'account' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'account' ? 1 : 0.6, marginBottom: Spacing.xxs }}
+              style={{ opacity: activeTab === 'account' ? 1 : 0.85, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'account' && styles.activeNavLabel]}>
               Account
@@ -218,14 +234,19 @@ function DiscoverView() {
               onChangeText={setSearchQuery}
               returnKeyType="search"
               clearButtonMode="while-editing"
+              accessible={true}
+              accessibilityLabel="Search films by title"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity
                 onPress={() => setSearchQuery('')}
                 style={styles.clearSearchButton}
                 activeOpacity={0.7}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel="Clear search input"
               >
-                <Ionicons name="close-circle" size={18} color={Colors.onSurface} style={{ opacity: 0.6 }} />
+                <Ionicons name="close-circle" size={18} color={Colors.onSurface} style={{ opacity: 0.85 }} />
               </TouchableOpacity>
             )}
           </View>
@@ -240,6 +261,10 @@ function DiscoverView() {
                 style={[styles.categoryPill, selectedCategory === cat && styles.activeCategoryPill]}
                 onPress={() => setSelectedCategory(cat)}
                 activeOpacity={0.7}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel={`Filter by ${cat}`}
+                accessibilityState={{ selected: selectedCategory === cat }}
               >
                 <Text style={[styles.categoryPillText, selectedCategory === cat && styles.activeCategoryPillText]}>
                   {cat}
@@ -282,7 +307,14 @@ function DiscoverView() {
         ) : filteredMovies.length === 0 ? (
           <View style={styles.emptySearchBox}>
             <Text style={styles.emptySearchText}>No films match "{searchQuery}"</Text>
-            <TouchableOpacity onPress={() => setSearchQuery('')} activeOpacity={0.7}>
+            <TouchableOpacity
+              onPress={() => setSearchQuery('')}
+              activeOpacity={0.7}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Clear search filter"
+              style={{ minHeight: 44, justifyContent: 'center' }}
+            >
               <Text style={styles.clearSearchBtnText}>Clear Search Filter</Text>
             </TouchableOpacity>
           </View>
@@ -298,12 +330,18 @@ function DiscoverView() {
                     setDetailSubTab('overview');
                   }}
                   activeOpacity={0.8}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${movie.title}, rated ${movie.rating} out of 10. ${movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 'Now showing'}`}
                 >
                   {movie.posterUrl ? (
                     <Image
                       source={{ uri: movie.posterUrl }}
                       style={styles.moviePoster}
                       resizeMode="cover"
+                      accessible={true}
+                      accessibilityRole="image"
+                      accessibilityLabel={`Movie poster for ${movie.title}`}
                     />
                   ) : (
                     <View style={styles.moviePosterPlaceholder}>
@@ -331,6 +369,9 @@ function DiscoverView() {
                 onPress={() => loadMovies(page + 1, true)}
                 disabled={loadingMore}
                 activeOpacity={0.8}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel={`Load more releases, page ${page + 1} of ${totalPages}`}
               >
                 {loadingMore ? (
                   <ActivityIndicator size="small" color={Colors.onPrimary} />
@@ -367,6 +408,9 @@ function DiscoverView() {
                     source={{ uri: selectedMovie.backdropUrl || selectedMovie.posterUrl }}
                     style={styles.fullScreenBackdrop}
                     resizeMode="cover"
+                    accessible={true}
+                    accessibilityRole="image"
+                    accessibilityLabel={`Backdrop for ${selectedMovie?.title}`}
                   />
                 ) : (
                   <View style={styles.fullScreenBackdropPlaceholder}>
@@ -382,6 +426,9 @@ function DiscoverView() {
                     onPress={() => setSelectedMovie(null)}
                     style={styles.circleIconBtn}
                     activeOpacity={0.8}
+                    accessible={true}
+                    accessibilityRole="button"
+                    accessibilityLabel="Close movie details"
                   >
                     <Ionicons name="arrow-back" size={22} color={Colors.onSurface} />
                   </TouchableOpacity>
@@ -391,6 +438,9 @@ function DiscoverView() {
                       onPress={() => setIsBookmarked(prev => !prev)}
                       style={styles.circleIconBtn}
                       activeOpacity={0.8}
+                      accessible={true}
+                      accessibilityRole="button"
+                      accessibilityLabel={isBookmarked ? "Remove from bookmarks" : "Save to bookmarks"}
                     >
                       <Ionicons
                         name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
@@ -401,6 +451,9 @@ function DiscoverView() {
                     <TouchableOpacity
                       style={styles.circleIconBtn}
                       activeOpacity={0.8}
+                      accessible={true}
+                      accessibilityRole="button"
+                      accessibilityLabel="Share movie details"
                     >
                       <Ionicons name="share-social-outline" size={20} color={Colors.onSurface} />
                     </TouchableOpacity>
@@ -437,6 +490,9 @@ function DiscoverView() {
                   style={styles.primaryBookButton}
                   onPress={() => setSelectedMovie(null)}
                   activeOpacity={0.85}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel="Select showtime and book seats"
                 >
                   <Ionicons name="ticket" size={20} color={Colors.onPrimary} style={{ marginRight: Spacing.xs }} />
                   <Text style={styles.primaryBookButtonText}>Select Showtime & Book Seats</Text>
@@ -447,6 +503,10 @@ function DiscoverView() {
                   <TouchableOpacity
                     style={[styles.detailTabItem, detailSubTab === 'overview' && styles.activeDetailTabItem]}
                     onPress={() => setDetailSubTab('overview')}
+                    accessible={true}
+                    accessibilityRole="tab"
+                    accessibilityLabel="Overview tab"
+                    accessibilityState={{ selected: detailSubTab === 'overview' }}
                   >
                     <Text style={[styles.detailTabText, detailSubTab === 'overview' && styles.activeDetailTabText]}>
                       Overview
@@ -455,6 +515,10 @@ function DiscoverView() {
                   <TouchableOpacity
                     style={[styles.detailTabItem, detailSubTab === 'cast' && styles.activeDetailTabItem]}
                     onPress={() => setDetailSubTab('cast')}
+                    accessible={true}
+                    accessibilityRole="tab"
+                    accessibilityLabel="Cast and crew tab"
+                    accessibilityState={{ selected: detailSubTab === 'cast' }}
                   >
                     <Text style={[styles.detailTabText, detailSubTab === 'cast' && styles.activeDetailTabText]}>
                       Cast & Crew
@@ -463,6 +527,10 @@ function DiscoverView() {
                   <TouchableOpacity
                     style={[styles.detailTabItem, detailSubTab === 'showtimes' && styles.activeDetailTabItem]}
                     onPress={() => setDetailSubTab('showtimes')}
+                    accessible={true}
+                    accessibilityRole="tab"
+                    accessibilityLabel="Showtimes tab"
+                    accessibilityState={{ selected: detailSubTab === 'showtimes' }}
                   >
                     <Text style={[styles.detailTabText, detailSubTab === 'showtimes' && styles.activeDetailTabText]}>
                       Showtimes
@@ -662,6 +730,10 @@ function CinemasView() {
             style={[styles.filterChip, selectedState === st && styles.activeFilterChip]}
             onPress={() => setSelectedState(st)}
             activeOpacity={0.7}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Filter cinemas by ${st}`}
+            accessibilityState={{ selected: selectedState === st }}
           >
             <Text style={[styles.filterChipText, selectedState === st && styles.activeFilterChipText]}>
               {st}
@@ -731,6 +803,10 @@ function TicketsView() {
           style={[styles.ticketSegmentBtn, ticketTab === 'upcoming' && styles.activeTicketSegmentBtn]}
           onPress={() => setTicketTab('upcoming')}
           activeOpacity={0.8}
+          accessible={true}
+          accessibilityRole="tab"
+          accessibilityLabel="Upcoming passes"
+          accessibilityState={{ selected: ticketTab === 'upcoming' }}
         >
           <Text style={[styles.ticketSegmentText, ticketTab === 'upcoming' && styles.activeTicketSegmentText]}>
             Upcoming Passes (1)
@@ -740,6 +816,10 @@ function TicketsView() {
           style={[styles.ticketSegmentBtn, ticketTab === 'past' && styles.activeTicketSegmentBtn]}
           onPress={() => setTicketTab('past')}
           activeOpacity={0.8}
+          accessible={true}
+          accessibilityRole="tab"
+          accessibilityLabel="Past bookings"
+          accessibilityState={{ selected: ticketTab === 'past' }}
         >
           <Text style={[styles.ticketSegmentText, ticketTab === 'past' && styles.activeTicketSegmentText]}>
             Past Bookings
@@ -890,7 +970,14 @@ function AccountView({ user, onLogout }) {
       </View>
 
       {/* Logout Action */}
-      <TouchableOpacity style={styles.logoutButton} onPress={onLogout} activeOpacity={0.85}>
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={onLogout}
+        activeOpacity={0.85}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Log out of account"
+      >
         <Text style={styles.logoutButtonText}>Log Out</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -954,7 +1041,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     paddingHorizontal: Spacing.md,
-    height: 44
+    minHeight: 48
   },
   searchIcon: {
     marginRight: Spacing.xs,
@@ -967,12 +1054,16 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.none
   },
   clearSearchButton: {
-    padding: Spacing.xxs
+    padding: Spacing.xxs,
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   clearSearchIcon: {
     fontSize: 14,
     color: Colors.onSurface,
-    opacity: 0.6,
+    opacity: 0.85,
     fontWeight: '700'
   },
   emptySearchBox: {
@@ -983,7 +1074,7 @@ const styles = StyleSheet.create({
   emptySearchText: {
     ...Typography.bodyMedium,
     color: Colors.onSurface,
-    opacity: 0.7,
+    opacity: 0.85,
     marginBottom: Spacing.sm
   },
   clearSearchBtnText: {
@@ -1058,7 +1149,7 @@ const styles = StyleSheet.create({
   loadingText: {
     ...Typography.bodySmall,
     color: Colors.onSurface,
-    opacity: 0.7,
+    opacity: 0.85,
     marginTop: Spacing.xs
   },
   movieGrid: {
@@ -1117,13 +1208,14 @@ const styles = StyleSheet.create({
   movieCardDate: {
     ...Typography.bodySmall,
     color: Colors.onSurface,
-    opacity: 0.6,
+    opacity: 0.85,
     marginTop: Spacing.xxs
   },
   loadMoreButton: {
     backgroundColor: Colors.primary,
     borderRadius: BorderRadius.md,
     paddingVertical: Spacing.sm,
+    minHeight: 48,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: Spacing.md,
@@ -1143,7 +1235,7 @@ const styles = StyleSheet.create({
   footerAttributionText: {
     ...Typography.labelSmall,
     color: Colors.onSurface,
-    opacity: 0.45,
+    opacity: 0.85,
     textAlign: 'center',
     fontSize: 10,
     lineHeight: 14
@@ -1151,7 +1243,7 @@ const styles = StyleSheet.create({
   aboutDisclaimerText: {
     ...Typography.bodySmall,
     color: Colors.onSurface,
-    opacity: 0.6,
+    opacity: 0.85,
     marginTop: Spacing.sm,
     fontSize: 11,
     lineHeight: 16
@@ -1167,6 +1259,8 @@ const styles = StyleSheet.create({
     borderColor: Colors.outlineVariant,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
+    minHeight: 44,
+    justifyContent: 'center',
     marginRight: Spacing.xs
   },
   activeCategoryPill: {
@@ -1226,8 +1320,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm
   },
   circleIconBtn: {
-    width: 38,
-    height: 38,
+    width: 44,
+    height: 44,
     borderRadius: BorderRadius.full,
     backgroundColor: 'rgba(13, 13, 18, 0.75)',
     borderWidth: 1,
@@ -1279,7 +1373,7 @@ const styles = StyleSheet.create({
   metaPillText: {
     ...Typography.labelSmall,
     color: Colors.onSurface,
-    opacity: 0.8
+    opacity: 0.85
   },
   primaryBookButton: {
     flexDirection: 'row',
@@ -1288,6 +1382,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md,
+    minHeight: 52,
     marginBottom: Spacing.lg,
     ...Shadows.medium
   },
@@ -1305,6 +1400,8 @@ const styles = StyleSheet.create({
   detailTabItem: {
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
+    minHeight: 44,
+    justifyContent: 'center',
     borderBottomWidth: 2,
     borderBottomColor: 'transparent'
   },
@@ -1314,7 +1411,7 @@ const styles = StyleSheet.create({
   detailTabText: {
     ...Typography.labelMedium,
     color: Colors.onSurface,
-    opacity: 0.6
+    opacity: 0.85
   },
   activeDetailTabText: {
     color: Colors.primary,
@@ -1352,7 +1449,7 @@ const styles = StyleSheet.create({
   metaGridLabel: {
     ...Typography.labelSmall,
     color: Colors.onSurface,
-    opacity: 0.6
+    opacity: 0.85
   },
   metaGridValue: {
     ...Typography.bodySmall,
@@ -1393,7 +1490,7 @@ const styles = StyleSheet.create({
   castRoleName: {
     ...Typography.labelSmall,
     color: Colors.onSurface,
-    opacity: 0.6,
+    opacity: 0.85,
     fontSize: 9,
     textAlign: 'center'
   },
@@ -1422,7 +1519,7 @@ const styles = StyleSheet.create({
   showtimeScreen: {
     ...Typography.bodySmall,
     color: Colors.onSurface,
-    opacity: 0.6,
+    opacity: 0.85,
     marginTop: Spacing.xxs,
     marginBottom: Spacing.sm
   },
@@ -1434,7 +1531,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceContainerHigh,
     borderRadius: BorderRadius.sm,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xxs
+    paddingVertical: Spacing.xxs,
+    minHeight: 32,
+    justifyContent: 'center'
   },
   activeTimePill: {
     backgroundColor: Colors.primaryContainer,
@@ -1444,7 +1543,7 @@ const styles = StyleSheet.create({
   timePillText: {
     ...Typography.labelSmall,
     color: Colors.onSurface,
-    opacity: 0.7
+    opacity: 0.85
   },
   activeTimePillText: {
     ...Typography.labelSmall,
@@ -1465,6 +1564,8 @@ const styles = StyleSheet.create({
   ticketSegmentBtn: {
     flex: 1,
     paddingVertical: Spacing.xs,
+    minHeight: 44,
+    justifyContent: 'center',
     alignItems: 'center',
     borderRadius: BorderRadius.md
   },
@@ -1474,7 +1575,7 @@ const styles = StyleSheet.create({
   ticketSegmentText: {
     ...Typography.labelMedium,
     color: Colors.onSurface,
-    opacity: 0.7
+    opacity: 0.85
   },
   activeTicketSegmentText: {
     color: Colors.onPrimary,
@@ -1587,7 +1688,7 @@ const styles = StyleSheet.create({
   ticketDataLabel: {
     ...Typography.labelSmall,
     color: Colors.onSurface,
-    opacity: 0.5,
+    opacity: 0.85,
     marginBottom: Spacing.xxs
   },
   ticketDataValue: {
@@ -1629,7 +1730,7 @@ const styles = StyleSheet.create({
   barcodePromptText: {
     ...Typography.labelSmall,
     color: Colors.onSurface,
-    opacity: 0.7
+    opacity: 0.85
   },
   infoCard: {
     backgroundColor: Colors.surfaceContainerLowest,
@@ -1648,7 +1749,7 @@ const styles = StyleSheet.create({
   cardBody: {
     ...Typography.bodyMedium,
     color: Colors.onSurface,
-    opacity: 0.7,
+    opacity: 0.85,
     lineHeight: 20
   },
   cinemaItem: {
@@ -1680,7 +1781,7 @@ const styles = StyleSheet.create({
   cinemaAddress: {
     ...Typography.bodySmall,
     color: Colors.onSurface,
-    opacity: 0.6,
+    opacity: 0.85,
     marginTop: Spacing.xxs
   },
   chipScroll: {
@@ -1689,6 +1790,8 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.surfaceContainer,
     marginRight: Spacing.xs
@@ -1763,7 +1866,7 @@ const styles = StyleSheet.create({
   emptyStateSubtitle: {
     ...Typography.bodyMedium,
     color: Colors.onSurface,
-    opacity: 0.7,
+    opacity: 0.85,
     textAlign: 'center',
     lineHeight: 22
   },
@@ -1802,7 +1905,7 @@ const styles = StyleSheet.create({
   accountEmail: {
     ...Typography.bodyMedium,
     color: Colors.onSurface,
-    opacity: 0.7
+    opacity: 0.85
   },
   sectionCard: {
     backgroundColor: Colors.surfaceContainerLowest,
@@ -1829,7 +1932,7 @@ const styles = StyleSheet.create({
   rowLabel: {
     ...Typography.bodyMedium,
     color: Colors.onSurface,
-    opacity: 0.7
+    opacity: 0.85
   },
   rowValue: {
     ...Typography.bodyMedium,
@@ -1852,6 +1955,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.error,
     borderRadius: BorderRadius.md,
     paddingVertical: Spacing.md,
+    minHeight: 48,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -1874,6 +1978,8 @@ const styles = StyleSheet.create({
   navItem: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 48,
     paddingVertical: Spacing.xxs,
     borderRadius: BorderRadius.md
   },
@@ -1883,7 +1989,7 @@ const styles = StyleSheet.create({
   navLabel: {
     ...Typography.labelSmall,
     color: Colors.onSurface,
-    opacity: 0.6
+    opacity: 0.85
   },
   activeNavLabel: {
     color: Colors.primary,

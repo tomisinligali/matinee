@@ -30,12 +30,16 @@ export default function PlatformAdminScreen({ user, onLogout }) {
             style={[styles.navItem, activeTab === 'cinemas' && styles.activeNavItem]}
             onPress={() => setActiveTab('cinemas')}
             activeOpacity={0.7}
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityLabel="Network Cinemas Tab"
+            accessibilityState={{ selected: activeTab === 'cinemas' }}
           >
             <Ionicons
               name={activeTab === 'cinemas' ? 'business' : 'business-outline'}
               size={22}
               color={activeTab === 'cinemas' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'cinemas' ? 1 : 0.6, marginBottom: Spacing.xxs }}
+              style={{ opacity: activeTab === 'cinemas' ? 1 : 0.8, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'cinemas' && styles.activeNavLabel]}>Network</Text>
           </TouchableOpacity>
@@ -44,12 +48,16 @@ export default function PlatformAdminScreen({ user, onLogout }) {
             style={[styles.navItem, activeTab === 'operators' && styles.activeNavItem]}
             onPress={() => setActiveTab('operators')}
             activeOpacity={0.7}
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityLabel="Staff Operators Tab"
+            accessibilityState={{ selected: activeTab === 'operators' }}
           >
             <Ionicons
               name={activeTab === 'operators' ? 'people' : 'people-outline'}
               size={22}
               color={activeTab === 'operators' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'operators' ? 1 : 0.6, marginBottom: Spacing.xxs }}
+              style={{ opacity: activeTab === 'operators' ? 1 : 0.8, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'operators' && styles.activeNavLabel]}>Staff</Text>
           </TouchableOpacity>
@@ -58,12 +66,16 @@ export default function PlatformAdminScreen({ user, onLogout }) {
             style={[styles.navItem, activeTab === 'audit' && styles.activeNavItem]}
             onPress={() => setActiveTab('audit')}
             activeOpacity={0.7}
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityLabel="Audit Log Tab"
+            accessibilityState={{ selected: activeTab === 'audit' }}
           >
             <Ionicons
               name={activeTab === 'audit' ? 'document-text' : 'document-text-outline'}
               size={22}
               color={activeTab === 'audit' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'audit' ? 1 : 0.6, marginBottom: Spacing.xxs }}
+              style={{ opacity: activeTab === 'audit' ? 1 : 0.8, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'audit' && styles.activeNavLabel]}>Audit Log</Text>
           </TouchableOpacity>
@@ -72,12 +84,16 @@ export default function PlatformAdminScreen({ user, onLogout }) {
             style={[styles.navItem, activeTab === 'account' && styles.activeNavItem]}
             onPress={() => setActiveTab('account')}
             activeOpacity={0.7}
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityLabel="Admin Profile Tab"
+            accessibilityState={{ selected: activeTab === 'account' }}
           >
             <Ionicons
               name={activeTab === 'account' ? 'shield-checkmark' : 'shield-checkmark-outline'}
               size={22}
               color={activeTab === 'account' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'account' ? 1 : 0.6, marginBottom: Spacing.xxs }}
+              style={{ opacity: activeTab === 'account' ? 1 : 0.8, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'account' && styles.activeNavLabel]}>Admin</Text>
           </TouchableOpacity>
@@ -149,6 +165,9 @@ function CinemasNetworkView() {
                 style={[styles.toggleBtn, c.status === 'ACTIVE' ? styles.suspendBtn : styles.activateBtn]}
                 onPress={() => toggleStatus(c.id)}
                 activeOpacity={0.7}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel={`${c.status === 'ACTIVE' ? 'Suspend' : 'Reinstate'} cinema ${c.name}`}
               >
                 <Text style={[styles.toggleBtnText, c.status === 'ACTIVE' ? styles.suspendBtnText : styles.activateBtnText]}>
                   {c.status === 'ACTIVE' ? 'Suspend Cinema' : 'Reinstate Cinema'}
@@ -185,7 +204,13 @@ function OperatorMembershipsView() {
               <Text style={styles.staffEmail}>{s.email}</Text>
               <Text style={styles.staffVenue}>Assigned to: {s.venue}</Text>
             </View>
-            <TouchableOpacity style={styles.revokeBtn} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.revokeBtn}
+              activeOpacity={0.7}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`Revoke access for staff member ${s.name}`}
+            >
               <Text style={styles.revokeBtnText}>Revoke</Text>
             </TouchableOpacity>
           </View>
@@ -255,7 +280,14 @@ function AdminAccountView({ user, onLogout }) {
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={onLogout} activeOpacity={0.85}>
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={onLogout}
+        activeOpacity={0.85}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Log Out"
+      >
         <Text style={styles.logoutButtonText}>Log Out</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -272,7 +304,7 @@ const styles = StyleSheet.create({
   topHeader: { marginBottom: Spacing.md },
   brandSubtitle: { ...Typography.labelSmall, color: Colors.primary, letterSpacing: 1.5, fontWeight: '700' },
   pageTitle: { ...Typography.headlineLarge, color: Colors.onSurface, marginTop: Spacing.xxs },
-  pageDescription: { ...Typography.bodyMedium, color: Colors.onSurface, opacity: 0.7, marginTop: Spacing.xxs },
+  pageDescription: { ...Typography.bodyMedium, color: Colors.onSurface, opacity: 0.85, marginTop: Spacing.xxs },
   networkStatsRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
   statBox: {
     flex: 1,
@@ -284,7 +316,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   statNum: { ...Typography.headlineMedium, color: Colors.primary, fontWeight: '700' },
-  statLabel: { ...Typography.labelSmall, color: Colors.onSurface, opacity: 0.7, marginTop: Spacing.xxs },
+  statLabel: { ...Typography.labelSmall, color: Colors.onSurface, opacity: 0.85, marginTop: Spacing.xxs },
   cardList: { gap: Spacing.sm },
   networkCard: {
     backgroundColor: Colors.surfaceContainerLowest,
@@ -295,14 +327,22 @@ const styles = StyleSheet.create({
   },
   networkCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   networkName: { ...Typography.titleMedium, color: Colors.onSurface, fontWeight: '700' },
-  networkLoc: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.6, marginTop: Spacing.xxs },
+  networkLoc: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.85, marginTop: Spacing.xxs },
   statusBadge: { paddingHorizontal: Spacing.xs, paddingVertical: Spacing.xxs, borderRadius: BorderRadius.sm },
   statusActive: { backgroundColor: Colors.successContainer },
   statusActiveText: { ...Typography.labelSmall, color: Colors.onSuccessContainer, fontWeight: '700' },
   statusSuspended: { backgroundColor: Colors.errorContainer },
   statusSuspendedText: { ...Typography.labelSmall, color: Colors.onErrorContainer, fontWeight: '700' },
   actionRow: { marginTop: Spacing.sm, alignItems: 'flex-end' },
-  toggleBtn: { paddingHorizontal: Spacing.sm, paddingVertical: Spacing.xxs, borderRadius: BorderRadius.sm },
+  toggleBtn: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+    minHeight: 44,
+    minWidth: 120,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   suspendBtn: { backgroundColor: Colors.errorContainer },
   suspendBtnText: { ...Typography.labelSmall, color: Colors.onErrorContainer, fontWeight: '700' },
   activateBtn: { backgroundColor: Colors.successContainer },
@@ -319,9 +359,18 @@ const styles = StyleSheet.create({
   },
   staffMeta: { flex: 1 },
   staffName: { ...Typography.titleMedium, color: Colors.onSurface, fontWeight: '700' },
-  staffEmail: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.7, marginTop: Spacing.xxs },
+  staffEmail: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.85, marginTop: Spacing.xxs },
   staffVenue: { ...Typography.bodySmall, color: Colors.primary, fontWeight: '600', marginTop: Spacing.xxs },
-  revokeBtn: { backgroundColor: Colors.surfaceContainerHigh, borderRadius: BorderRadius.sm, paddingHorizontal: Spacing.sm, paddingVertical: Spacing.xxs },
+  revokeBtn: {
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    minHeight: 44,
+    minWidth: 70,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   revokeBtnText: { ...Typography.labelSmall, color: Colors.error, fontWeight: '700' },
   auditCard: {
     backgroundColor: Colors.surfaceContainerLowest,
@@ -332,9 +381,9 @@ const styles = StyleSheet.create({
   },
   auditHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   auditAction: { ...Typography.labelMedium, color: Colors.primary, fontWeight: '700' },
-  auditTime: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.5 },
+  auditTime: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.8 },
   auditActor: { ...Typography.bodySmall, color: Colors.onSurface, marginTop: Spacing.xxs },
-  auditTarget: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.7, marginTop: Spacing.xxs },
+  auditTarget: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.85, marginTop: Spacing.xxs },
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -357,7 +406,7 @@ const styles = StyleSheet.create({
   avatarText: { fontSize: 24 },
   profileMeta: { flex: 1 },
   profileName: { ...Typography.titleLarge, color: Colors.onSurface, fontWeight: '700' },
-  profileEmail: { ...Typography.bodyMedium, color: Colors.onSurface, opacity: 0.7 },
+  profileEmail: { ...Typography.bodyMedium, color: Colors.onSurface, opacity: 0.85 },
   adminRoleBadge: {
     alignSelf: 'flex-start',
     backgroundColor: Colors.primaryContainer,
@@ -374,14 +423,16 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg
   },
   securityTitle: { ...Typography.titleMedium, color: Colors.onSurface, fontWeight: '700', marginBottom: Spacing.xxs },
-  securityDesc: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.8, lineHeight: 18 },
+  securityDesc: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.85, lineHeight: 18 },
   logoutButton: {
     backgroundColor: Colors.errorContainer,
     borderWidth: 1,
     borderColor: Colors.error,
     borderRadius: BorderRadius.md,
     paddingVertical: Spacing.md,
-    alignItems: 'center'
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   logoutButtonText: { ...Typography.labelLarge, color: Colors.onErrorContainer, fontWeight: '700' },
   bottomNav: {
@@ -393,10 +444,17 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.sm,
     paddingHorizontal: Spacing.xs
   },
-  navItem: { flex: 1, alignItems: 'center', paddingVertical: Spacing.xxs, borderRadius: BorderRadius.md },
+  navItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 48,
+    paddingVertical: Spacing.xxs,
+    borderRadius: BorderRadius.md
+  },
   activeNavItem: { backgroundColor: Colors.surfaceContainer },
   navIcon: { fontSize: 20, marginBottom: Spacing.xxs },
   activeNavIcon: { transform: [{ scale: 1.1 }] },
-  navLabel: { ...Typography.labelSmall, color: Colors.onSurface, opacity: 0.6 },
+  navLabel: { ...Typography.labelSmall, color: Colors.onSurface, opacity: 0.8 },
   activeNavLabel: { color: Colors.primary, fontWeight: '700', opacity: 1 }
 });
