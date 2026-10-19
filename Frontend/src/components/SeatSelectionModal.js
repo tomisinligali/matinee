@@ -52,6 +52,7 @@ function SeatButton({ seatId, status, isSelected, onPress }) {
         ]}
         onPress={handlePress}
         disabled={isOccupied}
+        hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
         activeOpacity={0.8}
         accessible={true}
         accessibilityRole="button"
