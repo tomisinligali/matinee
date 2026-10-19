@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
+import { View, SafeAreaView, StatusBar, StyleSheet, Platform } from 'react-native';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
+
+const SafeContainer = (Platform.OS === 'web' || !SafeAreaView) ? View : SafeAreaView;
 import SplashScreen from './src/screens/SplashScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
@@ -42,7 +44,7 @@ function AppContent() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.surface }]}>
+    <SafeContainer style={[styles.container, { backgroundColor: colors.surface }]}>
       <StatusBar
         barStyle={isDark ? 'light-content' : 'dark-content'}
         backgroundColor={colors.surface}
@@ -54,7 +56,7 @@ function AppContent() {
         <AuthScreen onNavigate={handleNavigate} />
       )}
       {currentScreen === 'dashboard' && renderDashboardByRole()}
-    </SafeAreaView>
+    </SafeContainer>
   );
 }
 

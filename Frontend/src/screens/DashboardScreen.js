@@ -21,12 +21,16 @@ import { api } from '../services/api';
 import { MovieGridSkeleton } from '../components/SkeletonLoader';
 import { SeatSelectionModal } from '../components/SeatSelectionModal';
 import ComponentGalleryScreen from './ComponentGalleryScreen';
+import QRCode from '../components/QRCode';
+import TicketScreen from './TicketScreen';
 
 export default function DashboardScreen({ user, onLogout }) {
   const { colors } = useTheme();
   const styles = getDashboardStyles(colors);
   const [activeTab, setActiveTab] = useState('discover'); // 'discover' | 'cinemas' | 'tickets' | 'account'
   const [showGallery, setShowGallery] = useState(false);
+
+  const [viewingTicketBooking, setViewingTicketBooking] = useState(null);
 
   if (showGallery) {
     return <ComponentGalleryScreen onBack={() => setShowGallery(false)} />;
@@ -37,9 +41,16 @@ export default function DashboardScreen({ user, onLogout }) {
       <View style={styles.container}>
         {/* Main Content Area */}
         <View style={styles.contentArea}>
-          {activeTab === 'discover' && <DiscoverView />}
+          {activeTab === 'discover' && (
+            <DiscoverView onOpenTickets={() => setActiveTab('tickets')} />
+          )}
           {activeTab === 'cinemas' && <CinemasView />}
-          {activeTab === 'tickets' && <TicketsView onBrowse={() => setActiveTab('discover')} />}
+          {activeTab === 'tickets' && (
+            <TicketsView
+              onBrowse={() => setActiveTab('discover')}
+              onViewTicket={(ticket) => setViewingTicketBooking(ticket)}
+            />
+          )}
           {activeTab === 'account' && (
             <AccountView
               user={user}
@@ -48,6 +59,16 @@ export default function DashboardScreen({ user, onLogout }) {
             />
           )}
         </View>
+
+        {/* Full-Screen Detailed Ticket Pass Modal */}
+        {viewingTicketBooking && (
+          <Modal visible={true} animationType="slide" presentationStyle="fullScreen">
+            <TicketScreen
+              booking={viewingTicketBooking}
+              onClose={() => setViewingTicketBooking(null)}
+            />
+          </Modal>
+        )}
 
         {/* Bottom Navigation Bar */}
         <View style={styles.bottomNav}>
@@ -150,7 +171,7 @@ export default function DashboardScreen({ user, onLogout }) {
 
 // ─── Sub-Views ───────────────────────────────────────────────────────────────
 
-function DiscoverView() {
+function DiscoverView({ onOpenTickets }) {
   const { colors } = useTheme();
   const styles = getDashboardStyles(colors);
   const [movies, setMovies] = useState([]);
@@ -487,10 +508,29 @@ function DiscoverView() {
           visible={Boolean(selectedMovie)}
           animationType="slide"
           presentationStyle="fullScreen"
-          onRequestClose={() => setSelectedMovie(null)}
+          onRequestClose={() => {
+            if (showSeatModal) {
+              setShowSeatModal(false);
+            } else {
+              setSelectedMovie(null);
+            }
+          }}
         >
           <View style={styles.fullScreenContainer}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.fullScreenScroll}>
+            {showSeatModal ? (
+              <SeatSelectionModal
+                visible={showSeatModal}
+                movie={selectedMovie}
+                isInline={true}
+                onClose={() => setShowSeatModal(false)}
+                onBookingSuccess={(booking) => {
+                  setShowSeatModal(false);
+                  setSelectedMovie(null);
+                  onOpenTickets?.();
+                }}
+              />
+            ) : (
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.fullScreenScroll}>
               {/* Hero Backdrop with Top Scrim & Floating Bar */}
               <View style={styles.fullScreenBackdropWrapper}>
                 {selectedMovie?.backdropUrl || selectedMovie?.posterUrl ? (
@@ -685,24 +725,28 @@ function DiscoverView() {
                       </View>
                       <Text style={styles.showtimeScreen}>Screen 1 • IMAX Laser</Text>
                       <View style={styles.timePillsRow}>
-                        <View style={styles.timePill}><Text style={styles.timePillText}>2:30 PM</Text></View>
-                        <View style={[styles.timePill, styles.activeTimePill]}><Text style={styles.activeTimePillText}>5:15 PM</Text></View>
-                        <View style={styles.timePill}><Text style={styles.timePillText}>8:00 PM</Text></View>
+                        {['2:30 PM', '5:15 PM', '8:00 PM'].map((time, idx) => (
+                          <TouchableOpacity
+                            key={time}
+                            style={[styles.timePill, idx === 1 && styles.activeTimePill]}
+                            onPress={() => {
+                              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch (_) {}
+                              setShowSeatModal(true);
+                            }}
+                            activeOpacity={0.8}
+                          >
+                            <Text style={[styles.timePillText, idx === 1 && styles.activeTimePillText]}>{time}</Text>
+                          </TouchableOpacity>
+                        ))}
                       </View>
                     </View>
                   </View>
                 )}
               </View>
             </ScrollView>
+            )}
           </View>
         </Modal>
-
-        {/* Interactive Seat Selection & Booking Confirmation Modal */}
-        <SeatSelectionModal
-          visible={showSeatModal}
-          movie={selectedMovie}
-          onClose={() => setShowSeatModal(false)}
-        />
 
       {/* Floating Back To Top Button */}
       {showBackToTop && (
@@ -813,6 +857,8 @@ const NIGERIAN_CINEMAS = [
 ];
 
 function CinemasView() {
+  const { colors } = useTheme();
+  const styles = getDashboardStyles(colors);
   const [selectedState, setSelectedState] = useState('All');
   const states = ['All', 'Lagos', 'Abuja', 'Enugu', 'Oyo', 'Rivers'];
 
@@ -883,7 +929,9 @@ function CinemasView() {
   );
 }
 
-function TicketsView({ onBrowse }) {
+function TicketsView({ onBrowse, onViewTicket }) {
+  const { colors } = useTheme();
+  const styles = getDashboardStyles(colors);
   const [ticketTab, setTicketTab] = useState('upcoming');
 
   const DEMO_TICKET = {
@@ -993,26 +1041,48 @@ function TicketsView({ onBrowse }) {
                 </View>
               </View>
 
-              {/* Barcode Graphic & Turnstile Scan Prompt */}
+              {/* Scannable QR Code and Turnstile Scan Prompt */}
               <View style={styles.barcodeWrapper}>
-                <View style={styles.barcodeBars}>
-                  {[3, 1, 2, 4, 1, 3, 2, 1, 4, 2, 3, 1, 2, 4, 1, 3, 2, 1, 3, 2, 4, 1, 2, 3, 1, 2, 4].map((w, idx) => (
-                    <View
-                      key={idx}
-                      style={{
-                        width: w * 2,
-                        height: 44,
-                        backgroundColor: colors.onSurface,
-                        marginRight: Spacing.xxs
-                      }}
-                    />
-                  ))}
+                <View style={{ backgroundColor: '#FFFFFF', padding: 12, borderRadius: 10, marginVertical: Spacing.sm }}>
+                  <QRCode
+                    value={JSON.stringify({
+                      bookingRef: DEMO_TICKET.bookingRef,
+                      movie: DEMO_TICKET.movieTitle,
+                      cinema: DEMO_TICKET.cinema,
+                      seats: DEMO_TICKET.seats,
+                      status: DEMO_TICKET.status
+                    })}
+                    size={140}
+                    color="#000000"
+                    backgroundColor="#FFFFFF"
+                  />
                 </View>
                 <Text style={styles.barcodeBookingRef}>BOOKING REF: {DEMO_TICKET.bookingRef}</Text>
                 <View style={styles.barcodePromptRow}>
-                  <Ionicons name="scan-outline" size={14} color={colors.primary} style={{ marginRight: Spacing.xxs }} />
-                  <Text style={styles.barcodePromptText}>Scan this digital barcode at cinema turnstile</Text>
+                  <Ionicons name="qr-code-outline" size={14} color={colors.primary} style={{ marginRight: Spacing.xxs }} />
+                  <Text style={styles.barcodePromptText}>Scan this digital QR code at cinema turnstile</Text>
                 </View>
+
+                {onViewTicket && (
+                  <TouchableOpacity
+                    style={{
+                      marginTop: Spacing.md,
+                      backgroundColor: colors.primary,
+                      paddingVertical: 10,
+                      paddingHorizontal: Spacing.lg,
+                      borderRadius: 20,
+                      flexDirection: 'row',
+                      alignItems: 'center'
+                    }}
+                    onPress={() => onViewTicket(DEMO_TICKET)}
+                    activeOpacity={0.85}
+                  >
+                    <Ionicons name="ticket" size={16} color={colors.onPrimary} style={{ marginRight: 6 }} />
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: colors.onPrimary }}>
+                      View Full Ticket Pass
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           </View>
@@ -1051,6 +1121,10 @@ function AccountView({ user, onLogout, onOpenGallery }) {
   const { colors, isDark, setTheme } = useTheme();
   const styles = getDashboardStyles(colors);
 
+  const displayName = user?.name || user?.email?.split('@')[0] || 'Customer';
+  const displayEmail = user?.email || 'patron@matinee.app';
+  const avatarInitial = (displayName || 'U').charAt(0).toUpperCase();
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
       <View style={styles.topHeader}>
@@ -1061,13 +1135,11 @@ function AccountView({ user, onLogout, onOpenGallery }) {
       {/* User Card */}
       <View style={styles.accountCard}>
         <View style={styles.avatarCircle}>
-          <Text style={styles.avatarInitial}>
-            {user?.name ? user.name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || 'U'}
-          </Text>
+          <Text style={styles.avatarInitial}>{avatarInitial}</Text>
         </View>
         <View style={styles.accountHeaderMeta}>
-          <Text style={styles.accountName}>{user?.name || 'Customer'}</Text>
-          <Text style={styles.accountEmail}>{user?.email}</Text>
+          <Text style={styles.accountName}>{displayName}</Text>
+          <Text style={styles.accountEmail}>{displayEmail}</Text>
         </View>
       </View>
 

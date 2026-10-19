@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
-import { BorderRadius, Spacing } from '../theme/tokens';
+import { Colors, BorderRadius, Spacing } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
 
 export function SkeletonBox({ width, height, borderRadius = BorderRadius.sm, style }) {
