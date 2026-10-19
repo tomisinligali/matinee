@@ -7,6 +7,7 @@ import {
   ScrollView,
   SafeAreaView
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography } from '../theme/tokens';
 
 export default function PlatformAdminScreen({ user, onLogout }) {
@@ -30,7 +31,12 @@ export default function PlatformAdminScreen({ user, onLogout }) {
             onPress={() => setActiveTab('cinemas')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.navIcon, activeTab === 'cinemas' && styles.activeNavIcon]}>🏛️</Text>
+            <Ionicons
+              name={activeTab === 'cinemas' ? 'business' : 'business-outline'}
+              size={22}
+              color={activeTab === 'cinemas' ? Colors.primary : Colors.onSurface}
+              style={{ opacity: activeTab === 'cinemas' ? 1 : 0.6, marginBottom: 2 }}
+            />
             <Text style={[styles.navLabel, activeTab === 'cinemas' && styles.activeNavLabel]}>Network</Text>
           </TouchableOpacity>
 
@@ -39,7 +45,12 @@ export default function PlatformAdminScreen({ user, onLogout }) {
             onPress={() => setActiveTab('operators')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.navIcon, activeTab === 'operators' && styles.activeNavIcon]}>👥</Text>
+            <Ionicons
+              name={activeTab === 'operators' ? 'people' : 'people-outline'}
+              size={22}
+              color={activeTab === 'operators' ? Colors.primary : Colors.onSurface}
+              style={{ opacity: activeTab === 'operators' ? 1 : 0.6, marginBottom: 2 }}
+            />
             <Text style={[styles.navLabel, activeTab === 'operators' && styles.activeNavLabel]}>Staff</Text>
           </TouchableOpacity>
 
@@ -48,7 +59,12 @@ export default function PlatformAdminScreen({ user, onLogout }) {
             onPress={() => setActiveTab('audit')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.navIcon, activeTab === 'audit' && styles.activeNavIcon]}>📋</Text>
+            <Ionicons
+              name={activeTab === 'audit' ? 'document-text' : 'document-text-outline'}
+              size={22}
+              color={activeTab === 'audit' ? Colors.primary : Colors.onSurface}
+              style={{ opacity: activeTab === 'audit' ? 1 : 0.6, marginBottom: 2 }}
+            />
             <Text style={[styles.navLabel, activeTab === 'audit' && styles.activeNavLabel]}>Audit Log</Text>
           </TouchableOpacity>
 
@@ -57,7 +73,12 @@ export default function PlatformAdminScreen({ user, onLogout }) {
             onPress={() => setActiveTab('account')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.navIcon, activeTab === 'account' && styles.activeNavIcon]}>🛡️</Text>
+            <Ionicons
+              name={activeTab === 'account' ? 'shield-checkmark' : 'shield-checkmark-outline'}
+              size={22}
+              color={activeTab === 'account' ? Colors.primary : Colors.onSurface}
+              style={{ opacity: activeTab === 'account' ? 1 : 0.6, marginBottom: 2 }}
+            />
             <Text style={[styles.navLabel, activeTab === 'account' && styles.activeNavLabel]}>Admin</Text>
           </TouchableOpacity>
         </View>

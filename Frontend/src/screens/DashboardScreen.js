@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Modal
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography } from '../theme/tokens';
 import { api } from '../services/api';
 
@@ -35,7 +36,12 @@ export default function DashboardScreen({ user, onLogout }) {
             onPress={() => setActiveTab('discover')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.navIcon, activeTab === 'discover' && styles.activeNavIcon]}>🎬</Text>
+            <Ionicons
+              name={activeTab === 'discover' ? 'film' : 'film-outline'}
+              size={22}
+              color={activeTab === 'discover' ? Colors.primary : Colors.onSurface}
+              style={{ opacity: activeTab === 'discover' ? 1 : 0.6, marginBottom: 2 }}
+            />
             <Text style={[styles.navLabel, activeTab === 'discover' && styles.activeNavLabel]}>
               Discover
             </Text>
@@ -46,7 +52,12 @@ export default function DashboardScreen({ user, onLogout }) {
             onPress={() => setActiveTab('cinemas')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.navIcon, activeTab === 'cinemas' && styles.activeNavIcon]}>🏢</Text>
+            <Ionicons
+              name={activeTab === 'cinemas' ? 'business' : 'business-outline'}
+              size={22}
+              color={activeTab === 'cinemas' ? Colors.primary : Colors.onSurface}
+              style={{ opacity: activeTab === 'cinemas' ? 1 : 0.6, marginBottom: 2 }}
+            />
             <Text style={[styles.navLabel, activeTab === 'cinemas' && styles.activeNavLabel]}>
               Cinemas
             </Text>
@@ -57,7 +68,12 @@ export default function DashboardScreen({ user, onLogout }) {
             onPress={() => setActiveTab('tickets')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.navIcon, activeTab === 'tickets' && styles.activeNavIcon]}>🎟️</Text>
+            <Ionicons
+              name={activeTab === 'tickets' ? 'ticket' : 'ticket-outline'}
+              size={22}
+              color={activeTab === 'tickets' ? Colors.primary : Colors.onSurface}
+              style={{ opacity: activeTab === 'tickets' ? 1 : 0.6, marginBottom: 2 }}
+            />
             <Text style={[styles.navLabel, activeTab === 'tickets' && styles.activeNavLabel]}>
               My Tickets
             </Text>
@@ -68,7 +84,12 @@ export default function DashboardScreen({ user, onLogout }) {
             onPress={() => setActiveTab('account')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.navIcon, activeTab === 'account' && styles.activeNavIcon]}>👤</Text>
+            <Ionicons
+              name={activeTab === 'account' ? 'person' : 'person-outline'}
+              size={22}
+              color={activeTab === 'account' ? Colors.primary : Colors.onSurface}
+              style={{ opacity: activeTab === 'account' ? 1 : 0.6, marginBottom: 2 }}
+            />
             <Text style={[styles.navLabel, activeTab === 'account' && styles.activeNavLabel]}>
               Account
             </Text>
@@ -168,7 +189,7 @@ function DiscoverView() {
         {/* Index 1: Sticky Search Input */}
         <View style={[styles.stickySearchWrapper, isScrolled && styles.stickySearchWrapperScrolled]}>
           <View style={styles.searchBarContainer}>
-            <Text style={styles.searchIcon}>🔍</Text>
+            <Ionicons name="search" size={18} color={Colors.outline} style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
               placeholder="Search films by title..."
@@ -184,7 +205,7 @@ function DiscoverView() {
                 style={styles.clearSearchButton}
                 activeOpacity={0.7}
               >
-                <Text style={styles.clearSearchIcon}>✕</Text>
+                <Ionicons name="close-circle" size={18} color={Colors.onSurface} style={{ opacity: 0.6 }} />
               </TouchableOpacity>
             )}
           </View>
@@ -245,11 +266,12 @@ function DiscoverView() {
                     />
                   ) : (
                     <View style={styles.moviePosterPlaceholder}>
-                      <Text style={styles.posterEmoji}>🎬</Text>
+                      <Ionicons name="film-outline" size={40} color={Colors.outline} />
                     </View>
                   )}
                   <View style={styles.ratingBadge}>
-                    <Text style={styles.ratingBadgeText}>★ {movie.rating}</Text>
+                    <Ionicons name="star" size={11} color="#FFD700" style={{ marginRight: 2 }} />
+                    <Text style={styles.ratingBadgeText}>{movie.rating}</Text>
                   </View>
                   <Text style={styles.movieCardTitle} numberOfLines={2}>
                     {movie.title}
@@ -309,13 +331,14 @@ function DiscoverView() {
                 <View style={styles.modalHeaderRow}>
                   <Text style={styles.modalTitle}>{selectedMovie?.title}</Text>
                   <TouchableOpacity onPress={() => setSelectedMovie(null)} style={styles.closeBtn}>
-                    <Text style={styles.closeBtnText}>✕</Text>
+                    <Ionicons name="close" size={22} color={Colors.onSurface} />
                   </TouchableOpacity>
                 </View>
 
                 <View style={styles.modalMetaRow}>
-                  <Text style={styles.modalRating}>★ {selectedMovie?.rating} / 10</Text>
-                  <Text style={styles.modalReleaseDate}>Released: {selectedMovie?.releaseDate}</Text>
+                  <Ionicons name="star" size={14} color="#FFD700" style={{ marginRight: 3 }} />
+                  <Text style={styles.modalRating}>{selectedMovie?.rating} / 10</Text>
+                  <Text style={styles.modalReleaseDate}>• Released: {selectedMovie?.releaseDate}</Text>
                 </View>
 
                 <Text style={styles.modalSectionTitle}>Synopsis</Text>
@@ -342,7 +365,7 @@ function DiscoverView() {
           activeOpacity={0.85}
           accessibilityLabel="Back to top"
         >
-          <Text style={styles.backToTopIcon}>↑</Text>
+          <Ionicons name="arrow-up" size={24} color={Colors.onPrimary} />
         </TouchableOpacity>
       )}
     </View>
@@ -478,7 +501,7 @@ function CinemasView() {
         {filteredCinemas.map(cinema => (
           <View key={cinema.id} style={styles.cinemaItem}>
             <View style={styles.cinemaIconBox}>
-              <Text style={styles.cinemaItemIcon}>🏛️</Text>
+              <Ionicons name="business-outline" size={22} color={Colors.primary} />
             </View>
             <View style={styles.cinemaDetails}>
               <View style={styles.cinemaHeaderRow}>
@@ -514,7 +537,9 @@ function TicketsView() {
       </View>
 
       <View style={styles.emptyStateBox}>
-        <Text style={styles.emptyStateEmoji}>🎟️</Text>
+        <View style={styles.emptyStateIconCircle}>
+          <Ionicons name="ticket-outline" size={44} color={Colors.primary} />
+        </View>
         <Text style={styles.emptyStateTitle}>No Active Tickets</Text>
         <Text style={styles.emptyStateSubtitle}>
           When you book tickets, your confirmed bookings and gate QR codes will appear right here.
@@ -802,7 +827,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.75)',
     borderRadius: 6,
     paddingHorizontal: 6,
-    paddingVertical: 2
+    paddingVertical: 2,
+    flexDirection: 'row',
+    alignItems: 'center'
   },
   ratingBadgeText: {
     color: '#FFD700',
@@ -1063,9 +1090,14 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.huge,
     paddingHorizontal: Spacing.lg
   },
-  emptyStateEmoji: {
-    fontSize: 48,
-    marginBottom: Spacing.sm
+  emptyStateIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: Colors.primaryContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md
   },
   emptyStateTitle: {
     ...Typography.headlineMedium,

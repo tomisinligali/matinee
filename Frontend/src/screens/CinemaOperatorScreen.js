@@ -7,6 +7,7 @@ import {
   ScrollView,
   SafeAreaView
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography } from '../theme/tokens';
 
 export default function CinemaOperatorScreen({ user, onLogout }) {
@@ -30,7 +31,12 @@ export default function CinemaOperatorScreen({ user, onLogout }) {
             onPress={() => setActiveTab('screens')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.navIcon, activeTab === 'screens' && styles.activeNavIcon]}>🖥️</Text>
+            <Ionicons
+              name={activeTab === 'screens' ? 'tv' : 'tv-outline'}
+              size={22}
+              color={activeTab === 'screens' ? Colors.primary : Colors.onSurface}
+              style={{ opacity: activeTab === 'screens' ? 1 : 0.6, marginBottom: 2 }}
+            />
             <Text style={[styles.navLabel, activeTab === 'screens' && styles.activeNavLabel]}>Screens</Text>
           </TouchableOpacity>
 
@@ -39,7 +45,12 @@ export default function CinemaOperatorScreen({ user, onLogout }) {
             onPress={() => setActiveTab('showtimes')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.navIcon, activeTab === 'showtimes' && styles.activeNavIcon]}>🕒</Text>
+            <Ionicons
+              name={activeTab === 'showtimes' ? 'time' : 'time-outline'}
+              size={22}
+              color={activeTab === 'showtimes' ? Colors.primary : Colors.onSurface}
+              style={{ opacity: activeTab === 'showtimes' ? 1 : 0.6, marginBottom: 2 }}
+            />
             <Text style={[styles.navLabel, activeTab === 'showtimes' && styles.activeNavLabel]}>Showtimes</Text>
           </TouchableOpacity>
 
@@ -48,7 +59,12 @@ export default function CinemaOperatorScreen({ user, onLogout }) {
             onPress={() => setActiveTab('scanner')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.navIcon, activeTab === 'scanner' && styles.activeNavIcon]}>📷</Text>
+            <Ionicons
+              name={activeTab === 'scanner' ? 'qr-code' : 'qr-code-outline'}
+              size={22}
+              color={activeTab === 'scanner' ? Colors.primary : Colors.onSurface}
+              style={{ opacity: activeTab === 'scanner' ? 1 : 0.6, marginBottom: 2 }}
+            />
             <Text style={[styles.navLabel, activeTab === 'scanner' && styles.activeNavLabel]}>Scan Gate</Text>
           </TouchableOpacity>
 
@@ -57,7 +73,12 @@ export default function CinemaOperatorScreen({ user, onLogout }) {
             onPress={() => setActiveTab('account')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.navIcon, activeTab === 'account' && styles.activeNavIcon]}>👤</Text>
+            <Ionicons
+              name={activeTab === 'account' ? 'person' : 'person-outline'}
+              size={22}
+              color={activeTab === 'account' ? Colors.primary : Colors.onSurface}
+              style={{ opacity: activeTab === 'account' ? 1 : 0.6, marginBottom: 2 }}
+            />
             <Text style={[styles.navLabel, activeTab === 'account' && styles.activeNavLabel]}>Account</Text>
           </TouchableOpacity>
         </View>

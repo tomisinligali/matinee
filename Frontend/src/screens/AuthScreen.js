@@ -10,6 +10,7 @@ import {
   Platform,
   ScrollView
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography } from '../theme/tokens';
 import { api } from '../services/api';
 
@@ -119,7 +120,12 @@ export default function AuthScreen({ onNavigate }) {
                     onPress={() => setRole('CUSTOMER')}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.roleIcon}>🎟️</Text>
+                    <Ionicons
+                      name="ticket-outline"
+                      size={20}
+                      color={role === 'CUSTOMER' ? Colors.onPrimaryContainer : Colors.onSurface}
+                      style={{ marginBottom: 4 }}
+                    />
                     <Text style={[styles.roleTitle, role === 'CUSTOMER' && styles.activeRoleTitle]}>
                       Moviegoer
                     </Text>
@@ -131,7 +137,12 @@ export default function AuthScreen({ onNavigate }) {
                     onPress={() => setRole('CINEMA_OPERATOR')}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.roleIcon}>🏢</Text>
+                    <Ionicons
+                      name="business-outline"
+                      size={20}
+                      color={role === 'CINEMA_OPERATOR' ? Colors.onPrimaryContainer : Colors.onSurface}
+                      style={{ marginBottom: 4 }}
+                    />
                     <Text style={[styles.roleTitle, role === 'CINEMA_OPERATOR' && styles.activeRoleTitle]}>
                       Cinema Operator
                     </Text>
@@ -143,7 +154,12 @@ export default function AuthScreen({ onNavigate }) {
                     onPress={() => setRole('PLATFORM_ADMIN')}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.roleIcon}>🛡️</Text>
+                    <Ionicons
+                      name="shield-checkmark-outline"
+                      size={20}
+                      color={role === 'PLATFORM_ADMIN' ? Colors.onPrimaryContainer : Colors.onSurface}
+                      style={{ marginBottom: 4 }}
+                    />
                     <Text style={[styles.roleTitle, role === 'PLATFORM_ADMIN' && styles.activeRoleTitle]}>
                       Platform Admin
                     </Text>
