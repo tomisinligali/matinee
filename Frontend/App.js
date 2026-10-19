@@ -42,7 +42,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.surface} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.surface} />
       {currentScreen === 'splash' && (
         <SplashScreen onNavigate={handleNavigate} />
       )}

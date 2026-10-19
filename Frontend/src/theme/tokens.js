@@ -7,59 +7,59 @@
  */
 
 export const Colors = {
-  // Primary
-  primary: 'rgba(126, 44, 222, 1)',
+  // Primary (Rich Cinematic Violet)
+  primary: 'rgba(142, 68, 235, 1)',
   onPrimary: 'rgba(255, 255, 255, 1)',
-  primaryContainer: 'rgba(228, 211, 248, 1)',
-  onPrimaryContainer: 'rgba(72, 21, 132, 1)',
+  primaryContainer: 'rgba(62, 22, 108, 1)',
+  onPrimaryContainer: 'rgba(228, 211, 248, 1)',
 
   // Secondary
-  secondary: 'rgba(90, 32, 172, 1)',
-  onSecondary: 'rgba(255, 255, 255, 1)',
-  secondaryContainer: 'rgba(227, 212, 247, 1)',
-  onSecondaryContainer: 'rgba(68, 24, 129, 1)',
+  secondary: 'rgba(168, 125, 238, 1)',
+  onSecondary: 'rgba(25, 10, 48, 1)',
+  secondaryContainer: 'rgba(52, 22, 88, 1)',
+  onSecondaryContainer: 'rgba(227, 212, 247, 1)',
 
   // Tertiary
-  tertiary: 'rgba(83, 9, 195, 1)',
-  onTertiary: 'rgba(255, 255, 255, 1)',
-  tertiaryContainer: 'rgba(225, 206, 253, 1)',
-  onTertiaryContainer: 'rgba(62, 7, 146, 1)',
+  tertiary: 'rgba(160, 95, 245, 1)',
+  onTertiary: 'rgba(25, 5, 55, 1)',
+  tertiaryContainer: 'rgba(48, 15, 95, 1)',
+  onTertiaryContainer: 'rgba(225, 206, 253, 1)',
 
-  // Neutral / Surface
-  surface: 'rgba(250, 250, 250, 1)',
-  onSurface: 'rgba(26, 26, 26, 1)',
-  surfaceContainer: 'rgba(242, 242, 242, 1)',
-  surfaceContainerHigh: 'rgba(230, 230, 230, 1)',
-  surfaceContainerHighest: 'rgba(230, 230, 230, 1)',
-  surfaceContainerLow: 'rgba(250, 250, 250, 1)',
-  surfaceContainerLowest: 'rgba(255, 255, 255, 1)',
-  inverseSurface: 'rgba(51, 51, 51, 1)',
-  inverseOnSurface: 'rgba(242, 242, 242, 1)',
+  // Neutral / Surface (Cinematic Dark Theme)
+  surface: 'rgba(13, 13, 18, 1)',
+  onSurface: 'rgba(244, 244, 248, 1)',
+  surfaceContainer: 'rgba(26, 26, 36, 1)',
+  surfaceContainerHigh: 'rgba(34, 34, 46, 1)',
+  surfaceContainerHighest: 'rgba(44, 44, 58, 1)',
+  surfaceContainerLow: 'rgba(18, 18, 25, 1)',
+  surfaceContainerLowest: 'rgba(22, 22, 30, 1)',
+  inverseSurface: 'rgba(244, 244, 248, 1)',
+  inverseOnSurface: 'rgba(18, 18, 25, 1)',
 
-  // Status & Feedback
-  error: 'rgba(186, 13, 16, 1)',
-  onError: 'rgba(255, 255, 255, 1)',
-  errorContainer: 'rgba(251, 230, 231, 1)',
-  onErrorContainer: 'rgba(112, 8, 10, 1)',
+  // Status & Feedback (High contrast for dark surfaces)
+  error: 'rgba(248, 113, 113, 1)',
+  onError: 'rgba(69, 10, 10, 1)',
+  errorContainer: 'rgba(90, 20, 24, 1)',
+  onErrorContainer: 'rgba(254, 202, 202, 1)',
 
-  success: 'rgba(4, 128, 46, 1)',
-  onSuccess: 'rgba(255, 255, 255, 1)',
-  successContainer: 'rgba(215, 245, 225, 1)',
-  onSuccessContainer: 'rgba(2, 64, 23, 1)',
+  success: 'rgba(52, 211, 153, 1)',
+  onSuccess: 'rgba(6, 78, 59, 1)',
+  successContainer: 'rgba(16, 62, 42, 1)',
+  onSuccessContainer: 'rgba(167, 243, 208, 1)',
 
-  warning: 'rgba(186, 123, 13, 1)',
-  onWarning: 'rgba(255, 255, 255, 1)',
-  warningContainer: 'rgba(253, 244, 222, 1)',
-  onWarningContainer: 'rgba(93, 62, 7, 1)',
+  warning: 'rgba(251, 191, 36, 1)',
+  onWarning: 'rgba(120, 53, 15, 1)',
+  warningContainer: 'rgba(75, 45, 10, 1)',
+  onWarningContainer: 'rgba(253, 230, 138, 1)',
 
-  info: 'rgba(13, 42, 186, 1)',
-  onInfo: 'rgba(255, 255, 255, 1)',
-  infoContainer: 'rgba(223, 228, 251, 1)',
-  onInfoContainer: 'rgba(7, 21, 93, 1)',
+  info: 'rgba(96, 165, 250, 1)',
+  onInfo: 'rgba(30, 58, 138, 1)',
+  infoContainer: 'rgba(25, 50, 100, 1)',
+  onInfoContainer: 'rgba(191, 219, 254, 1)',
 
   // Outlines and borders
-  outline: 'rgba(204, 204, 204, 1)',
-  outlineVariant: 'rgba(230, 230, 230, 1)'
+  outline: 'rgba(65, 65, 82, 1)',
+  outlineVariant: 'rgba(38, 38, 52, 1)'
 };
 
 export const Spacing = {
