@@ -1119,3 +1119,8 @@ are true:
 document is ready for stakeholder decisions and detailed implementation
 planning, but unresolved blocking decisions must be closed before the
 affected implementation or public launch proceeds.
+
+## Supporting Documents
+
+- [Design Inspirations & Comparative App Study](file:///Users/mac/git/Matinee%20App/docs/DESIGN_INSPIRATION.md)
+
