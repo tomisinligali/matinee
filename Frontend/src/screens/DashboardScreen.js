@@ -8,7 +8,9 @@ import {
   ScrollView,
   SafeAreaView,
   ActivityIndicator,
-  Modal
+  Modal,
+  FlatList,
+  Platform
 } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
 import * as Haptics from 'expo-haptics';
@@ -222,195 +224,217 @@ function DiscoverView() {
     filteredMovies = [...filteredMovies].filter(m => (parseFloat(m.rating) || 0) >= 6.5);
   }
 
-  return (
-    <View style={styles.discoverContainer}>
-      <ScrollView
-        ref={scrollRef}
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-        stickyHeaderIndices={[1]}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-      >
-        {/* Index 0: Top Header */}
-        <View style={styles.topHeader}>
-          <Text style={styles.brandSubtitle}>MATINEE MOVIES</Text>
-          <Text style={styles.pageTitle}>Now Showing</Text>
+  const renderMovieItem = ({ item: movie }) => (
+    <TouchableOpacity
+      key={movie.id}
+      style={styles.movieCard}
+      onPress={() => {
+        try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+        setSelectedMovie(movie);
+        setDetailSubTab('overview');
+      }}
+      activeOpacity={0.8}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={`${movie.title}, rated ${movie.rating} out of 10. ${movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 'Now showing'}`}
+    >
+      {movie.posterUrl ? (
+        <ExpoImage
+          source={{ uri: movie.posterUrl }}
+          style={styles.moviePoster}
+          contentFit="cover"
+          transition={300}
+          cachePolicy="memory-disk"
+          accessible={true}
+          accessibilityRole="image"
+          accessibilityLabel={`Movie poster for ${movie.title}`}
+        />
+      ) : (
+        <View style={styles.moviePosterPlaceholder}>
+          <Ionicons name="film-outline" size={40} color={Colors.outline} />
         </View>
+      )}
+      <View style={styles.ratingBadge}>
+        <Ionicons name="star" size={11} color="#FFD700" style={{ marginRight: Spacing.xxs }} />
+        <Text style={styles.ratingBadgeText}>{movie.rating}</Text>
+      </View>
+      <Text style={styles.movieCardTitle} numberOfLines={2}>
+        {movie.title}
+      </Text>
+      <Text style={styles.movieCardDate}>
+        {movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 'Now Showing'}
+      </Text>
+    </TouchableOpacity>
+  );
 
-        {/* Index 1: Sticky Search Input */}
-        <View style={[styles.stickySearchWrapper, isScrolled && styles.stickySearchWrapperScrolled]}>
-          <View style={styles.searchBarContainer}>
-            <Ionicons name="search" size={18} color={Colors.outline} style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search films by title..."
-              placeholderTextColor={Colors.outline}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              returnKeyType="search"
-              clearButtonMode="while-editing"
-              accessible={true}
-              accessibilityLabel="Search films by title"
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity
-                onPress={() => setSearchQuery('')}
-                style={styles.clearSearchButton}
-                activeOpacity={0.7}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel="Clear search input"
-              >
-                <Ionicons name="close-circle" size={18} color={Colors.onSurface} style={{ opacity: 0.85 }} />
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
+  const renderListHeader = () => (
+    <View>
+      {/* Index 0: Top Header */}
+      <View style={styles.topHeader}>
+        <Text style={styles.brandSubtitle}>MATINEE MOVIES</Text>
+        <Text style={styles.pageTitle}>Now Showing</Text>
+      </View>
 
-        {/* Index 2: Category Filter Pills (Steam Store / JioHotstar Inspired) */}
-        {!searchQuery.trim() && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryPillsScroll}>
-            {CATEGORIES.map(cat => (
-              <TouchableOpacity
-                key={cat}
-                style={[styles.categoryPill, selectedCategory === cat && styles.activeCategoryPill]}
-                onPress={() => {
-                  try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
-                  setSelectedCategory(cat);
-                }}
-                activeOpacity={0.7}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel={`Filter by ${cat}`}
-                accessibilityState={{ selected: selectedCategory === cat }}
-                hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
-              >
-                <Text style={[styles.categoryPillText, selectedCategory === cat && styles.activeCategoryPillText]}>
-                  {cat}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        )}
-
-        {/* Index 3: Featured Banner (Letterboxd / Funflix Inspired) */}
-        {!searchQuery.trim() && (
-          <View style={styles.bannerCard}>
-            <View style={styles.bannerBadge}>
-              <Text style={styles.bannerBadgeText}>PREMIERES & BLOCKBUSTERS</Text>
-            </View>
-            <Text style={styles.bannerTitle}>Experience Cinema in High Definition</Text>
-            <Text style={styles.bannerDesc}>
-              Browse upcoming schedules, select your favorite seats, and reserve tickets with zero hassle.
-            </Text>
-          </View>
-        )}
-
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionHeader}>
-            {searchQuery.trim() ? `Search Results (${filteredMovies.length})` : 'In Theatres Today'}
-          </Text>
-          <Text style={styles.movieCountText}>{filteredMovies.length} Films</Text>
-        </View>
-
-        {/* Movie Grid / List */}
-        {loading ? (
-          <MovieGridSkeleton count={6} />
-        ) : error ? (
-          <View style={styles.errorBox}>
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        ) : filteredMovies.length === 0 ? (
-          <View style={styles.emptySearchBox}>
-            <Text style={styles.emptySearchText}>No films match "{searchQuery}"</Text>
+      {/* Index 1: Sticky Search Input */}
+      <View style={[styles.stickySearchWrapper, isScrolled && styles.stickySearchWrapperScrolled]}>
+        <View style={styles.searchBarContainer}>
+          <Ionicons name="search" size={18} color={Colors.outline} style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search films by title..."
+            placeholderTextColor={Colors.outline}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+            clearButtonMode="while-editing"
+            accessible={true}
+            accessibilityLabel="Search films by title"
+          />
+          {searchQuery.length > 0 && (
             <TouchableOpacity
               onPress={() => setSearchQuery('')}
+              style={styles.clearSearchButton}
               activeOpacity={0.7}
               accessible={true}
               accessibilityRole="button"
-              accessibilityLabel="Clear search filter"
-              style={{ minHeight: 44, justifyContent: 'center' }}
+              accessibilityLabel="Clear search input"
             >
-              <Text style={styles.clearSearchBtnText}>Clear Search Filter</Text>
+              <Ionicons name="close-circle" size={18} color={Colors.onSurface} style={{ opacity: 0.85 }} />
             </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {/* Index 2: Category Filter Pills */}
+      {!searchQuery.trim() && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryPillsScroll}>
+          {CATEGORIES.map(cat => (
+            <TouchableOpacity
+              key={cat}
+              style={[styles.categoryPill, selectedCategory === cat && styles.activeCategoryPill]}
+              onPress={() => {
+                try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+                setSelectedCategory(cat);
+              }}
+              activeOpacity={0.7}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`Filter by ${cat}`}
+              accessibilityState={{ selected: selectedCategory === cat }}
+              hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+            >
+              <Text style={[styles.categoryPillText, selectedCategory === cat && styles.activeCategoryPillText]}>
+                {cat}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
+
+      {/* Index 3: Featured Banner */}
+      {!searchQuery.trim() && (
+        <View style={styles.bannerCard}>
+          <View style={styles.bannerBadge}>
+            <Text style={styles.bannerBadgeText}>PREMIERES & BLOCKBUSTERS</Text>
           </View>
-        ) : (
-          <>
-            <View style={styles.movieGrid}>
-              {filteredMovies.map(movie => (
-                <TouchableOpacity
-                  key={movie.id}
-                  style={styles.movieCard}
-                  onPress={() => {
-                    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
-                    setSelectedMovie(movie);
-                    setDetailSubTab('overview');
-                  }}
-                  activeOpacity={0.8}
-                  accessible={true}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${movie.title}, rated ${movie.rating} out of 10. ${movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 'Now showing'}`}
-                >
-                  {movie.posterUrl ? (
-                    <ExpoImage
-                      source={{ uri: movie.posterUrl }}
-                      style={styles.moviePoster}
-                      contentFit="cover"
-                      transition={300}
-                      cachePolicy="memory-disk"
-                      accessible={true}
-                      accessibilityRole="image"
-                      accessibilityLabel={`Movie poster for ${movie.title}`}
-                    />
-                  ) : (
-                    <View style={styles.moviePosterPlaceholder}>
-                      <Ionicons name="film-outline" size={40} color={Colors.outline} />
-                    </View>
-                  )}
-                  <View style={styles.ratingBadge}>
-                    <Ionicons name="star" size={11} color="#FFD700" style={{ marginRight: Spacing.xxs }} />
-                    <Text style={styles.ratingBadgeText}>{movie.rating}</Text>
-                  </View>
-                  <Text style={styles.movieCardTitle} numberOfLines={2}>
-                    {movie.title}
-                  </Text>
-                  <Text style={styles.movieCardDate}>
-                    {movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 'Now Showing'}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* Pagination Controls */}
-            {!searchQuery.trim() && page < totalPages && (
-              <TouchableOpacity
-                style={styles.loadMoreButton}
-                onPress={() => loadMovies(page + 1, true)}
-                disabled={loadingMore}
-                activeOpacity={0.8}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel={`Load more releases, page ${page + 1} of ${totalPages}`}
-              >
-                {loadingMore ? (
-                  <ActivityIndicator size="small" color={Colors.onPrimary} />
-                ) : (
-                  <Text style={styles.loadMoreButtonText}>
-                    Load More Releases (Page {page} of {totalPages})
-                  </Text>
-                )}
-              </TouchableOpacity>
-            )}
-          </>
-        )}
-
-        {/* Discreet Legal & Attribution Footer */}
-        <View style={styles.footerAttribution}>
-          <Text style={styles.footerAttributionText}>
-            Film metadata provided by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.
+          <Text style={styles.bannerTitle}>Experience Cinema in High Definition</Text>
+          <Text style={styles.bannerDesc}>
+            Browse upcoming schedules, select your favorite seats, and reserve tickets with zero hassle.
           </Text>
         </View>
+      )}
+
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionHeader}>
+          {searchQuery.trim() ? `Search Results (${filteredMovies.length})` : 'In Theatres Today'}
+        </Text>
+        <Text style={styles.movieCountText}>{filteredMovies.length} Films</Text>
+      </View>
+
+      {/* Skeleton Loading State during fetch */}
+      {loading && <MovieGridSkeleton count={6} />}
+
+      {/* Error Banner */}
+      {Boolean(error) && (
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+    </View>
+  );
+
+  const renderListEmpty = () => {
+    if (loading || error) return null;
+    return (
+      <View style={styles.emptySearchBox}>
+        <Text style={styles.emptySearchText}>No films match "{searchQuery}"</Text>
+        <TouchableOpacity
+          onPress={() => setSearchQuery('')}
+          activeOpacity={0.7}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Clear search filter"
+          style={{ minHeight: 44, justifyContent: 'center' }}
+        >
+          <Text style={styles.clearSearchBtnText}>Clear Search Filter</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const renderListFooter = () => (
+    <View>
+      {/* Pagination Controls */}
+      {!searchQuery.trim() && page < totalPages && (
+        <TouchableOpacity
+          style={styles.loadMoreButton}
+          onPress={() => loadMovies(page + 1, true)}
+          disabled={loadingMore}
+          activeOpacity={0.8}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel={`Load more releases, page ${page + 1} of ${totalPages}`}
+        >
+          {loadingMore ? (
+            <ActivityIndicator size="small" color={Colors.onPrimary} />
+          ) : (
+            <Text style={styles.loadMoreButtonText}>
+              Load More Releases (Page {page} of {totalPages})
+            </Text>
+          )}
+        </TouchableOpacity>
+      )}
+
+      {/* Discreet Legal & Attribution Footer */}
+      <View style={styles.footerAttribution}>
+        <Text style={styles.footerAttributionText}>
+          Film metadata provided by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.
+        </Text>
+      </View>
+    </View>
+  );
+
+  return (
+    <View style={styles.discoverContainer}>
+      <FlatList
+        ref={scrollRef}
+        data={loading || error ? [] : filteredMovies}
+        keyExtractor={item => String(item.id)}
+        renderItem={renderMovieItem}
+        numColumns={2}
+        columnWrapperStyle={styles.columnWrapper}
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        windowSize={5}
+        removeClippedSubviews={Platform.OS === 'android'}
+        ListHeaderComponent={renderListHeader}
+        ListEmptyComponent={renderListEmpty}
+        ListFooterComponent={renderListFooter}
+      />
 
         {/* Full-Screen Movie Details Page (Funflix & Letterboxd inspired) */}
         <Modal
@@ -633,13 +657,12 @@ function DiscoverView() {
           movie={selectedMovie}
           onClose={() => setShowSeatModal(false)}
         />
-      </ScrollView>
 
       {/* Floating Back To Top Button */}
       {showBackToTop && (
         <TouchableOpacity
           style={styles.backToTopButton}
-          onPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
+          onPress={() => scrollRef.current?.scrollToOffset({ offset: 0, animated: true })}
           activeOpacity={0.85}
           accessibilityLabel="Back to top"
         >
@@ -1198,6 +1221,10 @@ const styles = StyleSheet.create({
     opacity: 0.85,
     marginTop: Spacing.xs
   },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    gap: Spacing.md
+  },
   movieGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -1205,13 +1232,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   movieCard: {
-    width: '47%',
+    flex: 1,
+    maxWidth: '48%',
     backgroundColor: Colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     padding: Spacing.xs,
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.md,
     position: 'relative'
   },
   moviePoster: {
@@ -1822,7 +1850,9 @@ const styles = StyleSheet.create({
   },
   cinemaName: {
     ...Typography.labelLarge,
-    color: Colors.onSurface
+    color: Colors.onSurface,
+    flex: 1,
+    marginRight: Spacing.xs
   },
   cinemaAddress: {
     ...Typography.bodySmall,
@@ -1859,7 +1889,8 @@ const styles = StyleSheet.create({
   cinemaHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    gap: Spacing.xs
   },
   screenCountBadge: {
     backgroundColor: Colors.surfaceContainer,
