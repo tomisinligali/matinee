@@ -7,10 +7,10 @@ import {
   StyleSheet,
   ScrollView,
   SafeAreaView,
-  Image,
   ActivityIndicator,
   Modal
 } from 'react-native';
+import { Image as ExpoImage } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../theme/tokens';
 import { api } from '../services/api';
@@ -336,10 +336,12 @@ function DiscoverView() {
                   accessibilityLabel={`${movie.title}, rated ${movie.rating} out of 10. ${movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 'Now showing'}`}
                 >
                   {movie.posterUrl ? (
-                    <Image
+                    <ExpoImage
                       source={{ uri: movie.posterUrl }}
                       style={styles.moviePoster}
-                      resizeMode="cover"
+                      contentFit="cover"
+                      transition={300}
+                      cachePolicy="memory-disk"
                       accessible={true}
                       accessibilityRole="image"
                       accessibilityLabel={`Movie poster for ${movie.title}`}
@@ -405,10 +407,13 @@ function DiscoverView() {
               {/* Hero Backdrop with Top Scrim & Floating Bar */}
               <View style={styles.fullScreenBackdropWrapper}>
                 {selectedMovie?.backdropUrl || selectedMovie?.posterUrl ? (
-                  <Image
+                  <ExpoImage
                     source={{ uri: selectedMovie.backdropUrl || selectedMovie.posterUrl }}
                     style={styles.fullScreenBackdrop}
-                    resizeMode="cover"
+                    contentFit="cover"
+                    transition={350}
+                    cachePolicy="memory-disk"
+                    priority="high"
                     accessible={true}
                     accessibilityRole="image"
                     accessibilityLabel={`Backdrop for ${selectedMovie?.title}`}
