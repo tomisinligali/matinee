@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
-import { Colors, BorderRadius, Spacing } from '../theme/tokens';
+import { BorderRadius, Spacing } from '../theme/tokens';
+import { useTheme } from '../theme/ThemeContext';
 
 export function SkeletonBox({ width, height, borderRadius = BorderRadius.sm, style }) {
+  const { colors } = useTheme();
   const opacityAnim = useRef(new Animated.Value(0.35)).current;
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export function SkeletonBox({ width, height, borderRadius = BorderRadius.sm, sty
           width,
           height,
           borderRadius,
-          backgroundColor: Colors.surfaceContainerHigh,
+          backgroundColor: colors.surfaceContainerHigh,
           opacity: opacityAnim
         },
         style
@@ -41,8 +43,9 @@ export function SkeletonBox({ width, height, borderRadius = BorderRadius.sm, sty
 }
 
 export function MovieCardSkeleton() {
+  const { colors } = useTheme();
   return (
-    <View style={styles.movieCardSkeleton}>
+    <View style={[styles.movieCardSkeleton, { backgroundColor: colors.surfaceContainerLowest, borderColor: colors.outlineVariant }]}>
       {/* Poster Skeleton */}
       <SkeletonBox width="100%" height={190} borderRadius={BorderRadius.md} />
       

@@ -9,8 +9,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, BorderRadius } from '../theme/tokens';
+import { useTheme } from '../theme/ThemeContext';
 
 export default function CinemaOperatorScreen({ user, onLogout }) {
+  const { colors } = useTheme();
+  const styles = getOperatorStyles(colors);
   const [activeTab, setActiveTab] = useState('screens'); // 'screens' | 'showtimes' | 'scanner' | 'account'
 
   return (
@@ -38,7 +41,7 @@ export default function CinemaOperatorScreen({ user, onLogout }) {
             <Ionicons
               name={activeTab === 'screens' ? 'tv' : 'tv-outline'}
               size={22}
-              color={activeTab === 'screens' ? Colors.primary : Colors.onSurface}
+              color={activeTab === 'screens' ? colors.primary : colors.onSurface}
               style={{ opacity: activeTab === 'screens' ? 1 : 0.8, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'screens' && styles.activeNavLabel]}>Screens</Text>
@@ -56,7 +59,7 @@ export default function CinemaOperatorScreen({ user, onLogout }) {
             <Ionicons
               name={activeTab === 'showtimes' ? 'time' : 'time-outline'}
               size={22}
-              color={activeTab === 'showtimes' ? Colors.primary : Colors.onSurface}
+              color={activeTab === 'showtimes' ? colors.primary : colors.onSurface}
               style={{ opacity: activeTab === 'showtimes' ? 1 : 0.8, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'showtimes' && styles.activeNavLabel]}>Showtimes</Text>
@@ -74,7 +77,7 @@ export default function CinemaOperatorScreen({ user, onLogout }) {
             <Ionicons
               name={activeTab === 'scanner' ? 'qr-code' : 'qr-code-outline'}
               size={22}
-              color={activeTab === 'scanner' ? Colors.primary : Colors.onSurface}
+              color={activeTab === 'scanner' ? colors.primary : colors.onSurface}
               style={{ opacity: activeTab === 'scanner' ? 1 : 0.8, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'scanner' && styles.activeNavLabel]}>Scan Gate</Text>
@@ -92,7 +95,7 @@ export default function CinemaOperatorScreen({ user, onLogout }) {
             <Ionicons
               name={activeTab === 'account' ? 'person' : 'person-outline'}
               size={22}
-              color={activeTab === 'account' ? Colors.primary : Colors.onSurface}
+              color={activeTab === 'account' ? colors.primary : colors.onSurface}
               style={{ opacity: activeTab === 'account' ? 1 : 0.8, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'account' && styles.activeNavLabel]}>Account</Text>
@@ -106,6 +109,8 @@ export default function CinemaOperatorScreen({ user, onLogout }) {
 // ─── Sub-Views ───────────────────────────────────────────────────────────────
 
 function ScreensManagementView() {
+  const { colors } = useTheme();
+  const styles = getOperatorStyles(colors);
   const screens = [
     { id: '1', name: 'Screen 1 (Main Hall)', type: 'Standard Digital', capacity: 180, status: 'Active' },
     { id: '2', name: 'Screen 2 (IMAX Experience)', type: 'IMAX Laser 3D', capacity: 250, status: 'Active' },
@@ -167,6 +172,8 @@ function ScreensManagementView() {
 }
 
 function ShowtimesManagementView() {
+  const { colors } = useTheme();
+  const styles = getOperatorStyles(colors);
   const showtimes = [
     { id: '101', film: 'Interstellar Horizon', screen: 'Screen 2 (IMAX)', time: '02:30 PM', price: '₦6,500', booked: '42 / 250' },
     { id: '102', film: 'Shadows of Midnight', screen: 'Screen 1 (Main)', time: '05:15 PM', price: '₦4,000', booked: '88 / 180' },
@@ -185,7 +192,7 @@ function ShowtimesManagementView() {
         {showtimes.length === 0 ? (
           <View style={styles.emptyStateBox}>
             <View style={styles.emptyStateIconCircle}>
-              <Ionicons name="calendar-outline" size={40} color={Colors.outline} />
+              <Ionicons name="calendar-outline" size={40} color={colors.outline} />
             </View>
             <Text style={styles.emptyStateTitle}>No Active Schedules</Text>
             <Text style={styles.emptyStateSubtitle}>
@@ -215,6 +222,8 @@ function ShowtimesManagementView() {
 }
 
 function GateScannerView() {
+  const { colors } = useTheme();
+  const styles = getOperatorStyles(colors);
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
       <View style={styles.topHeader}>
@@ -245,6 +254,9 @@ function GateScannerView() {
 }
 
 function OperatorAccountView({ user, onLogout }) {
+  const { colors, isDark, setTheme } = useTheme();
+  const styles = getOperatorStyles(colors);
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
       <View style={styles.topHeader}>
@@ -265,6 +277,43 @@ function OperatorAccountView({ user, onLogout }) {
         </View>
       </View>
 
+      {/* Appearance & Theme Mode */}
+      <View style={styles.membershipCard}>
+        <Text style={styles.membershipTitle}>Appearance</Text>
+        <View style={styles.membershipRow}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
+            <Ionicons name={isDark ? 'moon' : 'sunny'} size={18} color={colors.primary} />
+            <Text style={styles.membershipLabel}>Theme Mode:</Text>
+          </View>
+          <View style={styles.themeSelectorRow}>
+            <TouchableOpacity
+              style={[styles.themeChoiceBtn, isDark && styles.themeChoiceBtnActive]}
+              onPress={() => setTheme('dark')}
+              activeOpacity={0.7}
+              accessible={true}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: isDark }}
+              accessibilityLabel="Select Dark Theme"
+            >
+              <Ionicons name="moon" size={13} color={isDark ? colors.onPrimary : colors.onSurface} style={{ marginRight: 4 }} />
+              <Text style={[styles.themeChoiceText, isDark && styles.themeChoiceTextActive]}>Dark</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.themeChoiceBtn, !isDark && styles.themeChoiceBtnActive]}
+              onPress={() => setTheme('light')}
+              activeOpacity={0.7}
+              accessible={true}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: !isDark }}
+              accessibilityLabel="Select Light Theme"
+            >
+              <Ionicons name="sunny" size={13} color={!isDark ? colors.onPrimary : colors.onSurface} style={{ marginRight: 4 }} />
+              <Text style={[styles.themeChoiceText, !isDark && styles.themeChoiceTextActive]}>Light</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
       <View style={styles.membershipCard}>
         <Text style={styles.membershipTitle}>Assigned Cinema Membership</Text>
         <View style={styles.membershipRow}>
@@ -277,7 +326,7 @@ function OperatorAccountView({ user, onLogout }) {
         </View>
         <View style={styles.membershipRow}>
           <Text style={styles.membershipLabel}>Status:</Text>
-          <Text style={[styles.membershipValue, { color: Colors.success, fontWeight: '700' }]}>Active Verified</Text>
+          <Text style={[styles.membershipValue, { color: colors.success, fontWeight: '700' }]}>Active Verified</Text>
         </View>
       </View>
 
@@ -297,38 +346,38 @@ function OperatorAccountView({ user, onLogout }) {
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: Colors.surface },
-  container: { flex: 1, backgroundColor: Colors.surface },
+const createOperatorStyles = (colors = Colors) => StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: colors.surface },
+  container: { flex: 1, backgroundColor: colors.surface },
   contentArea: { flex: 1 },
   scrollContainer: { padding: Spacing.lg, paddingBottom: Spacing.xl },
   topHeader: { marginBottom: Spacing.md },
-  brandSubtitle: { ...Typography.labelSmall, color: Colors.primary, letterSpacing: 1.5, fontWeight: '700' },
-  pageTitle: { ...Typography.headlineLarge, color: Colors.onSurface, marginTop: Spacing.xxs },
-  pageDescription: { ...Typography.bodyMedium, color: Colors.onSurface, opacity: 0.85, marginTop: Spacing.xxs },
+  brandSubtitle: { ...Typography.labelSmall, color: colors.primary, letterSpacing: 1.5, fontWeight: '700' },
+  pageTitle: { ...Typography.headlineLarge, color: colors.onSurface, marginTop: Spacing.xxs },
+  pageDescription: { ...Typography.bodyMedium, color: colors.onSurface, opacity: 0.85, marginTop: Spacing.xxs },
   venueBanner: {
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: colors.primaryContainer,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.md
   },
-  venueTitle: { ...Typography.titleMedium, color: Colors.onPrimaryContainer, fontWeight: '700' },
-  venueSubtitle: { ...Typography.bodySmall, color: Colors.onPrimaryContainer, opacity: 0.9, marginTop: Spacing.xxs },
+  venueTitle: { ...Typography.titleMedium, color: colors.onPrimaryContainer, fontWeight: '700' },
+  venueSubtitle: { ...Typography.bodySmall, color: colors.onPrimaryContainer, opacity: 0.9, marginTop: Spacing.xxs },
   cardList: { gap: Spacing.md },
   screenCard: {
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     padding: Spacing.md
   },
   screenCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  screenCardTitle: { ...Typography.titleMedium, color: Colors.onSurface, fontWeight: '700' },
-  screenType: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.85, marginTop: Spacing.xxs },
+  screenCardTitle: { ...Typography.titleMedium, color: colors.onSurface, fontWeight: '700' },
+  screenType: { ...Typography.bodySmall, color: colors.onSurface, opacity: 0.85, marginTop: Spacing.xxs },
   screenMetaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.sm },
-  screenMetaText: { ...Typography.bodyMedium, color: Colors.onSurface },
+  screenMetaText: { ...Typography.bodyMedium, color: colors.onSurface },
   manageBtn: {
-    backgroundColor: Colors.surfaceContainer,
+    backgroundColor: colors.surfaceContainer,
     borderRadius: BorderRadius.sm,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
@@ -337,49 +386,49 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
-  manageBtnText: { ...Typography.labelSmall, color: Colors.onSurface, fontWeight: '600' },
-  activeBadge: { backgroundColor: Colors.successContainer, paddingHorizontal: Spacing.xs, paddingVertical: Spacing.xxs, borderRadius: BorderRadius.sm },
-  activeBadgeText: { ...Typography.labelSmall, color: Colors.onSuccessContainer, fontWeight: '700' },
+  manageBtnText: { ...Typography.labelSmall, color: colors.onSurface, fontWeight: '600' },
+  activeBadge: { backgroundColor: colors.successContainer, paddingHorizontal: Spacing.xs, paddingVertical: Spacing.xxs, borderRadius: BorderRadius.sm },
+  activeBadgeText: { ...Typography.labelSmall, color: colors.onSuccessContainer, fontWeight: '700' },
   showtimeCard: {
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     padding: Spacing.md
   },
   showtimeHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  filmTitle: { ...Typography.titleMedium, color: Colors.onSurface, fontWeight: '700' },
-  showtimePrice: { ...Typography.titleMedium, color: Colors.primary, fontWeight: '700' },
-  showtimeScreen: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.85, marginTop: Spacing.xxs },
+  filmTitle: { ...Typography.titleMedium, color: colors.onSurface, fontWeight: '700' },
+  showtimePrice: { ...Typography.titleMedium, color: colors.primary, fontWeight: '700' },
+  showtimeScreen: { ...Typography.bodySmall, color: colors.onSurface, opacity: 0.85, marginTop: Spacing.xxs },
   occupancyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.sm },
-  occupancyLabel: { ...Typography.bodySmall, color: Colors.onSurface },
-  statusPill: { backgroundColor: Colors.primaryContainer, borderRadius: BorderRadius.sm, paddingHorizontal: Spacing.xs, paddingVertical: Spacing.xxs },
-  statusPillText: { ...Typography.labelSmall, color: Colors.onPrimaryContainer, fontWeight: '700' },
+  occupancyLabel: { ...Typography.bodySmall, color: colors.onSurface },
+  statusPill: { backgroundColor: colors.primaryContainer, borderRadius: BorderRadius.sm, paddingHorizontal: Spacing.xs, paddingVertical: Spacing.xxs },
+  statusPillText: { ...Typography.labelSmall, color: colors.onPrimaryContainer, fontWeight: '700' },
   scannerBox: {
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     padding: Spacing.xl,
     alignItems: 'center'
   },
   scannerTarget: {
     width: '100%',
     height: 220,
-    backgroundColor: Colors.surfaceContainer,
+    backgroundColor: colors.surfaceContainer,
     borderRadius: BorderRadius.lg,
     borderWidth: 2,
-    borderColor: Colors.primary,
+    borderColor: colors.primary,
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.lg
   },
   cameraEmoji: { fontSize: 44, marginBottom: Spacing.xs },
-  scannerTargetText: { ...Typography.headlineSmall, color: Colors.onSurface },
-  scannerInstruction: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.85, marginTop: Spacing.xxs },
+  scannerTargetText: { ...Typography.headlineSmall, color: colors.onSurface },
+  scannerInstruction: { ...Typography.bodySmall, color: colors.onSurface, opacity: 0.85, marginTop: Spacing.xxs },
   scannerButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     width: '100%',
     paddingVertical: Spacing.md,
     minHeight: 48,
@@ -387,14 +436,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
-  scannerButtonText: { ...Typography.labelLarge, color: Colors.onPrimary, fontWeight: '700' },
+  scannerButtonText: { ...Typography.labelLarge, color: colors.onPrimary, fontWeight: '700' },
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     padding: Spacing.md,
     marginBottom: Spacing.md
   },
@@ -402,58 +451,58 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: colors.primaryContainer,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md
   },
   avatarText: { fontSize: 24 },
   profileMeta: { flex: 1 },
-  profileName: { ...Typography.titleLarge, color: Colors.onSurface, fontWeight: '700' },
-  profileEmail: { ...Typography.bodyMedium, color: Colors.onSurface, opacity: 0.85 },
+  profileName: { ...Typography.titleLarge, color: colors.onSurface, fontWeight: '700' },
+  profileEmail: { ...Typography.bodyMedium, color: colors.onSurface, opacity: 0.85 },
   operatorRoleBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: colors.primaryContainer,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xxs,
     borderRadius: BorderRadius.full,
     marginTop: Spacing.xxs
   },
-  operatorRoleBadgeText: { ...Typography.labelSmall, color: Colors.onPrimaryContainer, fontWeight: '700' },
+  operatorRoleBadgeText: { ...Typography.labelSmall, color: colors.onPrimaryContainer, fontWeight: '700' },
   membershipCard: {
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     padding: Spacing.md,
     marginBottom: Spacing.lg
   },
-  membershipTitle: { ...Typography.titleMedium, color: Colors.onSurface, fontWeight: '700', marginBottom: Spacing.sm },
+  membershipTitle: { ...Typography.titleMedium, color: colors.onSurface, fontWeight: '700', marginBottom: Spacing.sm },
   membershipRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: Spacing.xs,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.surfaceContainer
+    borderBottomColor: colors.surfaceContainer
   },
-  membershipLabel: { ...Typography.bodyMedium, color: Colors.onSurface, opacity: 0.85 },
-  membershipValue: { ...Typography.bodyMedium, color: Colors.onSurface },
+  membershipLabel: { ...Typography.bodyMedium, color: colors.onSurface, opacity: 0.85 },
+  membershipValue: { ...Typography.bodyMedium, color: colors.onSurface },
   logoutButton: {
-    backgroundColor: Colors.errorContainer,
+    backgroundColor: colors.errorContainer,
     borderWidth: 1,
-    borderColor: Colors.error,
+    borderColor: colors.error,
     borderRadius: BorderRadius.md,
     paddingVertical: Spacing.md,
     minHeight: 48,
     alignItems: 'center',
     justifyContent: 'center'
   },
-  logoutButtonText: { ...Typography.labelLarge, color: Colors.onErrorContainer, fontWeight: '700' },
+  logoutButtonText: { ...Typography.labelLarge, color: colors.onErrorContainer, fontWeight: '700' },
   bottomNav: {
     flexDirection: 'row',
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderTopWidth: 1,
-    borderTopColor: Colors.outlineVariant,
+    borderTopColor: colors.outlineVariant,
     paddingTop: Spacing.xs,
     paddingBottom: Spacing.sm,
     paddingHorizontal: Spacing.xs
@@ -466,18 +515,18 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xxs,
     borderRadius: BorderRadius.md
   },
-  activeNavItem: { backgroundColor: Colors.surfaceContainer },
+  activeNavItem: { backgroundColor: colors.surfaceContainer },
   navIcon: { fontSize: 20, marginBottom: Spacing.xxs },
   activeNavIcon: { transform: [{ scale: 1.1 }] },
-  navLabel: { ...Typography.labelSmall, color: Colors.onSurface, opacity: 0.8 },
-  activeNavLabel: { color: Colors.primary, fontWeight: '700', opacity: 1 },
+  navLabel: { ...Typography.labelSmall, color: colors.onSurface, opacity: 0.8 },
+  activeNavLabel: { color: colors.primary, fontWeight: '700', opacity: 1 },
   emptyStateBox: {
     paddingVertical: Spacing.xl,
     paddingHorizontal: Spacing.lg,
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: Spacing.md
@@ -486,22 +535,60 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surfaceContainer,
+    backgroundColor: colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.sm
   },
   emptyStateTitle: {
     ...Typography.titleMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700',
     marginBottom: Spacing.xxs
   },
   emptyStateSubtitle: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     textAlign: 'center',
     lineHeight: 20
   }
+,
+  themeSelectorRow: {
+    flexDirection: 'row',
+    gap: Spacing.xs,
+    backgroundColor: colors.surfaceContainer,
+    borderRadius: BorderRadius.md,
+    padding: 3
+  },
+  themeChoiceBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+    minHeight: 36
+  },
+  themeChoiceBtnActive: {
+    backgroundColor: colors.primary
+  },
+  themeChoiceText: {
+    ...Typography.labelSmall,
+    color: colors.onSurface,
+    fontWeight: '600'
+  },
+  themeChoiceTextActive: {
+    color: colors.onPrimary,
+    fontWeight: '700'
+  }
 });
+
+const operatorStylesCache = new Map();
+const getOperatorStyles = (colors = Colors) => {
+  if (!operatorStylesCache.has(colors)) {
+    operatorStylesCache.set(colors, createOperatorStyles(colors));
+  }
+  return operatorStylesCache.get(colors);
+};
+
+const styles = getOperatorStyles(Colors);

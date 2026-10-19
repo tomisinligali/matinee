@@ -12,11 +12,14 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, BorderRadius } from '../theme/tokens';
+import { useTheme } from '../theme/ThemeContext';
 import { api } from '../services/api';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function AuthScreen({ onNavigate }) {
+  const { colors } = useTheme();
+  const styles = getAuthStyles(colors);
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState('CUSTOMER'); // 'CUSTOMER' | 'CINEMA_OPERATOR' | 'PLATFORM_ADMIN'
   const [email, setEmail] = useState('');
@@ -262,10 +265,10 @@ export default function AuthScreen({ onNavigate }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createAuthStyles = (colors = Colors) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: Colors.surface
+    backgroundColor: colors.surface
   },
   scrollContent: {
     flexGrow: 1,
@@ -278,25 +281,25 @@ const styles = StyleSheet.create({
   },
   appTitle: {
     ...Typography.headlineMedium,
-    color: Colors.primary,
+    color: colors.primary,
     letterSpacing: 2,
     marginBottom: Spacing.xs
   },
   formTitle: {
     ...Typography.headlineLarge,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     marginTop: Spacing.xs
   },
   formSubtitle: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     textAlign: 'center',
     marginTop: Spacing.xxs
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: Colors.surfaceContainer,
+    backgroundColor: colors.surfaceContainer,
     borderRadius: BorderRadius.md,
     padding: Spacing.xxs,
     marginBottom: Spacing.md
@@ -310,19 +313,19 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm
   },
   activeTab: {
-    backgroundColor: Colors.primaryContainer
+    backgroundColor: colors.primaryContainer
   },
   tabText: {
     ...Typography.labelLarge,
-    color: Colors.onSurface
+    color: colors.onSurface
   },
   activeTabText: {
-    color: Colors.onPrimaryContainer,
+    color: colors.onPrimaryContainer,
     fontWeight: '700'
   },
   errorBox: {
-    backgroundColor: Colors.errorContainer,
-    borderColor: Colors.error,
+    backgroundColor: colors.errorContainer,
+    borderColor: colors.error,
     borderWidth: 1,
     borderRadius: BorderRadius.md,
     padding: Spacing.sm,
@@ -330,7 +333,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     ...Typography.bodyMedium,
-    color: Colors.onErrorContainer,
+    color: colors.onErrorContainer,
     textAlign: 'center'
   },
   form: {
@@ -341,7 +344,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     ...Typography.labelMedium,
-    color: Colors.onSurface
+    color: colors.onSurface
   },
   roleGrid: {
     gap: Spacing.xs,
@@ -351,15 +354,15 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     minHeight: 64,
     justifyContent: 'center',
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderWidth: 1.5,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     borderRadius: BorderRadius.md,
     padding: Spacing.sm
   },
   activeRoleCard: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryContainer
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryContainer
   },
   roleIcon: {
     fontSize: 20,
@@ -367,31 +370,31 @@ const styles = StyleSheet.create({
   },
   roleTitle: {
     ...Typography.labelLarge,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700'
   },
   activeRoleTitle: {
-    color: Colors.onPrimaryContainer
+    color: colors.onPrimaryContainer
   },
   roleDesc: {
     ...Typography.bodySmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     marginTop: Spacing.xxs
   },
   input: {
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderWidth: 1,
-    borderColor: Colors.outline,
+    borderColor: colors.outline,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     minHeight: 48,
     fontSize: 16,
-    color: Colors.onSurface
+    color: colors.onSurface
   },
   submitButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
     alignItems: 'center',
@@ -404,7 +407,18 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     ...Typography.labelLarge,
-    color: Colors.onPrimary,
+    color: colors.onPrimary,
     fontSize: 16
   }
 });
+
+
+const authStylesCache = new Map();
+const getAuthStyles = (colors = Colors) => {
+  if (!authStylesCache.has(colors)) {
+    authStylesCache.set(colors, createAuthStyles(colors));
+  }
+  return authStylesCache.get(colors);
+};
+
+const styles = getAuthStyles(Colors);

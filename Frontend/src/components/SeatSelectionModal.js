@@ -12,6 +12,7 @@ import {
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../theme/tokens';
+import { useTheme } from '../theme/ThemeContext';
 
 const SEAT_ROWS = ['A', 'B', 'C', 'D'];
 const SEATS_PER_ROW = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -21,6 +22,8 @@ const TICKET_PRICE = 4500; // ₦4,500 per seat
 const OCCUPIED_SEATS = new Set(['A3', 'A4', 'B5', 'B6', 'C1', 'C2']);
 
 function SeatButton({ seatId, status, isSelected, onPress }) {
+  const { colors } = useTheme();
+  const styles = getModalStyles(colors);
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handlePress = () => {
@@ -74,6 +77,8 @@ function SeatButton({ seatId, status, isSelected, onPress }) {
 }
 
 export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess }) {
+  const { colors } = useTheme();
+  const styles = getModalStyles(colors);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [confirmed, setConfirmed] = useState(false);
   const [bookingRef, setBookingRef] = useState('');
@@ -147,7 +152,7 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess }
             accessibilityRole="button"
             accessibilityLabel="Close seat selection"
           >
-            <Ionicons name="close" size={24} color={Colors.onSurface} />
+            <Ionicons name="close" size={24} color={colors.onSurface} />
           </TouchableOpacity>
           <View style={styles.headerTitleWrap}>
             <Text style={styles.headerSub}>CHOOSE SEATS</Text>
@@ -234,7 +239,7 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess }
                     : 'Confirm Booking (select seats first)'
                 }
               >
-                <Ionicons name="checkmark-circle" size={20} color={Colors.onPrimary} style={{ marginRight: Spacing.xs }} />
+                <Ionicons name="checkmark-circle" size={20} color={colors.onPrimary} style={{ marginRight: Spacing.xs }} />
                 <Text style={styles.confirmBtnText}>Confirm Booking</Text>
               </TouchableOpacity>
             </View>
@@ -243,7 +248,7 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess }
           /* Celebratory Confirmation Screen */
           <View style={styles.confirmationContainer}>
             <Animated.View style={[styles.celebrationCircle, { transform: [{ scale: checkmarkScale }] }]}>
-              <Ionicons name="checkmark-done" size={54} color={Colors.onPrimary} />
+              <Ionicons name="checkmark-done" size={54} color={colors.onPrimary} />
             </Animated.View>
 
             <Text style={styles.confirmedTitle}>Booking Confirmed!</Text>
@@ -258,7 +263,7 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess }
               </View>
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>SEATS</Text>
-                <Text style={[styles.summaryValue, { color: Colors.primary, fontWeight: '700' }]}>
+                <Text style={[styles.summaryValue, { color: colors.primary, fontWeight: '700' }]}>
                   {selectedSeats.join(', ')}
                 </Text>
               </View>
@@ -289,10 +294,10 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess }
   );
 }
 
-const styles = StyleSheet.create({
+const createModalStyles = (colors = Colors) => StyleSheet.create({
   modalContainer: {
     flex: 1,
-    backgroundColor: Colors.surface
+    backgroundColor: colors.surface
   },
   headerRow: {
     flexDirection: 'row',
@@ -301,7 +306,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.outlineVariant
+    borderBottomColor: colors.outlineVariant
   },
   closeBtn: {
     width: 44,
@@ -316,13 +321,13 @@ const styles = StyleSheet.create({
   },
   headerSub: {
     ...Typography.labelSmall,
-    color: Colors.primary,
+    color: colors.primary,
     letterSpacing: 2,
     fontWeight: '700'
   },
   headerTitle: {
     ...Typography.titleMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700',
     marginTop: 2
   },
@@ -339,13 +344,13 @@ const styles = StyleSheet.create({
   curvedScreenBar: {
     width: '85%',
     height: 6,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: BorderRadius.full,
     ...Shadows.medium
   },
   screenStageText: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     letterSpacing: 3,
     marginTop: Spacing.xs,
@@ -365,7 +370,7 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     width: 16,
     textAlign: 'center',
@@ -382,31 +387,31 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: BorderRadius.xs,
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     alignItems: 'center',
     justifyContent: 'center'
   },
   seatSelected: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary
+    backgroundColor: colors.primary,
+    borderColor: colors.primary
   },
   seatOccupied: {
-    backgroundColor: Colors.surfaceContainerHigh,
+    backgroundColor: colors.surfaceContainerHigh,
     borderColor: 'transparent',
     opacity: 0.4
   },
   seatNumber: {
     fontSize: 9,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700'
   },
   seatNumberSelected: {
-    color: Colors.onPrimary
+    color: colors.onPrimary
   },
   seatNumberOccupied: {
-    color: Colors.outline
+    color: colors.outline
   },
   legendRow: {
     flexDirection: 'row',
@@ -426,29 +431,29 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xs
   },
   legendAvailable: {
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant
+    borderColor: colors.outlineVariant
   },
   legendSelected: {
-    backgroundColor: Colors.primary
+    backgroundColor: colors.primary
   },
   legendOccupied: {
-    backgroundColor: Colors.surfaceContainerHigh,
+    backgroundColor: colors.surfaceContainerHigh,
     opacity: 0.4
   },
   legendText: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85
   },
   bookingFooter: {
     width: '100%',
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     ...Shadows.soft
   },
   footerInfo: {
@@ -459,20 +464,20 @@ const styles = StyleSheet.create({
   },
   footerLabel: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     fontWeight: '600'
   },
   footerPrice: {
     ...Typography.titleLarge,
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '700'
   },
   confirmBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: BorderRadius.md,
     paddingVertical: Spacing.md,
     minHeight: 48
@@ -482,7 +487,7 @@ const styles = StyleSheet.create({
   },
   confirmBtnText: {
     ...Typography.labelLarge,
-    color: Colors.onPrimary,
+    color: colors.onPrimary,
     fontWeight: '700'
   },
 
@@ -497,7 +502,7 @@ const styles = StyleSheet.create({
     width: 90,
     height: 90,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.lg,
@@ -505,14 +510,14 @@ const styles = StyleSheet.create({
   },
   confirmedTitle: {
     ...Typography.headlineMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700',
     marginBottom: Spacing.xs,
     textAlign: 'center'
   },
   confirmedSubtitle: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     textAlign: 'center',
     lineHeight: 22,
@@ -520,11 +525,11 @@ const styles = StyleSheet.create({
   },
   ticketSummaryCard: {
     width: '100%',
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     marginBottom: Spacing.xl,
     gap: Spacing.sm
   },
@@ -535,17 +540,17 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85
   },
   summaryValue: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '600'
   },
   doneBtn: {
     width: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: BorderRadius.md,
     paddingVertical: Spacing.md,
     minHeight: 48,
@@ -554,7 +559,18 @@ const styles = StyleSheet.create({
   },
   doneBtnText: {
     ...Typography.labelLarge,
-    color: Colors.onPrimary,
+    color: colors.onPrimary,
     fontWeight: '700'
   }
 });
+
+
+const modalStylesCache = new Map();
+const getModalStyles = (colors = Colors) => {
+  if (!modalStylesCache.has(colors)) {
+    modalStylesCache.set(colors, createModalStyles(colors));
+  }
+  return modalStylesCache.get(colors);
+};
+
+const styles = getModalStyles(Colors);

@@ -16,11 +16,14 @@ import { Image as ExpoImage } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../theme/tokens';
+import { useTheme } from '../theme/ThemeContext';
 import { api } from '../services/api';
 import { MovieGridSkeleton } from '../components/SkeletonLoader';
 import { SeatSelectionModal } from '../components/SeatSelectionModal';
 
 export default function DashboardScreen({ user, onLogout }) {
+  const { colors } = useTheme();
+  const styles = getDashboardStyles(colors);
   const [activeTab, setActiveTab] = useState('discover'); // 'discover' | 'cinemas' | 'tickets' | 'account'
 
   return (
@@ -51,7 +54,7 @@ export default function DashboardScreen({ user, onLogout }) {
             <Ionicons
               name={activeTab === 'discover' ? 'film' : 'film-outline'}
               size={22}
-              color={activeTab === 'discover' ? Colors.primary : Colors.onSurface}
+              color={activeTab === 'discover' ? colors.primary : colors.onSurface}
               style={{ opacity: activeTab === 'discover' ? 1 : 0.85, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'discover' && styles.activeNavLabel]}>
@@ -74,7 +77,7 @@ export default function DashboardScreen({ user, onLogout }) {
             <Ionicons
               name={activeTab === 'cinemas' ? 'business' : 'business-outline'}
               size={22}
-              color={activeTab === 'cinemas' ? Colors.primary : Colors.onSurface}
+              color={activeTab === 'cinemas' ? colors.primary : colors.onSurface}
               style={{ opacity: activeTab === 'cinemas' ? 1 : 0.85, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'cinemas' && styles.activeNavLabel]}>
@@ -97,7 +100,7 @@ export default function DashboardScreen({ user, onLogout }) {
             <Ionicons
               name={activeTab === 'tickets' ? 'ticket' : 'ticket-outline'}
               size={22}
-              color={activeTab === 'tickets' ? Colors.primary : Colors.onSurface}
+              color={activeTab === 'tickets' ? colors.primary : colors.onSurface}
               style={{ opacity: activeTab === 'tickets' ? 1 : 0.85, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'tickets' && styles.activeNavLabel]}>
@@ -120,7 +123,7 @@ export default function DashboardScreen({ user, onLogout }) {
             <Ionicons
               name={activeTab === 'account' ? 'person' : 'person-outline'}
               size={22}
-              color={activeTab === 'account' ? Colors.primary : Colors.onSurface}
+              color={activeTab === 'account' ? colors.primary : colors.onSurface}
               style={{ opacity: activeTab === 'account' ? 1 : 0.85, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'account' && styles.activeNavLabel]}>
@@ -136,6 +139,8 @@ export default function DashboardScreen({ user, onLogout }) {
 // ─── Sub-Views ───────────────────────────────────────────────────────────────
 
 function DiscoverView() {
+  const { colors } = useTheme();
+  const styles = getDashboardStyles(colors);
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -251,7 +256,7 @@ function DiscoverView() {
         />
       ) : (
         <View style={styles.moviePosterPlaceholder}>
-          <Ionicons name="film-outline" size={40} color={Colors.outline} />
+          <Ionicons name="film-outline" size={40} color={colors.outline} />
         </View>
       )}
       <View style={styles.ratingBadge}>
@@ -278,11 +283,11 @@ function DiscoverView() {
       {/* Index 1: Sticky Search Input */}
       <View style={[styles.stickySearchWrapper, isScrolled && styles.stickySearchWrapperScrolled]}>
         <View style={styles.searchBarContainer}>
-          <Ionicons name="search" size={18} color={Colors.outline} style={styles.searchIcon} />
+          <Ionicons name="search" size={18} color={colors.outline} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search films by title..."
-            placeholderTextColor={Colors.outline}
+            placeholderTextColor={colors.outline}
             value={searchQuery}
             onChangeText={setSearchQuery}
             returnKeyType="search"
@@ -299,7 +304,7 @@ function DiscoverView() {
               accessibilityRole="button"
               accessibilityLabel="Clear search input"
             >
-              <Ionicons name="close-circle" size={18} color={Colors.onSurface} style={{ opacity: 0.85 }} />
+              <Ionicons name="close-circle" size={18} color={colors.onSurface} style={{ opacity: 0.85 }} />
             </TouchableOpacity>
           )}
         </View>
@@ -358,7 +363,7 @@ function DiscoverView() {
       {Boolean(error) && (
         <View style={styles.errorCard}>
           <View style={styles.errorIconCircle}>
-            <Ionicons name="cloud-offline-outline" size={32} color={Colors.onErrorContainer} />
+            <Ionicons name="cloud-offline-outline" size={32} color={colors.onErrorContainer} />
           </View>
           <Text style={styles.errorCardTitle}>Unable to Load Schedules</Text>
           <Text style={styles.errorCardSubtitle}>
@@ -375,7 +380,7 @@ function DiscoverView() {
             accessibilityRole="button"
             accessibilityLabel="Retry fetching movie schedules"
           >
-            <Ionicons name="refresh" size={16} color={Colors.onPrimary} style={{ marginRight: Spacing.xs }} />
+            <Ionicons name="refresh" size={16} color={colors.onPrimary} style={{ marginRight: Spacing.xs }} />
             <Text style={styles.retryButtonText}>Retry Screening Fetch</Text>
           </TouchableOpacity>
         </View>
@@ -388,7 +393,7 @@ function DiscoverView() {
     return (
       <View style={styles.emptySearchBox}>
         <View style={styles.emptySearchIconCircle}>
-          <Ionicons name="search-outline" size={32} color={Colors.outline} />
+          <Ionicons name="search-outline" size={32} color={colors.outline} />
         </View>
         <Text style={styles.emptySearchTitle}>No Screening Matches Found</Text>
         <Text style={styles.emptySearchText}>
@@ -425,7 +430,7 @@ function DiscoverView() {
           accessibilityLabel={`Load more releases, page ${page + 1} of ${totalPages}`}
         >
           {loadingMore ? (
-            <ActivityIndicator size="small" color={Colors.onPrimary} />
+            <ActivityIndicator size="small" color={colors.onPrimary} />
           ) : (
             <Text style={styles.loadMoreButtonText}>
               Load More Releases (Page {page} of {totalPages})
@@ -490,7 +495,7 @@ function DiscoverView() {
                   />
                 ) : (
                   <View style={styles.fullScreenBackdropPlaceholder}>
-                    <Ionicons name="film-outline" size={60} color={Colors.outline} />
+                    <Ionicons name="film-outline" size={60} color={colors.outline} />
                   </View>
                 )}
                 {/* Dark gradient scrim */}
@@ -506,7 +511,7 @@ function DiscoverView() {
                     accessibilityRole="button"
                     accessibilityLabel="Close movie details"
                   >
-                    <Ionicons name="arrow-back" size={22} color={Colors.onSurface} />
+                    <Ionicons name="arrow-back" size={22} color={colors.onSurface} />
                   </TouchableOpacity>
 
                   <View style={styles.topNavRightActions}>
@@ -524,7 +529,7 @@ function DiscoverView() {
                       <Ionicons
                         name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
                         size={20}
-                        color={isBookmarked ? Colors.primary : Colors.onSurface}
+                        color={isBookmarked ? colors.primary : colors.onSurface}
                       />
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -534,7 +539,7 @@ function DiscoverView() {
                       accessibilityRole="button"
                       accessibilityLabel="Share movie details"
                     >
-                      <Ionicons name="share-social-outline" size={20} color={Colors.onSurface} />
+                      <Ionicons name="share-social-outline" size={20} color={colors.onSurface} />
                     </TouchableOpacity>
                   </View>
                 </SafeAreaView>
@@ -576,7 +581,7 @@ function DiscoverView() {
                   accessibilityRole="button"
                   accessibilityLabel="Select showtime and book seats"
                 >
-                  <Ionicons name="ticket" size={20} color={Colors.onPrimary} style={{ marginRight: Spacing.xs }} />
+                  <Ionicons name="ticket" size={20} color={colors.onPrimary} style={{ marginRight: Spacing.xs }} />
                   <Text style={styles.primaryBookButtonText}>Select Showtime & Book Seats</Text>
                 </TouchableOpacity>
 
@@ -695,7 +700,7 @@ function DiscoverView() {
           activeOpacity={0.85}
           accessibilityLabel="Back to top"
         >
-          <Ionicons name="arrow-up" size={24} color={Colors.onPrimary} />
+          <Ionicons name="arrow-up" size={24} color={colors.onPrimary} />
         </TouchableOpacity>
       )}
     </View>
@@ -839,7 +844,7 @@ function CinemasView() {
         {filteredCinemas.map(cinema => (
           <View key={cinema.id} style={styles.cinemaItem}>
             <View style={styles.cinemaIconBox}>
-              <Ionicons name="business-outline" size={22} color={Colors.primary} />
+              <Ionicons name="business-outline" size={22} color={colors.primary} />
             </View>
             <View style={styles.cinemaDetails}>
               <View style={styles.cinemaHeaderRow}>
@@ -937,7 +942,7 @@ function TicketsView({ onBrowse }) {
             <View style={styles.ticketTopSection}>
               <View style={styles.ticketHeaderBadgeRow}>
                 <View style={styles.ticketStatusBadge}>
-                  <Ionicons name="checkmark-circle" size={14} color={Colors.onSuccessContainer} style={{ marginRight: Spacing.xxs }} />
+                  <Ionicons name="checkmark-circle" size={14} color={colors.onSuccessContainer} style={{ marginRight: Spacing.xxs }} />
                   <Text style={styles.ticketStatusBadgeText}>{DEMO_TICKET.status}</Text>
                 </View>
                 <Text style={styles.ticketFormatText}>{DEMO_TICKET.format}</Text>
@@ -945,7 +950,7 @@ function TicketsView({ onBrowse }) {
 
               <Text style={styles.ticketMovieTitle}>{DEMO_TICKET.movieTitle}</Text>
               <View style={styles.ticketVenueRow}>
-                <Ionicons name="location-outline" size={13} color={Colors.primary} style={{ marginRight: Spacing.xxs }} />
+                <Ionicons name="location-outline" size={13} color={colors.primary} style={{ marginRight: Spacing.xxs }} />
                 <Text style={styles.ticketCinemaVenue}>{DEMO_TICKET.cinema}</Text>
               </View>
             </View>
@@ -985,7 +990,7 @@ function TicketsView({ onBrowse }) {
                       style={{
                         width: w * 2,
                         height: 44,
-                        backgroundColor: Colors.onSurface,
+                        backgroundColor: colors.onSurface,
                         marginRight: Spacing.xxs
                       }}
                     />
@@ -993,7 +998,7 @@ function TicketsView({ onBrowse }) {
                 </View>
                 <Text style={styles.barcodeBookingRef}>BOOKING REF: {DEMO_TICKET.bookingRef}</Text>
                 <View style={styles.barcodePromptRow}>
-                  <Ionicons name="scan-outline" size={14} color={Colors.primary} style={{ marginRight: Spacing.xxs }} />
+                  <Ionicons name="scan-outline" size={14} color={colors.primary} style={{ marginRight: Spacing.xxs }} />
                   <Text style={styles.barcodePromptText}>Scan this digital barcode at cinema turnstile</Text>
                 </View>
               </View>
@@ -1003,7 +1008,7 @@ function TicketsView({ onBrowse }) {
       ) : (
         <View style={styles.emptyStateBox}>
           <View style={styles.emptyStateIconCircle}>
-            <Ionicons name="time-outline" size={44} color={Colors.outline} />
+            <Ionicons name="time-outline" size={44} color={colors.outline} />
           </View>
           <Text style={styles.emptyStateTitle}>No Past Bookings</Text>
           <Text style={styles.emptyStateSubtitle}>
@@ -1031,6 +1036,9 @@ function TicketsView({ onBrowse }) {
 }
 
 function AccountView({ user, onLogout }) {
+  const { colors, isDark, setTheme } = useTheme();
+  const styles = getDashboardStyles(colors);
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
       <View style={styles.topHeader}>
@@ -1051,6 +1059,77 @@ function AccountView({ user, onLogout }) {
         </View>
       </View>
 
+      {/* Appearance & Theme Mode */}
+      <View style={styles.sectionCard}>
+        <Text style={styles.sectionCardTitle}>Appearance</Text>
+        <View style={styles.accountRow}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs }}>
+            <Ionicons name={isDark ? 'moon' : 'sunny'} size={18} color={colors.primary} />
+            <Text style={styles.rowLabel}>Theme Mode</Text>
+          </View>
+          <View style={styles.themeSelectorRow}>
+            <TouchableOpacity
+              style={[
+                styles.themeChoiceBtn,
+                isDark && styles.themeChoiceBtnActive
+              ]}
+              onPress={() => setTheme('dark')}
+              activeOpacity={0.7}
+              accessible={true}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: isDark }}
+              accessibilityLabel="Select Dark Theme Mode"
+            >
+              <Ionicons
+                name="moon"
+                size={14}
+                color={isDark ? colors.onPrimary : colors.onSurface}
+                style={{ marginRight: 4 }}
+              />
+              <Text
+                style={[
+                  styles.themeChoiceText,
+                  isDark && styles.themeChoiceTextActive
+                ]}
+              >
+                Dark
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.themeChoiceBtn,
+                !isDark && styles.themeChoiceBtnActive
+              ]}
+              onPress={() => setTheme('light')}
+              activeOpacity={0.7}
+              accessible={true}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: !isDark }}
+              accessibilityLabel="Select Light Theme Mode"
+            >
+              <Ionicons
+                name="sunny"
+                size={14}
+                color={!isDark ? colors.onPrimary : colors.onSurface}
+                style={{ marginRight: 4 }}
+              />
+              <Text
+                style={[
+                  styles.themeChoiceText,
+                  !isDark && styles.themeChoiceTextActive
+                ]}
+              >
+                Light
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <Text style={styles.aboutDisclaimerText}>
+          Cinematic dark is enabled by default. Switch to light mode anytime for daylight clarity.
+        </Text>
+      </View>
+
       {/* Membership & Security */}
       <View style={styles.sectionCard}>
         <Text style={styles.sectionCardTitle}>Membership & Access</Text>
@@ -1062,7 +1141,7 @@ function AccountView({ user, onLogout }) {
         </View>
         <View style={styles.accountRow}>
           <Text style={styles.rowLabel}>Account Status</Text>
-          <Text style={[styles.rowValue, { color: Colors.success, fontWeight: '700' }]}>Active</Text>
+          <Text style={[styles.rowValue, { color: colors.success, fontWeight: '700' }]}>Active</Text>
         </View>
       </View>
 
@@ -1099,14 +1178,14 @@ function AccountView({ user, onLogout }) {
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const createStyles = (colors = Colors) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.surface
+    backgroundColor: colors.surface
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.surface
+    backgroundColor: colors.surface
   },
   contentArea: {
     flex: 1
@@ -1120,13 +1199,13 @@ const styles = StyleSheet.create({
   },
   brandSubtitle: {
     ...Typography.labelSmall,
-    color: Colors.primary,
+    color: colors.primary,
     letterSpacing: 2,
     fontWeight: '700'
   },
   pageTitle: {
     ...Typography.headlineLarge,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     marginTop: Spacing.xxs
   },
   discoverContainer: {
@@ -1134,7 +1213,7 @@ const styles = StyleSheet.create({
     position: 'relative'
   },
   stickySearchWrapper: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     paddingTop: Spacing.xs,
     paddingBottom: Spacing.sm,
     marginHorizontal: -Spacing.lg,
@@ -1143,16 +1222,16 @@ const styles = StyleSheet.create({
   },
   stickySearchWrapperScrolled: {
     borderBottomWidth: 1,
-    borderBottomColor: Colors.outlineVariant,
+    borderBottomColor: colors.outlineVariant,
     ...Shadows.soft
   },
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     paddingHorizontal: Spacing.md,
     minHeight: 48
   },
@@ -1163,7 +1242,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     paddingVertical: Spacing.none
   },
   clearSearchButton: {
@@ -1175,7 +1254,7 @@ const styles = StyleSheet.create({
   },
   clearSearchIcon: {
     fontSize: 14,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     fontWeight: '700'
   },
@@ -1189,27 +1268,27 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surfaceContainer,
+    backgroundColor: colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.sm
   },
   emptySearchTitle: {
     ...Typography.titleMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700',
     marginBottom: Spacing.xxs
   },
   emptySearchText: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     textAlign: 'center',
     marginBottom: Spacing.md
   },
   clearSearchBtnText: {
     ...Typography.labelMedium,
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '700'
   },
   backToTopButton: {
@@ -1219,21 +1298,21 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.hard,
     zIndex: 99
   },
   bannerCard: {
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: colors.primaryContainer,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.lg
   },
   bannerBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: BorderRadius.xs,
     paddingHorizontal: Spacing.xs,
     paddingVertical: Spacing.xxs,
@@ -1241,17 +1320,17 @@ const styles = StyleSheet.create({
   },
   bannerBadgeText: {
     ...Typography.labelSmall,
-    color: Colors.onPrimary,
+    color: colors.onPrimary,
     fontWeight: '700'
   },
   bannerTitle: {
     ...Typography.headlineSmall,
-    color: Colors.onPrimaryContainer,
+    color: colors.onPrimaryContainer,
     marginBottom: Spacing.xxs
   },
   bannerDesc: {
     ...Typography.bodyMedium,
-    color: Colors.onPrimaryContainer,
+    color: colors.onPrimaryContainer,
     opacity: 0.85,
     lineHeight: 20
   },
@@ -1263,12 +1342,12 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     ...Typography.titleMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700'
   },
   movieCountText: {
     ...Typography.labelSmall,
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '700'
   },
   loadingBox: {
@@ -1278,15 +1357,15 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     ...Typography.bodySmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     marginTop: Spacing.xs
   },
   errorCard: {
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.error,
+    borderColor: colors.error,
     padding: Spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1296,20 +1375,20 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.errorContainer,
+    backgroundColor: colors.errorContainer,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.sm
   },
   errorCardTitle: {
     ...Typography.titleMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700',
     marginBottom: Spacing.xxs
   },
   errorCardSubtitle: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     textAlign: 'center',
     lineHeight: 20,
@@ -1319,7 +1398,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
@@ -1327,11 +1406,11 @@ const styles = StyleSheet.create({
   },
   retryButtonText: {
     ...Typography.labelMedium,
-    color: Colors.onPrimary,
+    color: colors.onPrimary,
     fontWeight: '700'
   },
   emptyActionBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
@@ -1342,7 +1421,7 @@ const styles = StyleSheet.create({
   },
   emptyActionBtnText: {
     ...Typography.labelMedium,
-    color: Colors.onPrimary,
+    color: colors.onPrimary,
     fontWeight: '700'
   },
   columnWrapper: {
@@ -1358,10 +1437,10 @@ const styles = StyleSheet.create({
   movieCard: {
     flex: 1,
     maxWidth: '48%',
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     padding: Spacing.xs,
     marginBottom: Spacing.md,
     position: 'relative'
@@ -1370,13 +1449,13 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 190,
     borderRadius: BorderRadius.md,
-    backgroundColor: Colors.surfaceContainer
+    backgroundColor: colors.surfaceContainer
   },
   moviePosterPlaceholder: {
     width: '100%',
     height: 190,
     borderRadius: BorderRadius.md,
-    backgroundColor: Colors.surfaceContainer,
+    backgroundColor: colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -1398,19 +1477,19 @@ const styles = StyleSheet.create({
   },
   movieCardTitle: {
     ...Typography.labelMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     marginTop: Spacing.xs,
     fontWeight: '700',
     lineHeight: 18
   },
   movieCardDate: {
     ...Typography.bodySmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     marginTop: Spacing.xxs
   },
   loadMoreButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: BorderRadius.md,
     paddingVertical: Spacing.sm,
     minHeight: 48,
@@ -1421,7 +1500,7 @@ const styles = StyleSheet.create({
   },
   loadMoreButtonText: {
     ...Typography.labelMedium,
-    color: Colors.onPrimary,
+    color: colors.onPrimary,
     fontWeight: '700'
   },
   footerAttribution: {
@@ -1432,7 +1511,7 @@ const styles = StyleSheet.create({
   },
   footerAttributionText: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     textAlign: 'center',
     fontSize: 10,
@@ -1440,7 +1519,7 @@ const styles = StyleSheet.create({
   },
   aboutDisclaimerText: {
     ...Typography.bodySmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     marginTop: Spacing.sm,
     fontSize: 11,
@@ -1451,10 +1530,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md
   },
   categoryPill: {
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     minHeight: 40,
@@ -1462,23 +1541,23 @@ const styles = StyleSheet.create({
     marginRight: Spacing.xs
   },
   activeCategoryPill: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary
+    backgroundColor: colors.primary,
+    borderColor: colors.primary
   },
   categoryPillText: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '600'
   },
   activeCategoryPillText: {
-    color: Colors.onPrimary,
+    color: colors.onPrimary,
     fontWeight: '700'
   },
 
   // Full-Screen Movie Details Page (Funflix & Letterboxd)
   fullScreenContainer: {
     flex: 1,
-    backgroundColor: Colors.surface
+    backgroundColor: colors.surface
   },
   fullScreenScroll: {
     paddingBottom: Spacing.huge
@@ -1491,12 +1570,12 @@ const styles = StyleSheet.create({
   fullScreenBackdrop: {
     width: '100%',
     height: '100%',
-    backgroundColor: Colors.surfaceContainer
+    backgroundColor: colors.surfaceContainer
   },
   fullScreenBackdropPlaceholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: Colors.surfaceContainer,
+    backgroundColor: colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -1523,20 +1602,20 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
     backgroundColor: 'rgba(13, 13, 18, 0.75)',
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     alignItems: 'center',
     justifyContent: 'center'
   },
   fullScreenBody: {
     padding: Spacing.lg,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderTopLeftRadius: BorderRadius.xl,
     borderTopRightRadius: BorderRadius.xl,
     marginTop: -Spacing.xl
   },
   fullScreenTitle: {
     ...Typography.headlineLarge,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700',
     marginBottom: Spacing.sm
   },
@@ -1550,7 +1629,7 @@ const styles = StyleSheet.create({
   ratingPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceContainerHigh,
+    backgroundColor: colors.surfaceContainerHigh,
     borderRadius: BorderRadius.sm,
     paddingHorizontal: Spacing.xs,
     paddingVertical: Spacing.xxs
@@ -1561,23 +1640,23 @@ const styles = StyleSheet.create({
     fontWeight: '700'
   },
   metaPill: {
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     borderRadius: BorderRadius.sm,
     paddingHorizontal: Spacing.xs,
     paddingVertical: Spacing.xxs
   },
   metaPillText: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85
   },
   primaryBookButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md,
     minHeight: 52,
@@ -1586,13 +1665,13 @@ const styles = StyleSheet.create({
   },
   primaryBookButtonText: {
     ...Typography.labelLarge,
-    color: Colors.onPrimary,
+    color: colors.onPrimary,
     fontWeight: '700'
   },
   detailTabsRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: Colors.outlineVariant,
+    borderBottomColor: colors.outlineVariant,
     marginBottom: Spacing.md
   },
   detailTabItem: {
@@ -1604,15 +1683,15 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent'
   },
   activeDetailTabItem: {
-    borderBottomColor: Colors.primary
+    borderBottomColor: colors.primary
   },
   detailTabText: {
     ...Typography.labelMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85
   },
   activeDetailTabText: {
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '700',
     opacity: 1
   },
@@ -1621,13 +1700,13 @@ const styles = StyleSheet.create({
   },
   fullScreenSectionHeader: {
     ...Typography.titleMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700',
     marginTop: Spacing.xs
   },
   fullScreenSynopsis: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     lineHeight: 22
   },
@@ -1638,20 +1717,20 @@ const styles = StyleSheet.create({
   },
   metaGridItem: {
     flex: 1,
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.md,
     padding: Spacing.sm,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant
+    borderColor: colors.outlineVariant
   },
   metaGridLabel: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85
   },
   metaGridValue: {
     ...Typography.bodySmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '600',
     marginTop: Spacing.xxs
   },
@@ -1667,37 +1746,37 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: colors.primaryContainer,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.xxs
   },
   castAvatarInitial: {
     ...Typography.titleSmall,
-    color: Colors.onPrimaryContainer,
+    color: colors.onPrimaryContainer,
     fontWeight: '700'
   },
   castActorName: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     textAlign: 'center',
     fontWeight: '600'
   },
   castRoleName: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     fontSize: 9,
     textAlign: 'center'
   },
   showtimeCard: {
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant
+    borderColor: colors.outlineVariant
   },
   showtimeHeader: {
     flexDirection: 'row',
@@ -1706,17 +1785,17 @@ const styles = StyleSheet.create({
   },
   showtimeCinema: {
     ...Typography.titleSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700'
   },
   showtimePrice: {
     ...Typography.labelMedium,
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '700'
   },
   showtimeScreen: {
     ...Typography.bodySmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     marginTop: Spacing.xxs,
     marginBottom: Spacing.sm
@@ -1726,7 +1805,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm
   },
   timePill: {
-    backgroundColor: Colors.surfaceContainerHigh,
+    backgroundColor: colors.surfaceContainerHigh,
     borderRadius: BorderRadius.sm,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xxs,
@@ -1734,29 +1813,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   activeTimePill: {
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: colors.primaryContainer,
     borderWidth: 1,
-    borderColor: Colors.primary
+    borderColor: colors.primary
   },
   timePillText: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85
   },
   activeTimePillText: {
     ...Typography.labelSmall,
-    color: Colors.onPrimaryContainer,
+    color: colors.onPrimaryContainer,
     fontWeight: '700'
   },
 
   // Ticket Pass & Notch Cinema Pass Styling (Mobile Ticket Inspired)
   ticketSegmentWrapper: {
     flexDirection: 'row',
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     padding: Spacing.xxs,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     marginBottom: Spacing.lg
   },
   ticketSegmentBtn: {
@@ -1768,15 +1847,15 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md
   },
   activeTicketSegmentBtn: {
-    backgroundColor: Colors.primary
+    backgroundColor: colors.primary
   },
   ticketSegmentText: {
     ...Typography.labelMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85
   },
   activeTicketSegmentText: {
-    color: Colors.onPrimary,
+    color: colors.onPrimary,
     fontWeight: '700',
     opacity: 1
   },
@@ -1786,10 +1865,10 @@ const styles = StyleSheet.create({
   },
   notchTicketCard: {
     width: '100%',
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     overflow: 'hidden',
     position: 'relative',
     ...Shadows.medium
@@ -1801,10 +1880,10 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     zIndex: 10,
     borderRightWidth: 1,
-    borderRightColor: Colors.outlineVariant
+    borderRightColor: colors.outlineVariant
   },
   notchRight: {
     position: 'absolute',
@@ -1813,13 +1892,13 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     zIndex: 10,
     borderLeftWidth: 1,
-    borderLeftColor: Colors.outlineVariant
+    borderLeftColor: colors.outlineVariant
   },
   ticketTopSection: {
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: colors.primaryContainer,
     padding: Spacing.lg
   },
   ticketHeaderBadgeRow: {
@@ -1831,25 +1910,25 @@ const styles = StyleSheet.create({
   ticketStatusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.successContainer,
+    backgroundColor: colors.successContainer,
     borderRadius: BorderRadius.full,
     paddingHorizontal: Spacing.xs,
     paddingVertical: Spacing.xxs
   },
   ticketStatusBadgeText: {
     ...Typography.labelSmall,
-    color: Colors.onSuccessContainer,
+    color: colors.onSuccessContainer,
     fontWeight: '700'
   },
   ticketFormatText: {
     ...Typography.labelSmall,
-    color: Colors.onPrimaryContainer,
+    color: colors.onPrimaryContainer,
     letterSpacing: 1,
     fontWeight: '700'
   },
   ticketMovieTitle: {
     ...Typography.headlineMedium,
-    color: Colors.onPrimaryContainer,
+    color: colors.onPrimaryContainer,
     fontWeight: '700',
     marginBottom: Spacing.xxs
   },
@@ -1859,18 +1938,18 @@ const styles = StyleSheet.create({
   },
   ticketCinemaVenue: {
     ...Typography.bodySmall,
-    color: Colors.onPrimaryContainer,
+    color: colors.onPrimaryContainer,
     opacity: 0.9
   },
   perforatedDivider: {
     paddingHorizontal: Spacing.lg,
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     height: 1
   },
   perforatedDashes: {
     borderStyle: 'dashed',
     borderWidth: 1,
-    borderColor: Colors.outlineVariant
+    borderColor: colors.outlineVariant
   },
   ticketStubSection: {
     padding: Spacing.lg
@@ -1885,27 +1964,27 @@ const styles = StyleSheet.create({
   },
   ticketDataLabel: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     marginBottom: Spacing.xxs
   },
   ticketDataValue: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '600'
   },
   ticketDataValueHighlight: {
     ...Typography.bodyMedium,
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '700'
   },
   barcodeWrapper: {
     alignItems: 'center',
-    backgroundColor: Colors.surfaceContainerLow,
+    backgroundColor: colors.surfaceContainerLow,
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant
+    borderColor: colors.outlineVariant
   },
   barcodeBars: {
     flexDirection: 'row',
@@ -1916,7 +1995,7 @@ const styles = StyleSheet.create({
   },
   barcodeBookingRef: {
     ...Typography.labelMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     letterSpacing: 2,
     fontWeight: '700',
     marginBottom: Spacing.xxs
@@ -1927,36 +2006,36 @@ const styles = StyleSheet.create({
   },
   barcodePromptText: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85
   },
   infoCard: {
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     marginBottom: Spacing.md
   },
   cardHeader: {
     ...Typography.titleMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700',
     marginBottom: Spacing.xxs
   },
   cardBody: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     lineHeight: 20
   },
   cinemaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     padding: Spacing.md,
     marginBottom: Spacing.sm
   },
@@ -1964,7 +2043,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: BorderRadius.md,
-    backgroundColor: Colors.surfaceContainer,
+    backgroundColor: colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.sm
@@ -1974,13 +2053,13 @@ const styles = StyleSheet.create({
   },
   cinemaName: {
     ...Typography.labelLarge,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     flex: 1,
     marginRight: Spacing.xs
   },
   cinemaAddress: {
     ...Typography.bodySmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     marginTop: Spacing.xxs
   },
@@ -1993,18 +2072,18 @@ const styles = StyleSheet.create({
     minHeight: 40,
     justifyContent: 'center',
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surfaceContainer,
+    backgroundColor: colors.surfaceContainer,
     marginRight: Spacing.xs
   },
   activeFilterChip: {
-    backgroundColor: Colors.primary
+    backgroundColor: colors.primary
   },
   filterChipText: {
     ...Typography.labelMedium,
-    color: Colors.onSurface
+    color: colors.onSurface
   },
   activeFilterChipText: {
-    color: Colors.onPrimary,
+    color: colors.onPrimary,
     fontWeight: '700'
   },
   cinemaList: {
@@ -2017,14 +2096,14 @@ const styles = StyleSheet.create({
     gap: Spacing.xs
   },
   screenCountBadge: {
-    backgroundColor: Colors.surfaceContainer,
+    backgroundColor: colors.surfaceContainer,
     borderRadius: BorderRadius.sm,
     paddingHorizontal: Spacing.xs,
     paddingVertical: Spacing.xxs
   },
   screenCountText: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontSize: 11
   },
   formatRow: {
@@ -2033,14 +2112,14 @@ const styles = StyleSheet.create({
     gap: Spacing.xxs
   },
   formatBadge: {
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: colors.primaryContainer,
     borderRadius: BorderRadius.xs,
     paddingHorizontal: Spacing.xs,
     paddingVertical: Spacing.xxs
   },
   formatBadgeText: {
     ...Typography.labelSmall,
-    color: Colors.onPrimaryContainer,
+    color: colors.onPrimaryContainer,
     fontSize: 10,
     fontWeight: '700'
   },
@@ -2054,19 +2133,19 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: colors.primaryContainer,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.md
   },
   emptyStateTitle: {
     ...Typography.headlineMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     marginBottom: Spacing.xxs
   },
   emptyStateSubtitle: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85,
     textAlign: 'center',
     lineHeight: 22
@@ -2074,10 +2153,10 @@ const styles = StyleSheet.create({
   accountCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     padding: Spacing.md,
     marginBottom: Spacing.md
   },
@@ -2085,7 +2164,7 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: colors.primaryContainer,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md
@@ -2093,32 +2172,32 @@ const styles = StyleSheet.create({
   avatarInitial: {
     fontSize: 22,
     fontWeight: '700',
-    color: Colors.onPrimaryContainer
+    color: colors.onPrimaryContainer
   },
   accountHeaderMeta: {
     flex: 1
   },
   accountName: {
     ...Typography.titleLarge,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700'
   },
   accountEmail: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85
   },
   sectionCard: {
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: colors.outlineVariant,
     padding: Spacing.md,
     marginBottom: Spacing.lg
   },
   sectionCardTitle: {
     ...Typography.titleMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     fontWeight: '700',
     marginBottom: Spacing.sm
   },
@@ -2128,32 +2207,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.xs,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.surfaceContainer
+    borderBottomColor: colors.surfaceContainer
   },
   rowLabel: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85
   },
   rowValue: {
     ...Typography.bodyMedium,
-    color: Colors.onSurface
+    color: colors.onSurface
   },
   badge: {
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: colors.primaryContainer,
     borderRadius: BorderRadius.full,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xxs
   },
   badgeText: {
     ...Typography.labelSmall,
-    color: Colors.onPrimaryContainer,
+    color: colors.onPrimaryContainer,
     fontWeight: '700'
   },
   logoutButton: {
-    backgroundColor: Colors.errorContainer,
+    backgroundColor: colors.errorContainer,
     borderWidth: 1,
-    borderColor: Colors.error,
+    borderColor: colors.error,
     borderRadius: BorderRadius.md,
     paddingVertical: Spacing.md,
     minHeight: 48,
@@ -2162,16 +2241,16 @@ const styles = StyleSheet.create({
   },
   logoutButtonText: {
     ...Typography.labelLarge,
-    color: Colors.onErrorContainer,
+    color: colors.onErrorContainer,
     fontWeight: '700'
   },
 
   // Bottom Navigation Bar
   bottomNav: {
     flexDirection: 'row',
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLowest,
     borderTopWidth: 1,
-    borderTopColor: Colors.outlineVariant,
+    borderTopColor: colors.outlineVariant,
     paddingTop: Spacing.xs,
     paddingBottom: Spacing.sm,
     paddingHorizontal: Spacing.xs
@@ -2185,16 +2264,54 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md
   },
   activeNavItem: {
-    backgroundColor: Colors.surfaceContainer
+    backgroundColor: colors.surfaceContainer
   },
   navLabel: {
     ...Typography.labelSmall,
-    color: Colors.onSurface,
+    color: colors.onSurface,
     opacity: 0.85
   },
   activeNavLabel: {
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '700',
     opacity: 1
   }
+,
+  themeSelectorRow: {
+    flexDirection: 'row',
+    gap: Spacing.xs,
+    backgroundColor: colors.surfaceContainer,
+    borderRadius: BorderRadius.md,
+    padding: 3
+  },
+  themeChoiceBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+    minHeight: 36
+  },
+  themeChoiceBtnActive: {
+    backgroundColor: colors.primary
+  },
+  themeChoiceText: {
+    ...Typography.labelSmall,
+    color: colors.onSurface,
+    fontWeight: '600'
+  },
+  themeChoiceTextActive: {
+    color: colors.onPrimary,
+    fontWeight: '700'
+  }
 });
+
+const stylesCache = new Map();
+export const getDashboardStyles = (colors = Colors) => {
+  if (!stylesCache.has(colors)) {
+    stylesCache.set(colors, createStyles(colors));
+  }
+  return stylesCache.get(colors);
+};
+
+const styles = getDashboardStyles(Colors);

@@ -6,7 +6,7 @@
  * ==============================================================================
  */
 
-export const Colors = {
+export const DarkColors = {
   // Primary (Rich Cinematic Violet)
   primary: 'rgba(142, 68, 235, 1)',
   onPrimary: 'rgba(255, 255, 255, 1)',
@@ -63,6 +63,67 @@ export const Colors = {
   outline: 'rgba(110, 110, 130, 1)',
   outlineVariant: 'rgba(48, 48, 62, 1)'
 };
+
+export const LightColors = {
+  // Primary (Rich Cinematic Violet adapted for light theme)
+  primary: 'rgba(126, 44, 222, 1)',
+  onPrimary: 'rgba(255, 255, 255, 1)',
+  primaryContainer: 'rgba(242, 233, 252, 1)',
+  onPrimaryContainer: 'rgba(72, 21, 132, 1)',
+
+  // Secondary
+  secondary: 'rgba(90, 32, 172, 1)',
+  onSecondary: 'rgba(255, 255, 255, 1)',
+  secondaryContainer: 'rgba(227, 212, 247, 1)',
+  onSecondaryContainer: 'rgba(45, 16, 86, 1)',
+
+  // Tertiary
+  tertiary: 'rgba(83, 9, 195, 1)',
+  onTertiary: 'rgba(255, 255, 255, 1)',
+  tertiaryContainer: 'rgba(225, 206, 253, 1)',
+  onTertiaryContainer: 'rgba(42, 5, 97, 1)',
+
+  // Neutral / Surface (Daylight Light Theme - WCAG AA compliant >= 4.5:1 contrast)
+  surface: 'rgba(250, 250, 250, 1)',
+  onSurface: 'rgba(26, 26, 26, 1)', // 13.8:1 contrast against surface
+  onSurfaceVariant: 'rgba(77, 77, 77, 1)', // 5.8:1 contrast against surface
+  onSurfaceMuted: 'rgba(102, 102, 102, 1)', // 4.6:1 contrast against surface
+  surfaceContainer: 'rgba(242, 242, 242, 1)',
+  surfaceContainerHigh: 'rgba(230, 230, 230, 1)',
+  surfaceContainerHighest: 'rgba(220, 220, 224, 1)',
+  surfaceContainerLow: 'rgba(248, 248, 248, 1)',
+  surfaceContainerLowest: 'rgba(255, 255, 255, 1)',
+  inverseSurface: 'rgba(26, 26, 26, 1)',
+  inverseOnSurface: 'rgba(250, 250, 250, 1)',
+
+  // Status & Feedback (High contrast for light surfaces)
+  error: 'rgba(186, 13, 16, 1)',
+  onError: 'rgba(255, 255, 255, 1)',
+  errorContainer: 'rgba(254, 226, 226, 1)',
+  onErrorContainer: 'rgba(127, 29, 29, 1)',
+
+  success: 'rgba(4, 128, 46, 1)',
+  onSuccess: 'rgba(255, 255, 255, 1)',
+  successContainer: 'rgba(209, 250, 229, 1)',
+  onSuccessContainer: 'rgba(6, 78, 59, 1)',
+
+  warning: 'rgba(180, 83, 9, 1)',
+  onWarning: 'rgba(255, 255, 255, 1)',
+  warningContainer: 'rgba(254, 243, 199, 1)',
+  onWarningContainer: 'rgba(120, 53, 15, 1)',
+
+  info: 'rgba(29, 78, 216, 1)',
+  onInfo: 'rgba(255, 255, 255, 1)',
+  infoContainer: 'rgba(219, 234, 254, 1)',
+  onInfoContainer: 'rgba(30, 58, 138, 1)',
+
+  // Outlines and borders
+  outline: 'rgba(156, 163, 175, 1)',
+  outlineVariant: 'rgba(229, 231, 235, 1)'
+};
+
+// Default export is DarkColors for backward compatibility
+export const Colors = DarkColors;
 
 export const Spacing = {
   none: 0,

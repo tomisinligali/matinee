@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
-import { Colors } from './src/theme/tokens';
+import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import SplashScreen from './src/screens/SplashScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
@@ -8,7 +8,8 @@ import CinemaOperatorScreen from './src/screens/CinemaOperatorScreen';
 import PlatformAdminScreen from './src/screens/PlatformAdminScreen';
 import { api } from './src/services/api';
 
-export default function App() {
+function AppContent() {
+  const { colors, isDark } = useTheme();
   const [currentScreen, setCurrentScreen] = useState('splash'); // 'splash' | 'auth' | 'dashboard'
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -41,8 +42,11 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.surface} />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.surface }]}>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={colors.surface}
+      />
       {currentScreen === 'splash' && (
         <SplashScreen onNavigate={handleNavigate} />
       )}
@@ -54,9 +58,17 @@ export default function App() {
   );
 }
 
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: Colors.surface
+    flex: 1
   }
 });
+
