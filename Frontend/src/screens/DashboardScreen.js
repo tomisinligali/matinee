@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
@@ -88,6 +89,11 @@ function DiscoverView() {
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState('');
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const scrollRef = useRef(null);
 
   async function loadMovies(pageToLoad = 1, append = false) {
     try {
@@ -124,150 +130,222 @@ function DiscoverView() {
     loadMovies(1, false);
   }, []);
 
+  const handleScroll = (event) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    if (offsetY > 300) {
+      if (!showBackToTop) setShowBackToTop(true);
+    } else {
+      if (showBackToTop) setShowBackToTop(false);
+    }
+
+    if (offsetY > 30) {
+      if (!isScrolled) setIsScrolled(true);
+    } else {
+      if (isScrolled) setIsScrolled(false);
+    }
+  };
+
+  const filteredMovies = searchQuery.trim()
+    ? movies.filter(m => m.title?.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+    : movies;
+
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-      <View style={styles.topHeader}>
-        <Text style={styles.brandSubtitle}>MATINEE MOVIES</Text>
-        <Text style={styles.pageTitle}>Now Showing</Text>
-      </View>
-
-      <View style={styles.searchBarPlaceholder}>
-        <Text style={styles.searchIcon}>🔍</Text>
-        <Text style={styles.searchPlaceholderText}>Search films, genres, or cinemas...</Text>
-      </View>
-
-      {/* Featured Banner (Consumer Facing) */}
-      <View style={styles.bannerCard}>
-        <View style={styles.bannerBadge}>
-          <Text style={styles.bannerBadgeText}>PREMIERES & BLOCKBUSTERS</Text>
-        </View>
-        <Text style={styles.bannerTitle}>Experience Cinema in High Definition</Text>
-        <Text style={styles.bannerDesc}>
-          Browse upcoming schedules, select your favorite seats, and reserve tickets with zero hassle.
-        </Text>
-      </View>
-
-      <View style={styles.sectionHeaderRow}>
-        <Text style={styles.sectionHeader}>In Theatres Today</Text>
-        <Text style={styles.movieCountText}>{movies.length} Films</Text>
-      </View>
-
-      {/* Movie Grid / List */}
-      {loading ? (
-        <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Fetching latest releases...</Text>
-        </View>
-      ) : error ? (
-        <View style={styles.errorBox}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      ) : (
-        <>
-          <View style={styles.movieGrid}>
-            {movies.map(movie => (
-              <TouchableOpacity
-                key={movie.id}
-                style={styles.movieCard}
-                onPress={() => setSelectedMovie(movie)}
-                activeOpacity={0.8}
-              >
-                {movie.posterUrl ? (
-                  <Image
-                    source={{ uri: movie.posterUrl }}
-                    style={styles.moviePoster}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View style={styles.moviePosterPlaceholder}>
-                    <Text style={styles.posterEmoji}>🎬</Text>
-                  </View>
-                )}
-                <View style={styles.ratingBadge}>
-                  <Text style={styles.ratingBadgeText}>★ {movie.rating}</Text>
-                </View>
-                <Text style={styles.movieCardTitle} numberOfLines={2}>
-                  {movie.title}
-                </Text>
-                <Text style={styles.movieCardDate}>
-                  {movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 'Now Showing'}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Pagination Controls */}
-          {page < totalPages && (
-            <TouchableOpacity
-              style={styles.loadMoreButton}
-              onPress={() => loadMovies(page + 1, true)}
-              disabled={loadingMore}
-              activeOpacity={0.8}
-            >
-              {loadingMore ? (
-                <ActivityIndicator size="small" color={Colors.onPrimary} />
-              ) : (
-                <Text style={styles.loadMoreButtonText}>
-                  Load More Releases (Page {page} of {totalPages})
-                </Text>
-              )}
-            </TouchableOpacity>
-          )}
-        </>
-      )}
-
-      {/* Discreet Legal & Attribution Footer */}
-      <View style={styles.footerAttribution}>
-        <Text style={styles.footerAttributionText}>
-          Film metadata provided by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.
-        </Text>
-      </View>
-
-      {/* Movie Details Modal */}
-      <Modal
-        visible={Boolean(selectedMovie)}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setSelectedMovie(null)}
+    <View style={styles.discoverContainer}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        stickyHeaderIndices={[1]}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            {selectedMovie?.backdropUrl ? (
-              <Image
-                source={{ uri: selectedMovie.backdropUrl }}
-                style={styles.modalBackdrop}
-                resizeMode="cover"
-              />
-            ) : null}
+        {/* Index 0: Top Header */}
+        <View style={styles.topHeader}>
+          <Text style={styles.brandSubtitle}>MATINEE MOVIES</Text>
+          <Text style={styles.pageTitle}>Now Showing</Text>
+        </View>
 
-            <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
-              <View style={styles.modalHeaderRow}>
-                <Text style={styles.modalTitle}>{selectedMovie?.title}</Text>
-                <TouchableOpacity onPress={() => setSelectedMovie(null)} style={styles.closeBtn}>
-                  <Text style={styles.closeBtnText}>✕</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.modalMetaRow}>
-                <Text style={styles.modalRating}>★ {selectedMovie?.rating} / 10</Text>
-                <Text style={styles.modalReleaseDate}>Released: {selectedMovie?.releaseDate}</Text>
-              </View>
-
-              <Text style={styles.modalSectionTitle}>Synopsis</Text>
-              <Text style={styles.modalSynopsis}>{selectedMovie?.synopsis}</Text>
-
+        {/* Index 1: Sticky Search Input */}
+        <View style={[styles.stickySearchWrapper, isScrolled && styles.stickySearchWrapperScrolled]}>
+          <View style={styles.searchBarContainer}>
+            <Text style={styles.searchIcon}>🔍</Text>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search films by title..."
+              placeholderTextColor={Colors.outline}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              returnKeyType="search"
+              clearButtonMode="while-editing"
+            />
+            {searchQuery.length > 0 && (
               <TouchableOpacity
-                style={styles.selectSeatsBtn}
-                onPress={() => setSelectedMovie(null)}
-                activeOpacity={0.8}
+                onPress={() => setSearchQuery('')}
+                style={styles.clearSearchButton}
+                activeOpacity={0.7}
               >
-                <Text style={styles.selectSeatsBtnText}>Select Showtime & Seats</Text>
+                <Text style={styles.clearSearchIcon}>✕</Text>
               </TouchableOpacity>
-            </ScrollView>
+            )}
           </View>
         </View>
-      </Modal>
-    </ScrollView>
+
+        {/* Index 2: Featured Banner (Consumer Facing) */}
+        {!searchQuery.trim() && (
+          <View style={styles.bannerCard}>
+            <View style={styles.bannerBadge}>
+              <Text style={styles.bannerBadgeText}>PREMIERES & BLOCKBUSTERS</Text>
+            </View>
+            <Text style={styles.bannerTitle}>Experience Cinema in High Definition</Text>
+            <Text style={styles.bannerDesc}>
+              Browse upcoming schedules, select your favorite seats, and reserve tickets with zero hassle.
+            </Text>
+          </View>
+        )}
+
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionHeader}>
+            {searchQuery.trim() ? `Search Results (${filteredMovies.length})` : 'In Theatres Today'}
+          </Text>
+          <Text style={styles.movieCountText}>{filteredMovies.length} Films</Text>
+        </View>
+
+        {/* Movie Grid / List */}
+        {loading ? (
+          <View style={styles.loadingBox}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.loadingText}>Fetching latest releases...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : filteredMovies.length === 0 ? (
+          <View style={styles.emptySearchBox}>
+            <Text style={styles.emptySearchText}>No films match "{searchQuery}"</Text>
+            <TouchableOpacity onPress={() => setSearchQuery('')} activeOpacity={0.7}>
+              <Text style={styles.clearSearchBtnText}>Clear Search Filter</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <View style={styles.movieGrid}>
+              {filteredMovies.map(movie => (
+                <TouchableOpacity
+                  key={movie.id}
+                  style={styles.movieCard}
+                  onPress={() => setSelectedMovie(movie)}
+                  activeOpacity={0.8}
+                >
+                  {movie.posterUrl ? (
+                    <Image
+                      source={{ uri: movie.posterUrl }}
+                      style={styles.moviePoster}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={styles.moviePosterPlaceholder}>
+                      <Text style={styles.posterEmoji}>🎬</Text>
+                    </View>
+                  )}
+                  <View style={styles.ratingBadge}>
+                    <Text style={styles.ratingBadgeText}>★ {movie.rating}</Text>
+                  </View>
+                  <Text style={styles.movieCardTitle} numberOfLines={2}>
+                    {movie.title}
+                  </Text>
+                  <Text style={styles.movieCardDate}>
+                    {movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 'Now Showing'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Pagination Controls */}
+            {!searchQuery.trim() && page < totalPages && (
+              <TouchableOpacity
+                style={styles.loadMoreButton}
+                onPress={() => loadMovies(page + 1, true)}
+                disabled={loadingMore}
+                activeOpacity={0.8}
+              >
+                {loadingMore ? (
+                  <ActivityIndicator size="small" color={Colors.onPrimary} />
+                ) : (
+                  <Text style={styles.loadMoreButtonText}>
+                    Load More Releases (Page {page} of {totalPages})
+                  </Text>
+                )}
+              </TouchableOpacity>
+            )}
+          </>
+        )}
+
+        {/* Discreet Legal & Attribution Footer */}
+        <View style={styles.footerAttribution}>
+          <Text style={styles.footerAttributionText}>
+            Film metadata provided by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.
+          </Text>
+        </View>
+
+        {/* Movie Details Modal */}
+        <Modal
+          visible={Boolean(selectedMovie)}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setSelectedMovie(null)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              {selectedMovie?.backdropUrl ? (
+                <Image
+                  source={{ uri: selectedMovie.backdropUrl }}
+                  style={styles.modalBackdrop}
+                  resizeMode="cover"
+                />
+              ) : null}
+
+              <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+                <View style={styles.modalHeaderRow}>
+                  <Text style={styles.modalTitle}>{selectedMovie?.title}</Text>
+                  <TouchableOpacity onPress={() => setSelectedMovie(null)} style={styles.closeBtn}>
+                    <Text style={styles.closeBtnText}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.modalMetaRow}>
+                  <Text style={styles.modalRating}>★ {selectedMovie?.rating} / 10</Text>
+                  <Text style={styles.modalReleaseDate}>Released: {selectedMovie?.releaseDate}</Text>
+                </View>
+
+                <Text style={styles.modalSectionTitle}>Synopsis</Text>
+                <Text style={styles.modalSynopsis}>{selectedMovie?.synopsis}</Text>
+
+                <TouchableOpacity
+                  style={styles.selectSeatsBtn}
+                  onPress={() => setSelectedMovie(null)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.selectSeatsBtnText}>Select Showtime & Seats</Text>
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+      </ScrollView>
+
+      {/* Floating Back To Top Button */}
+      {showBackToTop && (
+        <TouchableOpacity
+          style={styles.backToTopButton}
+          onPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
+          activeOpacity={0.85}
+          accessibilityLabel="Back to top"
+        >
+          <Text style={styles.backToTopIcon}>↑</Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
@@ -538,7 +616,28 @@ const styles = StyleSheet.create({
     color: Colors.onSurface,
     marginTop: Spacing.xxs
   },
-  searchBarPlaceholder: {
+  discoverContainer: {
+    flex: 1,
+    position: 'relative'
+  },
+  stickySearchWrapper: {
+    backgroundColor: Colors.surface,
+    paddingTop: Spacing.xs,
+    paddingBottom: Spacing.sm,
+    marginHorizontal: -Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+    zIndex: 10
+  },
+  stickySearchWrapperScrolled: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outlineVariant,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3
+  },
+  searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surfaceContainerLowest,
@@ -546,17 +645,65 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    marginBottom: Spacing.md
+    height: 44
   },
   searchIcon: {
     marginRight: Spacing.xs,
     fontSize: 16
   },
-  searchPlaceholderText: {
+  searchInput: {
+    flex: 1,
     ...Typography.bodyMedium,
     color: Colors.onSurface,
-    opacity: 0.5
+    paddingVertical: 0
+  },
+  clearSearchButton: {
+    padding: Spacing.xxs
+  },
+  clearSearchIcon: {
+    fontSize: 14,
+    color: Colors.onSurface,
+    opacity: 0.6,
+    fontWeight: '700'
+  },
+  emptySearchBox: {
+    paddingVertical: Spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  emptySearchText: {
+    ...Typography.bodyMedium,
+    color: Colors.onSurface,
+    opacity: 0.7,
+    marginBottom: Spacing.sm
+  },
+  clearSearchBtnText: {
+    ...Typography.labelMedium,
+    color: Colors.primary,
+    fontWeight: '700'
+  },
+  backToTopButton: {
+    position: 'absolute',
+    bottom: Spacing.lg,
+    right: Spacing.lg,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
+    zIndex: 99
+  },
+  backToTopIcon: {
+    color: Colors.onPrimary,
+    fontSize: 22,
+    fontWeight: '800',
+    marginTop: -2
   },
   bannerCard: {
     backgroundColor: Colors.primaryContainer,
