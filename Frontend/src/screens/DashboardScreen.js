@@ -14,6 +14,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../theme/tokens';
 import { api } from '../services/api';
+import { MovieGridSkeleton } from '../components/SkeletonLoader';
 
 export default function DashboardScreen({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('discover'); // 'discover' | 'cinemas' | 'tickets' | 'account'
@@ -297,10 +298,7 @@ function DiscoverView() {
 
         {/* Movie Grid / List */}
         {loading ? (
-          <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" color={Colors.primary} />
-            <Text style={styles.loadingText}>Fetching latest releases...</Text>
-          </View>
+          <MovieGridSkeleton count={6} />
         ) : error ? (
           <View style={styles.errorBox}>
             <Text style={styles.errorText}>{error}</Text>
