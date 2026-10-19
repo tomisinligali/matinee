@@ -40,7 +40,7 @@ export default function DashboardScreen({ user, onLogout }) {
               name={activeTab === 'discover' ? 'film' : 'film-outline'}
               size={22}
               color={activeTab === 'discover' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'discover' ? 1 : 0.6, marginBottom: 2 }}
+              style={{ opacity: activeTab === 'discover' ? 1 : 0.6, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'discover' && styles.activeNavLabel]}>
               Discover
@@ -56,7 +56,7 @@ export default function DashboardScreen({ user, onLogout }) {
               name={activeTab === 'cinemas' ? 'business' : 'business-outline'}
               size={22}
               color={activeTab === 'cinemas' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'cinemas' ? 1 : 0.6, marginBottom: 2 }}
+              style={{ opacity: activeTab === 'cinemas' ? 1 : 0.6, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'cinemas' && styles.activeNavLabel]}>
               Cinemas
@@ -72,7 +72,7 @@ export default function DashboardScreen({ user, onLogout }) {
               name={activeTab === 'tickets' ? 'ticket' : 'ticket-outline'}
               size={22}
               color={activeTab === 'tickets' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'tickets' ? 1 : 0.6, marginBottom: 2 }}
+              style={{ opacity: activeTab === 'tickets' ? 1 : 0.6, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'tickets' && styles.activeNavLabel]}>
               My Tickets
@@ -88,7 +88,7 @@ export default function DashboardScreen({ user, onLogout }) {
               name={activeTab === 'account' ? 'person' : 'person-outline'}
               size={22}
               color={activeTab === 'account' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'account' ? 1 : 0.6, marginBottom: 2 }}
+              style={{ opacity: activeTab === 'account' ? 1 : 0.6, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'account' && styles.activeNavLabel]}>
               Account
@@ -270,7 +270,7 @@ function DiscoverView() {
                     </View>
                   )}
                   <View style={styles.ratingBadge}>
-                    <Ionicons name="star" size={11} color="#FFD700" style={{ marginRight: 2 }} />
+                    <Ionicons name="star" size={11} color="#FFD700" style={{ marginRight: Spacing.xxs }} />
                     <Text style={styles.ratingBadgeText}>{movie.rating}</Text>
                   </View>
                   <Text style={styles.movieCardTitle} numberOfLines={2}>
@@ -336,7 +336,7 @@ function DiscoverView() {
                 </View>
 
                 <View style={styles.modalMetaRow}>
-                  <Ionicons name="star" size={14} color="#FFD700" style={{ marginRight: 3 }} />
+                  <Ionicons name="star" size={14} color="#FFD700" style={{ marginRight: Spacing.xxs }} />
                   <Text style={styles.modalRating}>{selectedMovie?.rating} / 10</Text>
                   <Text style={styles.modalReleaseDate}>• Released: {selectedMovie?.releaseDate}</Text>
                 </View>
@@ -676,7 +676,7 @@ const styles = StyleSheet.create({
     flex: 1,
     ...Typography.bodyMedium,
     color: Colors.onSurface,
-    paddingVertical: 0
+    paddingVertical: Spacing.none
   },
   clearSearchButton: {
     padding: Spacing.xxs

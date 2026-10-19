@@ -35,7 +35,7 @@ export default function PlatformAdminScreen({ user, onLogout }) {
               name={activeTab === 'cinemas' ? 'business' : 'business-outline'}
               size={22}
               color={activeTab === 'cinemas' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'cinemas' ? 1 : 0.6, marginBottom: 2 }}
+              style={{ opacity: activeTab === 'cinemas' ? 1 : 0.6, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'cinemas' && styles.activeNavLabel]}>Network</Text>
           </TouchableOpacity>
@@ -49,7 +49,7 @@ export default function PlatformAdminScreen({ user, onLogout }) {
               name={activeTab === 'operators' ? 'people' : 'people-outline'}
               size={22}
               color={activeTab === 'operators' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'operators' ? 1 : 0.6, marginBottom: 2 }}
+              style={{ opacity: activeTab === 'operators' ? 1 : 0.6, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'operators' && styles.activeNavLabel]}>Staff</Text>
           </TouchableOpacity>
@@ -63,7 +63,7 @@ export default function PlatformAdminScreen({ user, onLogout }) {
               name={activeTab === 'audit' ? 'document-text' : 'document-text-outline'}
               size={22}
               color={activeTab === 'audit' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'audit' ? 1 : 0.6, marginBottom: 2 }}
+              style={{ opacity: activeTab === 'audit' ? 1 : 0.6, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'audit' && styles.activeNavLabel]}>Audit Log</Text>
           </TouchableOpacity>
@@ -77,7 +77,7 @@ export default function PlatformAdminScreen({ user, onLogout }) {
               name={activeTab === 'account' ? 'shield-checkmark' : 'shield-checkmark-outline'}
               size={22}
               color={activeTab === 'account' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'account' ? 1 : 0.6, marginBottom: 2 }}
+              style={{ opacity: activeTab === 'account' ? 1 : 0.6, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'account' && styles.activeNavLabel]}>Admin</Text>
           </TouchableOpacity>
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   topHeader: { marginBottom: Spacing.md },
   brandSubtitle: { ...Typography.labelSmall, color: Colors.primary, letterSpacing: 1.5, fontWeight: '700' },
   pageTitle: { ...Typography.headlineLarge, color: Colors.onSurface, marginTop: Spacing.xxs },
-  pageDescription: { ...Typography.bodyMedium, color: Colors.onSurface, opacity: 0.7, marginTop: 2 },
+  pageDescription: { ...Typography.bodyMedium, color: Colors.onSurface, opacity: 0.7, marginTop: Spacing.xxs },
   networkStatsRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
   statBox: {
     flex: 1,
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   },
   staffMeta: { flex: 1 },
   staffName: { ...Typography.titleMedium, color: Colors.onSurface, fontWeight: '700' },
-  staffEmail: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.7, marginTop: 1 },
+  staffEmail: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.7, marginTop: Spacing.xxs },
   staffVenue: { ...Typography.bodySmall, color: Colors.primary, fontWeight: '600', marginTop: Spacing.xxs },
   revokeBtn: { backgroundColor: Colors.surfaceContainerHigh, borderRadius: BorderRadius.sm, paddingHorizontal: Spacing.sm, paddingVertical: Spacing.xxs },
   revokeBtnText: { ...Typography.labelSmall, color: Colors.error, fontWeight: '700' },
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   auditAction: { ...Typography.labelMedium, color: Colors.primary, fontWeight: '700' },
   auditTime: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.5 },
   auditActor: { ...Typography.bodySmall, color: Colors.onSurface, marginTop: Spacing.xxs },
-  auditTarget: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.7, marginTop: 1 },
+  auditTarget: { ...Typography.bodySmall, color: Colors.onSurface, opacity: 0.7, marginTop: Spacing.xxs },
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
   },
   navItem: { flex: 1, alignItems: 'center', paddingVertical: Spacing.xxs, borderRadius: BorderRadius.md },
   activeNavItem: { backgroundColor: Colors.surfaceContainer },
-  navIcon: { fontSize: 20, marginBottom: 2 },
+  navIcon: { fontSize: 20, marginBottom: Spacing.xxs },
   activeNavIcon: { transform: [{ scale: 1.1 }] },
   navLabel: { ...Typography.labelSmall, color: Colors.onSurface, opacity: 0.6 },
   activeNavLabel: { color: Colors.primary, fontWeight: '700', opacity: 1 }

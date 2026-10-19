@@ -124,7 +124,7 @@ export default function AuthScreen({ onNavigate }) {
                       name="ticket-outline"
                       size={20}
                       color={role === 'CUSTOMER' ? Colors.onPrimaryContainer : Colors.onSurface}
-                      style={{ marginBottom: 4 }}
+                      style={{ marginBottom: Spacing.xxs }}
                     />
                     <Text style={[styles.roleTitle, role === 'CUSTOMER' && styles.activeRoleTitle]}>
                       Moviegoer
@@ -141,7 +141,7 @@ export default function AuthScreen({ onNavigate }) {
                       name="business-outline"
                       size={20}
                       color={role === 'CINEMA_OPERATOR' ? Colors.onPrimaryContainer : Colors.onSurface}
-                      style={{ marginBottom: 4 }}
+                      style={{ marginBottom: Spacing.xxs }}
                     />
                     <Text style={[styles.roleTitle, role === 'CINEMA_OPERATOR' && styles.activeRoleTitle]}>
                       Cinema Operator
@@ -158,7 +158,7 @@ export default function AuthScreen({ onNavigate }) {
                       name="shield-checkmark-outline"
                       size={20}
                       color={role === 'PLATFORM_ADMIN' ? Colors.onPrimaryContainer : Colors.onSurface}
-                      style={{ marginBottom: 4 }}
+                      style={{ marginBottom: Spacing.xxs }}
                     />
                     <Text style={[styles.roleTitle, role === 'PLATFORM_ADMIN' && styles.activeRoleTitle]}>
                       Platform Admin

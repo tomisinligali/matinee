@@ -35,7 +35,7 @@ export default function CinemaOperatorScreen({ user, onLogout }) {
               name={activeTab === 'screens' ? 'tv' : 'tv-outline'}
               size={22}
               color={activeTab === 'screens' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'screens' ? 1 : 0.6, marginBottom: 2 }}
+              style={{ opacity: activeTab === 'screens' ? 1 : 0.6, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'screens' && styles.activeNavLabel]}>Screens</Text>
           </TouchableOpacity>
@@ -49,7 +49,7 @@ export default function CinemaOperatorScreen({ user, onLogout }) {
               name={activeTab === 'showtimes' ? 'time' : 'time-outline'}
               size={22}
               color={activeTab === 'showtimes' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'showtimes' ? 1 : 0.6, marginBottom: 2 }}
+              style={{ opacity: activeTab === 'showtimes' ? 1 : 0.6, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'showtimes' && styles.activeNavLabel]}>Showtimes</Text>
           </TouchableOpacity>
@@ -63,7 +63,7 @@ export default function CinemaOperatorScreen({ user, onLogout }) {
               name={activeTab === 'scanner' ? 'qr-code' : 'qr-code-outline'}
               size={22}
               color={activeTab === 'scanner' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'scanner' ? 1 : 0.6, marginBottom: 2 }}
+              style={{ opacity: activeTab === 'scanner' ? 1 : 0.6, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'scanner' && styles.activeNavLabel]}>Scan Gate</Text>
           </TouchableOpacity>
@@ -77,7 +77,7 @@ export default function CinemaOperatorScreen({ user, onLogout }) {
               name={activeTab === 'account' ? 'person' : 'person-outline'}
               size={22}
               color={activeTab === 'account' ? Colors.primary : Colors.onSurface}
-              style={{ opacity: activeTab === 'account' ? 1 : 0.6, marginBottom: 2 }}
+              style={{ opacity: activeTab === 'account' ? 1 : 0.6, marginBottom: Spacing.xxs }}
             />
             <Text style={[styles.navLabel, activeTab === 'account' && styles.activeNavLabel]}>Account</Text>
           </TouchableOpacity>
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   topHeader: { marginBottom: Spacing.md },
   brandSubtitle: { ...Typography.labelSmall, color: Colors.primary, letterSpacing: 1.5, fontWeight: '700' },
   pageTitle: { ...Typography.headlineLarge, color: Colors.onSurface, marginTop: Spacing.xxs },
-  pageDescription: { ...Typography.bodyMedium, color: Colors.onSurface, opacity: 0.7, marginTop: 2 },
+  pageDescription: { ...Typography.bodyMedium, color: Colors.onSurface, opacity: 0.7, marginTop: Spacing.xxs },
   venueBanner: {
     backgroundColor: Colors.primaryContainer,
     borderRadius: BorderRadius.lg,
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
   },
   navItem: { flex: 1, alignItems: 'center', paddingVertical: Spacing.xxs, borderRadius: BorderRadius.md },
   activeNavItem: { backgroundColor: Colors.surfaceContainer },
-  navIcon: { fontSize: 20, marginBottom: 2 },
+  navIcon: { fontSize: 20, marginBottom: Spacing.xxs },
   activeNavIcon: { transform: [{ scale: 1.1 }] },
   navLabel: { ...Typography.labelSmall, color: Colors.onSurface, opacity: 0.6 },
   activeNavLabel: { color: Colors.primary, fontWeight: '700', opacity: 1 }
