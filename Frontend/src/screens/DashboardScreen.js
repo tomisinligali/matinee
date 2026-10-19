@@ -20,11 +20,17 @@ import { useTheme } from '../theme/ThemeContext';
 import { api } from '../services/api';
 import { MovieGridSkeleton } from '../components/SkeletonLoader';
 import { SeatSelectionModal } from '../components/SeatSelectionModal';
+import ComponentGalleryScreen from './ComponentGalleryScreen';
 
 export default function DashboardScreen({ user, onLogout }) {
   const { colors } = useTheme();
   const styles = getDashboardStyles(colors);
   const [activeTab, setActiveTab] = useState('discover'); // 'discover' | 'cinemas' | 'tickets' | 'account'
+  const [showGallery, setShowGallery] = useState(false);
+
+  if (showGallery) {
+    return <ComponentGalleryScreen onBack={() => setShowGallery(false)} />;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -34,7 +40,13 @@ export default function DashboardScreen({ user, onLogout }) {
           {activeTab === 'discover' && <DiscoverView />}
           {activeTab === 'cinemas' && <CinemasView />}
           {activeTab === 'tickets' && <TicketsView onBrowse={() => setActiveTab('discover')} />}
-          {activeTab === 'account' && <AccountView user={user} onLogout={onLogout} />}
+          {activeTab === 'account' && (
+            <AccountView
+              user={user}
+              onLogout={onLogout}
+              onOpenGallery={() => setShowGallery(true)}
+            />
+          )}
         </View>
 
         {/* Bottom Navigation Bar */}
@@ -1035,7 +1047,7 @@ function TicketsView({ onBrowse }) {
   );
 }
 
-function AccountView({ user, onLogout }) {
+function AccountView({ user, onLogout, onOpenGallery }) {
   const { colors, isDark, setTheme } = useTheme();
   const styles = getDashboardStyles(colors);
 
@@ -1160,6 +1172,32 @@ function AccountView({ user, onLogout }) {
           Film posters, descriptions, and ratings provided by The Movie Database. This product uses the TMDB API but is not endorsed or certified by TMDB.
         </Text>
       </View>
+
+      {/* Developer & Design System Tools */}
+      {onOpenGallery && (
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionCardTitle}>Developer & Design System</Text>
+          <TouchableOpacity
+            style={styles.galleryLaunchBtn}
+            onPress={onOpenGallery}
+            activeOpacity={0.8}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Open living design system component gallery"
+          >
+            <View style={styles.galleryBtnInner}>
+              <View style={styles.galleryIconCircle}>
+                <Ionicons name="color-palette" size={20} color={colors.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.galleryBtnTitle}>Living Component Gallery</Text>
+                <Text style={styles.galleryBtnSub}>Inspect all 12 UI components, states, and 300-seat map</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.outline} />
+            </View>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Logout Action */}
       <TouchableOpacity
@@ -2303,6 +2341,38 @@ const createStyles = (colors = Colors) => StyleSheet.create({
   themeChoiceTextActive: {
     color: colors.onPrimary,
     fontWeight: '700'
+  },
+  galleryLaunchBtn: {
+    backgroundColor: colors.surfaceContainer,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant
+  },
+  galleryBtnInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm
+  },
+  galleryIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: BorderRadius.full,
+    backgroundColor: colors.surfaceContainerLowest,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.outlineVariant
+  },
+  galleryBtnTitle: {
+    ...Typography.titleSmall,
+    color: colors.onSurface,
+    fontWeight: '700'
+  },
+  galleryBtnSub: {
+    ...Typography.labelSmall,
+    color: colors.onSurfaceVariant,
+    marginTop: 2
   }
 });
 

@@ -1,0 +1,26 @@
+{
+  "name": "@matinee/react-native-cinema-seatmap",
+  "version": "1.0.0",
+  "description": "High-performance, accessible 300+ seat auditorium map for React Native cinema and event ticketing apps.",
+  "main": "src/index.js",
+  "keywords": [
+    "react-native",
+    "seatmap",
+    "cinema",
+    "theatre",
+    "ticketing",
+    "auditorium",
+    "accessible",
+    "reservation"
+  ],
+  "author": "Matinee Engineering",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-native": ">=0.70.0"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^14.0.0 || ^15.0.0",
+    "expo-haptics": "^13.0.0 || ^14.0.0 || ^57.0.0"
+  }
+}
