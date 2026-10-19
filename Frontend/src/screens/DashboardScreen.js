@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  SafeAreaView
+  SafeAreaView,
+  Image,
+  ActivityIndicator,
+  Modal
 } from 'react-native';
 import { Colors, Spacing, Typography } from '../theme/tokens';
+import { api } from '../services/api';
 
 export default function DashboardScreen({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('discover'); // 'discover' | 'cinemas' | 'tickets' | 'account'
@@ -77,10 +81,34 @@ export default function DashboardScreen({ user, onLogout }) {
 // ─── Sub-Views ───────────────────────────────────────────────────────────────
 
 function DiscoverView() {
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [selectedMovie, setSelectedMovie] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadMovies() {
+      try {
+        setError('');
+        const data = await api.getNowPlaying(1);
+        if (isMounted && data?.movies) {
+          setMovies(data.movies);
+        }
+      } catch (err) {
+        if (isMounted) setError(err.message || 'Unable to fetch movies.');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    loadMovies();
+    return () => { isMounted = false; };
+  }, []);
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
       <View style={styles.topHeader}>
-        <Text style={styles.brandSubtitle}>MATINEE</Text>
+        <Text style={styles.brandSubtitle}>MATINEE MOVIES</Text>
         <Text style={styles.pageTitle}>Now Showing</Text>
       </View>
 
@@ -89,9 +117,10 @@ function DiscoverView() {
         <Text style={styles.searchPlaceholderText}>Search films, genres, or cinemas...</Text>
       </View>
 
+      {/* Featured Banner */}
       <View style={styles.bannerCard}>
         <View style={styles.bannerBadge}>
-          <Text style={styles.bannerBadgeText}>Featured</Text>
+          <Text style={styles.bannerBadgeText}>TMDB Powered</Text>
         </View>
         <Text style={styles.bannerTitle}>Experience Cinema in High Definition</Text>
         <Text style={styles.bannerDesc}>
@@ -99,24 +128,107 @@ function DiscoverView() {
         </Text>
       </View>
 
-      <Text style={styles.sectionHeader}>Upcoming Releases</Text>
-      <View style={styles.placeholderRow}>
-        <View style={styles.miniMovieCard}>
-          <View style={styles.moviePosterPlaceholder}>
-            <Text style={styles.posterEmoji}>🍿</Text>
-          </View>
-          <Text style={styles.movieTitleText}>Interstellar Horizon</Text>
-          <Text style={styles.movieGenreText}>Sci-Fi • 2h 45m</Text>
-        </View>
-
-        <View style={styles.miniMovieCard}>
-          <View style={styles.moviePosterPlaceholder}>
-            <Text style={styles.posterEmoji}>🎭</Text>
-          </View>
-          <Text style={styles.movieTitleText}>Shadows of Midnight</Text>
-          <Text style={styles.movieGenreText}>Mystery • 1h 55m</Text>
-        </View>
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionHeader}>In Theatres Today</Text>
+        <Text style={styles.movieCountText}>{movies.length} Films</Text>
       </View>
+
+      {/* Movie Grid / List */}
+      {loading ? (
+        <View style={styles.loadingBox}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Fetching latest releases...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      ) : (
+        <View style={styles.movieGrid}>
+          {movies.map(movie => (
+            <TouchableOpacity
+              key={movie.id}
+              style={styles.movieCard}
+              onPress={() => setSelectedMovie(movie)}
+              activeOpacity={0.8}
+            >
+              {movie.posterUrl ? (
+                <Image
+                  source={{ uri: movie.posterUrl }}
+                  style={styles.moviePoster}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={styles.moviePosterPlaceholder}>
+                  <Text style={styles.posterEmoji}>🎬</Text>
+                </View>
+              )}
+              <View style={styles.ratingBadge}>
+                <Text style={styles.ratingBadgeText}>★ {movie.rating}</Text>
+              </View>
+              <Text style={styles.movieCardTitle} numberOfLines={2}>
+                {movie.title}
+              </Text>
+              <Text style={styles.movieCardDate}>
+                {movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 'Now Showing'}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {/* TMDB Attribution Banner (Required by TMDB API Terms) */}
+      <View style={styles.tmdbAttributionBox}>
+        <Text style={styles.tmdbLogoText}>THE MOVIE DATABASE</Text>
+        <Text style={styles.tmdbDisclaimerText}>
+          This product uses the TMDB API but is not endorsed or certified by TMDB.
+        </Text>
+      </View>
+
+      {/* Movie Details Modal */}
+      <Modal
+        visible={Boolean(selectedMovie)}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setSelectedMovie(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {selectedMovie?.backdropUrl ? (
+              <Image
+                source={{ uri: selectedMovie.backdropUrl }}
+                style={styles.modalBackdrop}
+                resizeMode="cover"
+              />
+            ) : null}
+
+            <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+              <View style={styles.modalHeaderRow}>
+                <Text style={styles.modalTitle}>{selectedMovie?.title}</Text>
+                <TouchableOpacity onPress={() => setSelectedMovie(null)} style={styles.closeBtn}>
+                  <Text style={styles.closeBtnText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.modalMetaRow}>
+                <Text style={styles.modalRating}>★ {selectedMovie?.rating} / 10</Text>
+                <Text style={styles.modalReleaseDate}>Released: {selectedMovie?.releaseDate}</Text>
+              </View>
+
+              <Text style={styles.modalSectionTitle}>Synopsis</Text>
+              <Text style={styles.modalSynopsis}>{selectedMovie?.synopsis}</Text>
+
+              <TouchableOpacity
+                style={styles.selectSeatsBtn}
+                onPress={() => setSelectedMovie(null)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.selectSeatsBtnText}>Select Showtime & Seats</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -422,44 +534,202 @@ const styles = StyleSheet.create({
     opacity: 0.85,
     lineHeight: 20
   },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm
+  },
   sectionHeader: {
     ...Typography.titleMedium,
     color: Colors.onSurface,
-    fontWeight: '700',
-    marginBottom: Spacing.sm
+    fontWeight: '700'
   },
-  placeholderRow: {
+  movieCountText: {
+    ...Typography.labelSmall,
+    color: Colors.primary,
+    fontWeight: '700'
+  },
+  loadingBox: {
+    paddingVertical: Spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  loadingText: {
+    ...Typography.bodySmall,
+    color: Colors.onSurface,
+    opacity: 0.7,
+    marginTop: Spacing.xs
+  },
+  movieGrid: {
     flexDirection: 'row',
-    gap: Spacing.md
+    flexWrap: 'wrap',
+    gap: Spacing.md,
+    justifyContent: 'space-between'
   },
-  miniMovieCard: {
-    flex: 1,
+  movieCard: {
+    width: '47%',
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
-    padding: Spacing.xs
+    padding: Spacing.xs,
+    marginBottom: Spacing.xs,
+    position: 'relative'
+  },
+  moviePoster: {
+    width: '100%',
+    height: 190,
+    borderRadius: 8,
+    backgroundColor: Colors.surfaceContainer
   },
   moviePosterPlaceholder: {
-    height: 140,
-    backgroundColor: Colors.surfaceContainer,
+    width: '100%',
+    height: 190,
     borderRadius: 8,
+    backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.xs
+    justifyContent: 'center'
   },
   posterEmoji: {
-    fontSize: 36
+    fontSize: 40
   },
-  movieTitleText: {
-    ...Typography.labelLarge,
-    color: Colors.onSurface
+  ratingBadge: {
+    position: 'absolute',
+    top: Spacing.sm,
+    right: Spacing.sm,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2
   },
-  movieGenreText: {
+  ratingBadgeText: {
+    color: '#FFD700',
+    fontSize: 11,
+    fontWeight: '700'
+  },
+  movieCardTitle: {
+    ...Typography.labelMedium,
+    color: Colors.onSurface,
+    marginTop: Spacing.xs,
+    fontWeight: '700',
+    lineHeight: 18
+  },
+  movieCardDate: {
     ...Typography.bodySmall,
     color: Colors.onSurface,
     opacity: 0.6,
     marginTop: 2
+  },
+  tmdbAttributionBox: {
+    backgroundColor: Colors.surfaceContainer,
+    borderRadius: 10,
+    padding: Spacing.md,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
+    alignItems: 'center'
+  },
+  tmdbLogoText: {
+    ...Typography.labelSmall,
+    color: Colors.primary,
+    letterSpacing: 1.5,
+    fontWeight: '800'
+  },
+  tmdbDisclaimerText: {
+    ...Typography.bodySmall,
+    color: Colors.onSurface,
+    opacity: 0.7,
+    textAlign: 'center',
+    marginTop: 4,
+    fontSize: 11,
+    lineHeight: 16
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end'
+  },
+  modalContent: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '85%',
+    overflow: 'hidden'
+  },
+  modalBackdrop: {
+    width: '100%',
+    height: 180,
+    backgroundColor: Colors.surfaceContainer
+  },
+  modalScroll: {
+    padding: Spacing.lg
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: Spacing.xs
+  },
+  modalTitle: {
+    ...Typography.headlineMedium,
+    color: Colors.onSurface,
+    fontWeight: '700',
+    flex: 1,
+    marginRight: Spacing.sm
+  },
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.surfaceContainerHigh,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  closeBtnText: {
+    fontSize: 16,
+    color: Colors.onSurface,
+    fontWeight: '700'
+  },
+  modalMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginBottom: Spacing.md
+  },
+  modalRating: {
+    ...Typography.labelMedium,
+    color: Colors.primary,
+    fontWeight: '700'
+  },
+  modalReleaseDate: {
+    ...Typography.bodySmall,
+    color: Colors.onSurface,
+    opacity: 0.6
+  },
+  modalSectionTitle: {
+    ...Typography.titleMedium,
+    color: Colors.onSurface,
+    fontWeight: '700',
+    marginBottom: Spacing.xs
+  },
+  modalSynopsis: {
+    ...Typography.bodyMedium,
+    color: Colors.onSurface,
+    opacity: 0.8,
+    lineHeight: 22,
+    marginBottom: Spacing.lg
+  },
+  selectSeatsBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    marginBottom: Spacing.xl
+  },
+  selectSeatsBtnText: {
+    ...Typography.labelLarge,
+    color: Colors.onPrimary,
+    fontWeight: '700'
   },
   infoCard: {
     backgroundColor: Colors.surfaceContainerLowest,

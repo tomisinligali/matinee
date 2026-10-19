@@ -3,6 +3,7 @@ const cors = require('cors');
 
 const healthRoutes = require('./modules/health/health.routes');
 const identityRoutes = require('./modules/identity/identity.routes');
+const movieRoutes = require('./modules/movies/movie.routes');
 const { requireAuth } = require('./middleware/auth');
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.json());
 // Routes
 app.use('/', healthRoutes);
 app.use('/api/v1/auth', identityRoutes);
+app.use('/api/v1/movies', movieRoutes);
 
 // Protected dashboard route for mobile client
 app.get('/api/v1/dashboard', requireAuth, (req, res) => {

@@ -76,6 +76,14 @@ export const api = {
     return request('/api/v1/dashboard');
   },
 
+  getNowPlaying(page = 1) {
+    return request(`/api/v1/movies/now-playing?page=${page}`);
+  },
+
+  getMovieDetails(movieId) {
+    return request(`/api/v1/movies/${movieId}`);
+  },
+
   async logout() {
     await authStorage.clearSession();
   }
