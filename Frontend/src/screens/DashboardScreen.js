@@ -11,10 +11,12 @@ import {
   Modal
 } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
+import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../theme/tokens';
 import { api } from '../services/api';
 import { MovieGridSkeleton } from '../components/SkeletonLoader';
+import { SeatSelectionModal } from '../components/SeatSelectionModal';
 
 export default function DashboardScreen({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('discover'); // 'discover' | 'cinemas' | 'tickets' | 'account'
@@ -34,7 +36,10 @@ export default function DashboardScreen({ user, onLogout }) {
         <View style={styles.bottomNav}>
           <TouchableOpacity
             style={[styles.navItem, activeTab === 'discover' && styles.activeNavItem]}
-            onPress={() => setActiveTab('discover')}
+            onPress={() => {
+              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+              setActiveTab('discover');
+            }}
             activeOpacity={0.7}
             accessible={true}
             accessibilityRole="tab"
@@ -54,7 +59,10 @@ export default function DashboardScreen({ user, onLogout }) {
 
           <TouchableOpacity
             style={[styles.navItem, activeTab === 'cinemas' && styles.activeNavItem]}
-            onPress={() => setActiveTab('cinemas')}
+            onPress={() => {
+              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+              setActiveTab('cinemas');
+            }}
             activeOpacity={0.7}
             accessible={true}
             accessibilityRole="tab"
@@ -74,7 +82,10 @@ export default function DashboardScreen({ user, onLogout }) {
 
           <TouchableOpacity
             style={[styles.navItem, activeTab === 'tickets' && styles.activeNavItem]}
-            onPress={() => setActiveTab('tickets')}
+            onPress={() => {
+              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+              setActiveTab('tickets');
+            }}
             activeOpacity={0.7}
             accessible={true}
             accessibilityRole="tab"
@@ -94,7 +105,10 @@ export default function DashboardScreen({ user, onLogout }) {
 
           <TouchableOpacity
             style={[styles.navItem, activeTab === 'account' && styles.activeNavItem]}
-            onPress={() => setActiveTab('account')}
+            onPress={() => {
+              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+              setActiveTab('account');
+            }}
             activeOpacity={0.7}
             accessible={true}
             accessibilityRole="tab"
@@ -133,6 +147,7 @@ function DiscoverView() {
   const [selectedCategory, setSelectedCategory] = useState('All Films');
   const [detailSubTab, setDetailSubTab] = useState('overview');
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [showSeatModal, setShowSeatModal] = useState(false);
 
   const scrollRef = useRef(null);
 
@@ -260,7 +275,10 @@ function DiscoverView() {
               <TouchableOpacity
                 key={cat}
                 style={[styles.categoryPill, selectedCategory === cat && styles.activeCategoryPill]}
-                onPress={() => setSelectedCategory(cat)}
+                onPress={() => {
+                  try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+                  setSelectedCategory(cat);
+                }}
                 activeOpacity={0.7}
                 accessible={true}
                 accessibilityRole="button"
@@ -325,6 +343,7 @@ function DiscoverView() {
                   key={movie.id}
                   style={styles.movieCard}
                   onPress={() => {
+                    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
                     setSelectedMovie(movie);
                     setDetailSubTab('overview');
                   }}
@@ -439,7 +458,10 @@ function DiscoverView() {
 
                   <View style={styles.topNavRightActions}>
                     <TouchableOpacity
-                      onPress={() => setIsBookmarked(prev => !prev)}
+                      onPress={() => {
+                        try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch (_) {}
+                        setIsBookmarked(prev => !prev);
+                      }}
                       style={styles.circleIconBtn}
                       activeOpacity={0.8}
                       accessible={true}
@@ -492,7 +514,10 @@ function DiscoverView() {
                 {/* Primary Booking Call-To-Action */}
                 <TouchableOpacity
                   style={styles.primaryBookButton}
-                  onPress={() => setSelectedMovie(null)}
+                  onPress={() => {
+                    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch (_) {}
+                    setShowSeatModal(true);
+                  }}
                   activeOpacity={0.85}
                   accessible={true}
                   accessibilityRole="button"
@@ -601,6 +626,13 @@ function DiscoverView() {
             </ScrollView>
           </View>
         </Modal>
+
+        {/* Interactive Seat Selection & Booking Confirmation Modal */}
+        <SeatSelectionModal
+          visible={showSeatModal}
+          movie={selectedMovie}
+          onClose={() => setShowSeatModal(false)}
+        />
       </ScrollView>
 
       {/* Floating Back To Top Button */}
@@ -732,7 +764,10 @@ function CinemasView() {
           <TouchableOpacity
             key={st}
             style={[styles.filterChip, selectedState === st && styles.activeFilterChip]}
-            onPress={() => setSelectedState(st)}
+            onPress={() => {
+              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+              setSelectedState(st);
+            }}
             activeOpacity={0.7}
             accessible={true}
             accessibilityRole="button"
@@ -806,7 +841,10 @@ function TicketsView() {
       <View style={styles.ticketSegmentWrapper}>
         <TouchableOpacity
           style={[styles.ticketSegmentBtn, ticketTab === 'upcoming' && styles.activeTicketSegmentBtn]}
-          onPress={() => setTicketTab('upcoming')}
+          onPress={() => {
+            try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+            setTicketTab('upcoming');
+          }}
           activeOpacity={0.8}
           accessible={true}
           accessibilityRole="tab"
@@ -819,7 +857,10 @@ function TicketsView() {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.ticketSegmentBtn, ticketTab === 'past' && styles.activeTicketSegmentBtn]}
-          onPress={() => setTicketTab('past')}
+          onPress={() => {
+            try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+            setTicketTab('past');
+          }}
           activeOpacity={0.8}
           accessible={true}
           accessibilityRole="tab"
