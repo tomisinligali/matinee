@@ -601,10 +601,14 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess, 
 
   const modalContent = (
     <SafeAreaView style={styles.modalContainer}>
+      {/* Visual Sheet Pull / Drag Handle */}
+      <View style={styles.sheetDragHandle} />
+
       {/* Modal Header */}
       <View style={styles.headerRow}>
           <TouchableOpacity
             onPress={() => {
+              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
               if (step === 'CHECKOUT') {
                 handleAbandon();
               } else if (step === 'CONFIRMED') {
@@ -614,11 +618,12 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess, 
               }
             }}
             style={styles.closeBtn}
+            hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
             accessible={true}
             accessibilityRole="button"
             accessibilityLabel="Close seat selection"
           >
-            <Ionicons name="close" size={24} color={colors.onSurface} />
+            <Ionicons name="close" size={22} color={colors.onSurface} />
           </TouchableOpacity>
 
           <View style={styles.headerTitleWrap}>
@@ -629,7 +634,7 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess, 
               {movie?.title || 'Movie Screening'}
             </Text>
           </View>
-          <View style={{ width: 44 }} />
+          <View style={{ width: 38 }} />
         </View>
 
         {/* Error notification banner with Retry button */}
@@ -1375,6 +1380,15 @@ const createModalStyles = (colors = Colors) => StyleSheet.create({
     flex: 1,
     backgroundColor: colors.surface
   },
+  sheetDragHandle: {
+    width: 38,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: colors.outlineVariant || '#555',
+    alignSelf: 'center',
+    marginTop: 8,
+    marginBottom: 4
+  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1385,11 +1399,12 @@ const createModalStyles = (colors = Colors) => StyleSheet.create({
     borderBottomColor: colors.outlineVariant || colors.outline + '22'
   },
   closeBtn: {
-    width: 44,
-    height: 44,
+    width: 38,
+    height: 38,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: BorderRadius.full
+    borderRadius: 19,
+    backgroundColor: colors.surfaceContainer
   },
   headerTitleWrap: {
     alignItems: 'center',

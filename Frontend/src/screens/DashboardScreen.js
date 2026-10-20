@@ -1001,162 +1001,212 @@ function CinemasView({ onOpenTickets }) {
 
       {/* Cinema Schedule & Movie Showtimes Modal */}
       {selectedCinema && (
-        <Modal visible={true} animationType="slide" presentationStyle="pageSheet">
+        <Modal
+          visible={true}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => {
+            if (bookingMovie) {
+              setBookingMovie(null);
+            } else {
+              setSelectedCinema(null);
+            }
+          }}
+        >
           <SafeAreaView style={{ flex: 1, backgroundColor: colors.surface }}>
-            {/* Modal Header */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md, borderBottomWidth: 1, borderBottomColor: colors.outlineVariant }}>
-              <View style={{ flex: 1, marginRight: Spacing.md }}>
-                <Text style={{ ...Typography.labelSmall, color: colors.primary, fontWeight: '700', letterSpacing: 1 }}>
-                  CINEMA SHOWTIMES
-                </Text>
-                <Text style={{ ...Typography.titleMedium, color: colors.onSurface, fontWeight: '700' }} numberOfLines={1}>
-                  {selectedCinema.name}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => setSelectedCinema(null)}
-                style={{ padding: Spacing.xxs, borderRadius: 20, backgroundColor: colors.surfaceContainer }}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel="Close cinema schedule"
-              >
-                <Ionicons name="close" size={22} color={colors.onSurface} />
-              </TouchableOpacity>
-            </View>
+            {bookingMovie ? (
+              <SeatSelectionModal
+                visible={Boolean(bookingMovie)}
+                movie={bookingMovie}
+                isInline={true}
+                onClose={() => setBookingMovie(null)}
+                onBookingSuccess={() => {
+                  setBookingMovie(null);
+                  setSelectedCinema(null);
+                  onOpenTickets?.();
+                }}
+              />
+            ) : (
+              <>
+                {/* Visual Sheet Pull / Drag Handle */}
+                <View
+                  style={{
+                    width: 38,
+                    height: 5,
+                    borderRadius: 3,
+                    backgroundColor: colors.outlineVariant || '#555',
+                    alignSelf: 'center',
+                    marginTop: 8,
+                    marginBottom: 4
+                  }}
+                />
 
-            <ScrollView contentContainerStyle={{ padding: Spacing.lg, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
-              {/* Cinema Overview Card */}
-              <View style={{ backgroundColor: colors.surfaceContainerLowest, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: colors.outlineVariant, padding: Spacing.md, marginBottom: Spacing.lg }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.xs }}>
-                  <Ionicons name="location" size={16} color={colors.primary} style={{ marginRight: 6 }} />
-                  <Text style={{ ...Typography.bodySmall, color: colors.onSurface, flex: 1, fontWeight: '600' }}>
-                    {selectedCinema.address} • {selectedCinema.city}, {selectedCinema.state}
-                  </Text>
-                </View>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: Spacing.xxs }}>
-                  <View style={{ backgroundColor: colors.surfaceContainer, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 }}>
-                    <Text style={{ fontSize: 11, fontWeight: '600', color: colors.onSurfaceVariant }}>
-                      {selectedCinema.screens} Screens
+                {/* Modal Header: Close button on the FAR LEFT (avoids Expo Go top-right overlay) */}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingHorizontal: Spacing.md,
+                    paddingVertical: Spacing.sm,
+                    borderBottomWidth: 1,
+                    borderBottomColor: colors.outlineVariant
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() => {
+                      try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+                      setSelectedCinema(null);
+                    }}
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 19,
+                      backgroundColor: colors.surfaceContainer,
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
+                    accessible={true}
+                    accessibilityRole="button"
+                    accessibilityLabel="Close cinema schedule"
+                  >
+                    <Ionicons name="close" size={22} color={colors.onSurface} />
+                  </TouchableOpacity>
+
+                  <View style={{ flex: 1, alignItems: 'center', marginHorizontal: Spacing.xs }}>
+                    <Text style={{ ...Typography.labelSmall, color: colors.primary, fontWeight: '700', letterSpacing: 1 }}>
+                      CINEMA SHOWTIMES
+                    </Text>
+                    <Text style={{ ...Typography.titleMedium, color: colors.onSurface, fontWeight: '700' }} numberOfLines={1}>
+                      {selectedCinema.name}
                     </Text>
                   </View>
-                  {selectedCinema.formats.map((fmt, i) => (
-                    <View key={i} style={{ backgroundColor: colors.primaryContainer, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 }}>
-                      <Text style={{ fontSize: 11, fontWeight: '700', color: colors.onPrimaryContainer }}>
-                        {fmt}
+
+                  {/* Empty right placeholder keeping header centered & clear of Expo Go's top-right menu */}
+                  <View style={{ width: 38 }} />
+                </View>
+
+                <ScrollView contentContainerStyle={{ padding: Spacing.lg, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
+                  {/* Cinema Overview Card */}
+                  <View style={{ backgroundColor: colors.surfaceContainerLowest, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: colors.outlineVariant, padding: Spacing.md, marginBottom: Spacing.lg }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.xs }}>
+                      <Ionicons name="location" size={16} color={colors.primary} style={{ marginRight: 6 }} />
+                      <Text style={{ ...Typography.bodySmall, color: colors.onSurface, flex: 1, fontWeight: '600' }}>
+                        {selectedCinema.address} • {selectedCinema.city}, {selectedCinema.state}
                       </Text>
                     </View>
-                  ))}
-                </View>
-              </View>
-
-              {/* Today's Screenings Section */}
-              <View style={{ marginBottom: Spacing.md }}>
-                <Text style={{ ...Typography.titleSmall, color: colors.onSurface, fontWeight: '700', marginBottom: 4 }}>
-                  Now Showing Today
-                </Text>
-                <Text style={{ ...Typography.bodySmall, color: colors.onSurfaceVariant }}>
-                  Select a movie screening to pick your preferred seats
-                </Text>
-              </View>
-
-              {loadingShowtimes ? (
-                <CinemaShowtimesSkeleton />
-              ) : cinemaMovieGroups.length === 0 ? (
-                <View style={{ paddingVertical: Spacing.xl, alignItems: 'center' }}>
-                  <Ionicons name="film-outline" size={40} color={colors.outline} />
-                  <Text style={{ marginTop: Spacing.sm, ...Typography.bodyMedium, color: colors.onSurfaceVariant }}>
-                    No scheduled screenings for this venue today.
-                  </Text>
-                </View>
-              ) : (
-                cinemaMovieGroups.map((group, idx) => (
-                  <View key={idx} style={{ backgroundColor: colors.surfaceContainerLowest, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: colors.outlineVariant, padding: Spacing.md, marginBottom: Spacing.md }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.sm }}>
-                      {group.posterUrl ? (
-                        <ExpoImage
-                          source={{ uri: group.posterUrl }}
-                          style={{ width: 48, height: 70, borderRadius: BorderRadius.sm, marginRight: Spacing.sm }}
-                          contentFit="cover"
-                        />
-                      ) : (
-                        <View style={{ width: 48, height: 70, borderRadius: BorderRadius.sm, backgroundColor: colors.surfaceContainer, marginRight: Spacing.sm, alignItems: 'center', justifyContent: 'center' }}>
-                          <Ionicons name="film" size={20} color={colors.outline} />
-                        </View>
-                      )}
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ ...Typography.titleSmall, color: colors.onSurface, fontWeight: '700' }} numberOfLines={1}>
-                          {group.title}
-                        </Text>
-                        <Text style={{ ...Typography.bodySmall, color: colors.onSurfaceVariant, marginTop: 2 }}>
-                          {group.screenName || 'Screen 1'} • 2D Laser Cinema
-                        </Text>
-                        <Text style={{ fontSize: 11, fontWeight: '600', color: colors.primary, marginTop: 4 }}>
-                          Standard Admission: ₦4,500.00
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: Spacing.xxs }}>
+                      <View style={{ backgroundColor: colors.surfaceContainer, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 }}>
+                        <Text style={{ fontSize: 11, fontWeight: '600', color: colors.onSurfaceVariant }}>
+                          {selectedCinema.screens} Screens
                         </Text>
                       </View>
-                    </View>
-
-                    {/* Showtimes Pills */}
-                    <Text style={{ ...Typography.labelSmall, color: colors.onSurfaceVariant, marginBottom: Spacing.xxs, fontWeight: '600' }}>
-                      AVAILABLE SHOWTIMES
-                    </Text>
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                      {group.showtimes.map((st) => {
-                        const sDate = new Date(st.startTime);
-                        const timeLabel = sDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                        return (
-                          <TouchableOpacity
-                            key={st.id}
-                            style={{
-                              backgroundColor: colors.primary,
-                              paddingVertical: 8,
-                              paddingHorizontal: Spacing.md,
-                              borderRadius: BorderRadius.md,
-                              alignItems: 'center'
-                            }}
-                            onPress={() => {
-                              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
-                              setBookingMovie({
-                                id: st.movieId,
-                                title: st.movieTitle,
-                                posterUrl: st.moviePoster,
-                                showtimeId: st.id,
-                                cinema: selectedCinema.name,
-                                screen: st.screenName
-                              });
-                            }}
-                            activeOpacity={0.85}
-                            accessible={true}
-                            accessibilityRole="button"
-                            accessibilityLabel={`Book ${group.title} at ${timeLabel}`}
-                          >
-                            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.onPrimary }}>
-                              {timeLabel}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
+                      {selectedCinema.formats.map((fmt, i) => (
+                        <View key={i} style={{ backgroundColor: colors.primaryContainer, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 }}>
+                          <Text style={{ fontSize: 11, fontWeight: '700', color: colors.onPrimaryContainer }}>
+                            {fmt}
+                          </Text>
+                        </View>
+                      ))}
                     </View>
                   </View>
-                ))
-              )}
-            </ScrollView>
-          </SafeAreaView>
 
-          {/* Seat Selection Modal launched from Cinema Schedule */}
-          {bookingMovie && (
-            <SeatSelectionModal
-              visible={Boolean(bookingMovie)}
-              movie={bookingMovie}
-              isInline={false}
-              onClose={() => setBookingMovie(null)}
-              onBookingSuccess={() => {
-                setBookingMovie(null);
-                setSelectedCinema(null);
-                onOpenTickets?.();
-              }}
-            />
-          )}
+                  {/* Today's Screenings Section */}
+                  <View style={{ marginBottom: Spacing.md }}>
+                    <Text style={{ ...Typography.titleSmall, color: colors.onSurface, fontWeight: '700', marginBottom: 4 }}>
+                      Now Showing Today
+                    </Text>
+                    <Text style={{ ...Typography.bodySmall, color: colors.onSurfaceVariant }}>
+                      Select a movie screening to pick your preferred seats
+                    </Text>
+                  </View>
+
+                  {loadingShowtimes ? (
+                    <CinemaShowtimesSkeleton />
+                  ) : cinemaMovieGroups.length === 0 ? (
+                    <View style={{ paddingVertical: Spacing.xl, alignItems: 'center' }}>
+                      <Ionicons name="film-outline" size={40} color={colors.outline} />
+                      <Text style={{ marginTop: Spacing.sm, ...Typography.bodyMedium, color: colors.onSurfaceVariant }}>
+                        No scheduled screenings for this venue today.
+                      </Text>
+                    </View>
+                  ) : (
+                    cinemaMovieGroups.map((group, idx) => (
+                      <View key={idx} style={{ backgroundColor: colors.surfaceContainerLowest, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: colors.outlineVariant, padding: Spacing.md, marginBottom: Spacing.md }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.sm }}>
+                          {group.posterUrl ? (
+                            <ExpoImage
+                              source={{ uri: group.posterUrl }}
+                              style={{ width: 48, height: 70, borderRadius: BorderRadius.sm, marginRight: Spacing.sm }}
+                              contentFit="cover"
+                            />
+                          ) : (
+                            <View style={{ width: 48, height: 70, borderRadius: BorderRadius.sm, backgroundColor: colors.surfaceContainer, marginRight: Spacing.sm, alignItems: 'center', justifyContent: 'center' }}>
+                              <Ionicons name="film" size={20} color={colors.outline} />
+                            </View>
+                          )}
+                          <View style={{ flex: 1 }}>
+                            <Text style={{ ...Typography.titleSmall, color: colors.onSurface, fontWeight: '700' }} numberOfLines={1}>
+                              {group.title}
+                            </Text>
+                            <Text style={{ ...Typography.bodySmall, color: colors.onSurfaceVariant, marginTop: 2 }}>
+                              {group.screenName || 'Screen 1'} • 2D Laser Cinema
+                            </Text>
+                            <Text style={{ fontSize: 11, fontWeight: '600', color: colors.primary, marginTop: 4 }}>
+                              Standard Admission: ₦4,500.00
+                            </Text>
+                          </View>
+                        </View>
+
+                        {/* Showtimes Pills */}
+                        <Text style={{ ...Typography.labelSmall, color: colors.onSurfaceVariant, marginBottom: Spacing.xxs, fontWeight: '600' }}>
+                          AVAILABLE SHOWTIMES
+                        </Text>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                          {group.showtimes.map((st) => {
+                            const sDate = new Date(st.startTime);
+                            const timeLabel = sDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                            return (
+                              <TouchableOpacity
+                                key={st.id}
+                                style={{
+                                  backgroundColor: colors.primary,
+                                  paddingVertical: 8,
+                                  paddingHorizontal: Spacing.md,
+                                  borderRadius: BorderRadius.md,
+                                  alignItems: 'center'
+                                }}
+                                onPress={() => {
+                                  try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+                                  setBookingMovie({
+                                    id: st.movieId,
+                                    title: st.movieTitle,
+                                    posterUrl: st.moviePoster,
+                                    showtimeId: st.id,
+                                    cinema: selectedCinema.name,
+                                    screen: st.screenName
+                                  });
+                                }}
+                                activeOpacity={0.85}
+                                accessible={true}
+                                accessibilityRole="button"
+                                accessibilityLabel={`Book ${group.title} at ${timeLabel}`}
+                              >
+                                <Text style={{ fontSize: 13, fontWeight: '700', color: colors.onPrimary }}>
+                                  {timeLabel}
+                                </Text>
+                              </TouchableOpacity>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    ))
+                  )}
+                </ScrollView>
+              </>
+            )}
+          </SafeAreaView>
         </Modal>
       )}
     </ScrollView>
