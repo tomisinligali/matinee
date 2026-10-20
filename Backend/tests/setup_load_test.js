@@ -67,13 +67,14 @@ async function setupLoadTest() {
 
   console.log(`[Setup Load Test] Selected ${targetSeats.length} seats (from ${targetSeats[0].label} to ${targetSeats[targetSeats.length - 1].label})`);
 
-  // 2. Seed 500 test users in PostgreSQL
+  // 2. Seed 500 test users in PostgreSQL with authentic bcrypt cost factor 12
+  const defaultPasswordHash = bcrypt.hashSync('LoadTestPass123!', 12);
   const usersToCreate = [];
   for (let i = 1; i <= NUM_USERS; i++) {
     usersToCreate.push({
       email: `loadtest_vu_${i}@matinee.local`,
       name: `Virtual User ${i}`,
-      passwordHash: 'seeded_dummy_password_hash_for_load_test',
+      passwordHash: defaultPasswordHash,
       role: 'CUSTOMER'
     });
   }

@@ -177,10 +177,12 @@ export default function AuthScreen({ onNavigate }) {
   const handlePasswordChange = (text) => {
     setPassword(text);
 
-    if (passwordError === 'Password field cannot be empty') {
+    if (text.length > 64) {
+      setPasswordError('Password cannot exceed 64 characters');
+      setPasswordSuccess(false);
+    } else if (passwordError === 'Password cannot exceed 64 characters' || passwordError === 'Password field cannot be empty') {
       setPasswordError('');
-    }
-    if (text.length >= 8 && passwordError === 'Password must be at least 8 characters long') {
+    } else if (text.length >= 8 && passwordError === 'Password must be between 8 and 64 characters') {
       setPasswordError('');
     }
   };
@@ -199,9 +201,9 @@ export default function AuthScreen({ onNavigate }) {
       return;
     }
 
-    // Minimum 8 characters validation
-    if (trimmed.length < 8) {
-      setPasswordError('Password must be at least 8 characters long');
+    // Range: 8 min, 64 max
+    if (trimmed.length < 8 || trimmed.length > 64) {
+      setPasswordError('Password must be between 8 and 64 characters');
       setPasswordSuccess(false);
       return;
     }
@@ -229,7 +231,7 @@ export default function AuthScreen({ onNavigate }) {
   const hasDomainAfterAt = emailParts.length > 1 && emailParts[1].length > 0 && emailParts[1].includes('.') && emailParts[1].split('.')[1]?.length >= 2;
   const isEmailValid = trimmedEmail.length > 0 && hasDomainAfterAt && !emailError;
 
-  const isPasswordValid = trimmedPassword.length >= 8 && !passwordError;
+  const isPasswordValid = trimmedPassword.length >= 8 && trimmedPassword.length <= 64 && !passwordError;
 
   // The button is only enabled the moment the user fills in the last valid piece of data
   const isFormComplete = isLogin
@@ -479,7 +481,7 @@ export default function AuthScreen({ onNavigate }) {
 
           {/* Password Field with Conditional Visibility Toggle Icon */}
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Password (Min. 8 characters)</Text>
+            <Text style={styles.inputLabel}>Password (8 to 64 characters)</Text>
             <View style={[styles.passwordContainer, getInputStyle('password', !!passwordError, passwordSuccess)]}>
               <TextInput
                 style={styles.passwordInput}

@@ -18,9 +18,11 @@ class IdentityService {
       throw error;
     }
 
-    // Hash password securely
-    const saltRounds = 12;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+    // Cryptographic Salting & Hashing: bcrypt with cost factor 12 (2^12 = 4096 rounds)
+    // Guarantees unique 128-bit salt per user; plaintext password is NEVER stored
+    const BCRYPT_COST_FACTOR = 12;
+    const salt = await bcrypt.genSalt(BCRYPT_COST_FACTOR);
+    const passwordHash = await bcrypt.hash(password, salt);
 
     // Parse name components (handling 1, 2, 3, or more words)
     let firstName = null;
