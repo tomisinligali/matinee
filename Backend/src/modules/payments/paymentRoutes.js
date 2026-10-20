@@ -198,6 +198,83 @@ router.post('/abandon', requireAuth, async (req, res, next) => {
 });
 
 /**
+ * GET /api/v1/bookings
+ * Returns confirmed and completed bookings for the authenticated user.
+ */
+router.get('/bookings', requireAuth, async (req, res, next) => {
+  try {
+    const userId = req.user.sub;
+    const bookings = await prisma.booking.findMany({
+      where: {
+        userId,
+        status: { in: ['CONFIRMED', 'COMPLETED'] }
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        tickets: true,
+        seats: true,
+        showtime: {
+          include: {
+            movie: true,
+            screen: {
+              include: {
+                cinema: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const data = bookings.map(b => ({
+      id: b.id,
+      bookingRef: b.bookingRef,
+      status: b.status,
+      subtotalMinor: b.subtotalMinor,
+      serviceFeeMinor: b.serviceFeeMinor,
+      totalMinor: b.totalMinor,
+      currency: b.currency,
+      createdAt: b.createdAt,
+      movieTitle: b.showtime?.movie?.title || 'Movie Screening',
+      cinemaName: b.showtime?.screen?.cinema?.name || 'Matinee Cinema',
+      screenName: b.showtime?.screen?.name || 'Main Screen',
+      showtimeStart: b.showtime?.startTime,
+      movie: {
+        id: b.showtime?.movie?.id,
+        title: b.showtime?.movie?.title,
+        posterPath: b.showtime?.movie?.posterPath,
+        overview: b.showtime?.movie?.overview
+      },
+      cinema: {
+        name: b.showtime?.screen?.cinema?.name,
+        location: b.showtime?.screen?.cinema?.location,
+        screen: b.showtime?.screen?.name
+      },
+      showtime: {
+        id: b.showtime?.id,
+        startTime: b.showtime?.startTime,
+        endTime: b.showtime?.endTime
+      },
+      seats: b.seats.map(s => s.seatLabel),
+      tickets: b.tickets.map(t => ({
+        id: t.id,
+        seatLabel: t.seatLabel,
+        ticketCode: t.ticketCode,
+        qrPayload: t.qrPayload,
+        status: t.status
+      }))
+    }));
+
+    res.status(200).json({
+      status: 'success',
+      data
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * GET /api/v1/bookings/:id/status
  * Poll booking and payment status.
  */

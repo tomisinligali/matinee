@@ -45,8 +45,9 @@ export default function TicketScreen({
       setLoading(true);
       api.getBookingTickets(bookingId)
         .then(res => {
-          if (res?.booking) {
-            setBookingData(res.booking);
+          const fetched = res?.data || res?.booking;
+          if (fetched) {
+            setBookingData(fetched);
           }
         })
         .catch(err => {

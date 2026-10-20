@@ -200,6 +200,10 @@ export const api = {
     });
   },
 
+  getUserBookings() {
+    return request('/api/v1/bookings');
+  },
+
   getBookingStatus(bookingId) {
     return request(`/api/v1/bookings/${bookingId}/status`);
   },

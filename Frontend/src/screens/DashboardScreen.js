@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Modal,
   FlatList,
+  RefreshControl,
   Platform
 } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
@@ -31,6 +32,7 @@ export default function DashboardScreen({ user, onLogout }) {
   const [showGallery, setShowGallery] = useState(false);
 
   const [viewingTicketBooking, setViewingTicketBooking] = useState(null);
+  const [ticketsRefreshKey, setTicketsRefreshKey] = useState(0);
 
   if (showGallery) {
     return <ComponentGalleryScreen onBack={() => setShowGallery(false)} />;
@@ -42,11 +44,17 @@ export default function DashboardScreen({ user, onLogout }) {
         {/* Main Content Area */}
         <View style={styles.contentArea}>
           {activeTab === 'discover' && (
-            <DiscoverView onOpenTickets={() => setActiveTab('tickets')} />
+            <DiscoverView
+              onOpenTickets={() => {
+                setActiveTab('tickets');
+                setTicketsRefreshKey(k => k + 1);
+              }}
+            />
           )}
           {activeTab === 'cinemas' && <CinemasView />}
           {activeTab === 'tickets' && (
             <TicketsView
+              refreshTrigger={ticketsRefreshKey}
               onBrowse={() => setActiveTab('discover')}
               onViewTicket={(ticket) => setViewingTicketBooking(ticket)}
             />
@@ -55,7 +63,6 @@ export default function DashboardScreen({ user, onLogout }) {
             <AccountView
               user={user}
               onLogout={onLogout}
-              onOpenGallery={() => setShowGallery(true)}
             />
           )}
         </View>
@@ -929,26 +936,57 @@ function CinemasView() {
   );
 }
 
-function TicketsView({ onBrowse, onViewTicket }) {
+function TicketsView({ onBrowse, onViewTicket, refreshTrigger }) {
   const { colors } = useTheme();
   const styles = getDashboardStyles(colors);
   const [ticketTab, setTicketTab] = useState('upcoming');
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const DEMO_TICKET = {
-    bookingRef: 'MTN-9482-LKK',
-    movieTitle: 'The Wild Robot',
-    cinema: 'Filmhouse Cinemas, Lekki Phase 1',
-    screen: 'Screen 1 (IMAX Laser)',
-    date: 'Today, Oct 19',
-    time: '7:45 PM',
-    row: 'Row F',
-    seats: 'Seats 12, 13',
-    format: 'IMAX 2D',
-    status: 'CONFIRMED'
+  const fetchBookings = useCallback(async () => {
+    try {
+      const res = await api.getUserBookings();
+      const list = res?.data || (Array.isArray(res) ? res : []);
+      setBookings(list);
+    } catch (err) {
+      console.warn('[TicketsView fetch bookings error]:', err.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings, refreshTrigger]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchBookings();
   };
 
+  const now = new Date();
+  const upcomingBookings = bookings.filter(b => {
+    const startTime = b.showtime?.startTime || b.showtimeStart;
+    if (!startTime) return true;
+    return new Date(startTime).getTime() >= (now.getTime() - 4 * 3600 * 1000);
+  });
+
+  const pastBookings = bookings.filter(b => {
+    const startTime = b.showtime?.startTime || b.showtimeStart;
+    if (!startTime) return false;
+    return new Date(startTime).getTime() < (now.getTime() - 4 * 3600 * 1000);
+  });
+
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      contentContainerStyle={styles.scrollContainer}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+      }
+    >
       <View style={styles.topHeader}>
         <Text style={styles.brandSubtitle}>MATINEE DIGITAL PASS</Text>
         <Text style={styles.pageTitle}>My Tickets</Text>
@@ -969,7 +1007,7 @@ function TicketsView({ onBrowse, onViewTicket }) {
           accessibilityState={{ selected: ticketTab === 'upcoming' }}
         >
           <Text style={[styles.ticketSegmentText, ticketTab === 'upcoming' && styles.activeTicketSegmentText]}>
-            Upcoming Passes (1)
+            Upcoming Passes ({upcomingBookings.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -985,133 +1023,222 @@ function TicketsView({ onBrowse, onViewTicket }) {
           accessibilityState={{ selected: ticketTab === 'past' }}
         >
           <Text style={[styles.ticketSegmentText, ticketTab === 'past' && styles.activeTicketSegmentText]}>
-            Past Bookings
+            Past Bookings ({pastBookings.length})
           </Text>
         </TouchableOpacity>
       </View>
 
-      {ticketTab === 'upcoming' ? (
-        <View style={styles.ticketPassContainer}>
-          {/* Authentic Physical Cinema Notch Ticket Pass */}
-          <View style={styles.notchTicketCard}>
-            {/* Semicircular Ticket Notches on Left and Right edges */}
-            <View style={styles.notchLeft} />
-            <View style={styles.notchRight} />
-
-            {/* Top Ticket Header: Movie Details */}
-            <View style={styles.ticketTopSection}>
-              <View style={styles.ticketHeaderBadgeRow}>
-                <View style={styles.ticketStatusBadge}>
-                  <Ionicons name="checkmark-circle" size={14} color={colors.onSuccessContainer} style={{ marginRight: Spacing.xxs }} />
-                  <Text style={styles.ticketStatusBadgeText}>{DEMO_TICKET.status}</Text>
-                </View>
-                <Text style={styles.ticketFormatText}>{DEMO_TICKET.format}</Text>
-              </View>
-
-              <Text style={styles.ticketMovieTitle}>{DEMO_TICKET.movieTitle}</Text>
-              <View style={styles.ticketVenueRow}>
-                <Ionicons name="location-outline" size={13} color={colors.primary} style={{ marginRight: Spacing.xxs }} />
-                <Text style={styles.ticketCinemaVenue}>{DEMO_TICKET.cinema}</Text>
-              </View>
-            </View>
-
-            {/* Perforated Divider with dashed dots */}
-            <View style={styles.perforatedDivider}>
-              <View style={styles.perforatedDashes} />
-            </View>
-
-            {/* Bottom Ticket Stub: Screening & Seating Matrix */}
-            <View style={styles.ticketStubSection}>
-              <View style={styles.ticketDataGrid}>
-                <View style={styles.ticketDataCol}>
-                  <Text style={styles.ticketDataLabel}>DATE</Text>
-                  <Text style={styles.ticketDataValue}>{DEMO_TICKET.date}</Text>
-                </View>
-                <View style={styles.ticketDataCol}>
-                  <Text style={styles.ticketDataLabel}>TIME</Text>
-                  <Text style={styles.ticketDataValue}>{DEMO_TICKET.time}</Text>
-                </View>
-                <View style={styles.ticketDataCol}>
-                  <Text style={styles.ticketDataLabel}>HALL</Text>
-                  <Text style={styles.ticketDataValue}>Screen 1</Text>
-                </View>
-                <View style={styles.ticketDataCol}>
-                  <Text style={styles.ticketDataLabel}>SEATS</Text>
-                  <Text style={styles.ticketDataValueHighlight}>{DEMO_TICKET.row} • 12, 13</Text>
-                </View>
-              </View>
-
-              {/* Scannable QR Code and Turnstile Scan Prompt */}
-              <View style={styles.barcodeWrapper}>
-                <View style={{ backgroundColor: '#FFFFFF', padding: 12, borderRadius: 10, marginVertical: Spacing.sm }}>
-                  <QRCode
-                    value={JSON.stringify({
-                      bookingRef: DEMO_TICKET.bookingRef,
-                      movie: DEMO_TICKET.movieTitle,
-                      cinema: DEMO_TICKET.cinema,
-                      seats: DEMO_TICKET.seats,
-                      status: DEMO_TICKET.status
-                    })}
-                    size={140}
-                    color="#000000"
-                    backgroundColor="#FFFFFF"
-                  />
-                </View>
-                <Text style={styles.barcodeBookingRef}>BOOKING REF: {DEMO_TICKET.bookingRef}</Text>
-                <View style={styles.barcodePromptRow}>
-                  <Ionicons name="qr-code-outline" size={14} color={colors.primary} style={{ marginRight: Spacing.xxs }} />
-                  <Text style={styles.barcodePromptText}>Scan this digital QR code at cinema turnstile</Text>
-                </View>
-
-                {onViewTicket && (
-                  <TouchableOpacity
-                    style={{
-                      marginTop: Spacing.md,
-                      backgroundColor: colors.primary,
-                      paddingVertical: 10,
-                      paddingHorizontal: Spacing.lg,
-                      borderRadius: 20,
-                      flexDirection: 'row',
-                      alignItems: 'center'
-                    }}
-                    onPress={() => onViewTicket(DEMO_TICKET)}
-                    activeOpacity={0.85}
-                  >
-                    <Ionicons name="ticket" size={16} color={colors.onPrimary} style={{ marginRight: 6 }} />
-                    <Text style={{ fontSize: 13, fontWeight: '700', color: colors.onPrimary }}>
-                      View Full Ticket Pass
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
-          </View>
-        </View>
-      ) : (
-        <View style={styles.emptyStateBox}>
-          <View style={styles.emptyStateIconCircle}>
-            <Ionicons name="time-outline" size={44} color={colors.outline} />
-          </View>
-          <Text style={styles.emptyStateTitle}>No Past Bookings</Text>
-          <Text style={styles.emptyStateSubtitle}>
-            Completed movie bookings from previous visits will be archived here.
+      {loading && bookings.length === 0 ? (
+        <View style={{ paddingVertical: Spacing.xl, alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={{ marginTop: Spacing.sm, color: colors.onSurfaceVariant, fontSize: 13 }}>
+            Loading your passes...
           </Text>
-          {onBrowse && (
-            <TouchableOpacity
-              style={styles.emptyActionBtn}
-              onPress={() => {
-                try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
-                onBrowse();
-              }}
-              activeOpacity={0.85}
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel="Explore movies in theatres"
-            >
-              <Text style={styles.emptyActionBtnText}>Explore In Theatres</Text>
-            </TouchableOpacity>
-          )}
         </View>
+      ) : ticketTab === 'upcoming' ? (
+        upcomingBookings.length > 0 ? (
+          <View style={styles.ticketPassContainer}>
+            {upcomingBookings.map((b) => {
+              const showDate = new Date(b.showtime?.startTime || b.showtimeStart || b.createdAt);
+              const dateStr = showDate.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric'
+              });
+              const timeStr = showDate.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+              });
+              const seatDisplay = (b.seats && b.seats.length > 0)
+                ? b.seats.join(', ')
+                : (b.tickets?.map(t => t.seatLabel).join(', ') || 'Seats Reserved');
+
+              return (
+                <View key={b.id || b.bookingRef} style={[styles.notchTicketCard, { marginBottom: Spacing.lg }]}>
+                  {/* Semicircular Ticket Notches on Left and Right edges */}
+                  <View style={styles.notchLeft} />
+                  <View style={styles.notchRight} />
+
+                  {/* Top Ticket Header: Movie Details */}
+                  <View style={styles.ticketTopSection}>
+                    <View style={styles.ticketHeaderBadgeRow}>
+                      <View style={styles.ticketStatusBadge}>
+                        <Ionicons name="checkmark-circle" size={14} color={colors.onSuccessContainer} style={{ marginRight: Spacing.xxs }} />
+                        <Text style={styles.ticketStatusBadgeText}>{b.status}</Text>
+                      </View>
+                      <Text style={styles.ticketFormatText}>Cinema Pass</Text>
+                    </View>
+
+                    <Text style={styles.ticketMovieTitle}>{b.movie?.title || b.movieTitle}</Text>
+                    <View style={styles.ticketVenueRow}>
+                      <Ionicons name="location-outline" size={13} color={colors.primary} style={{ marginRight: Spacing.xxs }} />
+                      <Text style={styles.ticketCinemaVenue}>
+                        {b.cinema?.name || b.cinemaName || 'Filmhouse Cinemas'}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Perforated Divider with dashed dots */}
+                  <View style={styles.perforatedDivider}>
+                    <View style={styles.perforatedDashes} />
+                  </View>
+
+                  {/* Bottom Ticket Stub: Screening & Seating Matrix */}
+                  <View style={styles.ticketStubSection}>
+                    <View style={styles.ticketDataGrid}>
+                      <View style={styles.ticketDataCol}>
+                        <Text style={styles.ticketDataLabel}>DATE</Text>
+                        <Text style={styles.ticketDataValue}>{dateStr}</Text>
+                      </View>
+                      <View style={styles.ticketDataCol}>
+                        <Text style={styles.ticketDataLabel}>TIME</Text>
+                        <Text style={styles.ticketDataValue}>{timeStr}</Text>
+                      </View>
+                      <View style={styles.ticketDataCol}>
+                        <Text style={styles.ticketDataLabel}>HALL</Text>
+                        <Text style={styles.ticketDataValue}>{b.cinema?.screen || b.screenName || 'Screen 1'}</Text>
+                      </View>
+                      <View style={styles.ticketDataCol}>
+                        <Text style={styles.ticketDataLabel}>SEATS</Text>
+                        <Text style={styles.ticketDataValueHighlight}>{seatDisplay}</Text>
+                      </View>
+                    </View>
+
+                    {/* Scannable QR Code and Turnstile Scan Prompt */}
+                    <View style={styles.barcodeWrapper}>
+                      <View style={{ backgroundColor: '#FFFFFF', padding: 12, borderRadius: 10, marginVertical: Spacing.sm }}>
+                        <QRCode
+                          value={JSON.stringify({
+                            bookingRef: b.bookingRef,
+                            movie: b.movie?.title || b.movieTitle,
+                            cinema: b.cinema?.name || b.cinemaName,
+                            seats: seatDisplay,
+                            status: b.status
+                          })}
+                          size={140}
+                          color="#000000"
+                          backgroundColor="#FFFFFF"
+                        />
+                      </View>
+                      <Text style={styles.barcodeBookingRef}>BOOKING REF: {b.bookingRef}</Text>
+                      <View style={styles.barcodePromptRow}>
+                        <Ionicons name="qr-code-outline" size={14} color={colors.primary} style={{ marginRight: Spacing.xxs }} />
+                        <Text style={styles.barcodePromptText}>Scan this digital QR code at cinema turnstile</Text>
+                      </View>
+
+                      {onViewTicket && (
+                        <TouchableOpacity
+                          style={{
+                            marginTop: Spacing.md,
+                            backgroundColor: colors.primary,
+                            paddingVertical: 10,
+                            paddingHorizontal: Spacing.lg,
+                            borderRadius: 20,
+                            flexDirection: 'row',
+                            alignItems: 'center'
+                          }}
+                          onPress={() => onViewTicket(b)}
+                          activeOpacity={0.85}
+                        >
+                          <Ionicons name="ticket" size={16} color={colors.onPrimary} style={{ marginRight: 6 }} />
+                          <Text style={{ fontSize: 13, fontWeight: '700', color: colors.onPrimary }}>
+                            View Full Ticket Pass
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={styles.emptyStateBox}>
+            <View style={styles.emptyStateIconCircle}>
+              <Ionicons name="ticket-outline" size={44} color={colors.outline} />
+            </View>
+            <Text style={styles.emptyStateTitle}>No Upcoming Passes</Text>
+            <Text style={styles.emptyStateSubtitle}>
+              You have no upcoming cinema screenings scheduled. Explore currently showing movies to book tickets.
+            </Text>
+            {onBrowse && (
+              <TouchableOpacity
+                style={styles.emptyActionBtn}
+                onPress={() => {
+                  try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+                  onBrowse();
+                }}
+                activeOpacity={0.85}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel="Explore movies in theatres"
+              >
+                <Text style={styles.emptyActionBtnText}>Explore In Theatres</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )
+      ) : (
+        pastBookings.length > 0 ? (
+          <View style={styles.ticketPassContainer}>
+            {pastBookings.map((b) => {
+              const showDate = new Date(b.showtime?.startTime || b.showtimeStart || b.createdAt);
+              const dateStr = showDate.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric'
+              });
+              const timeStr = showDate.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+              });
+              const seatDisplay = (b.seats && b.seats.length > 0)
+                ? b.seats.join(', ')
+                : (b.tickets?.map(t => t.seatLabel).join(', ') || 'Seats Reserved');
+
+              return (
+                <View key={b.id || b.bookingRef} style={[styles.notchTicketCard, { marginBottom: Spacing.lg, opacity: 0.75 }]}>
+                  <View style={styles.ticketTopSection}>
+                    <View style={styles.ticketHeaderBadgeRow}>
+                      <View style={[styles.ticketStatusBadge, { backgroundColor: colors.surfaceContainerHighest }]}>
+                        <Text style={[styles.ticketStatusBadgeText, { color: colors.onSurfaceVariant }]}>{b.status}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.ticketMovieTitle}>{b.movie?.title || b.movieTitle}</Text>
+                    <Text style={styles.ticketCinemaVenue}>{dateStr} • {timeStr} • {seatDisplay}</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={styles.emptyStateBox}>
+            <View style={styles.emptyStateIconCircle}>
+              <Ionicons name="time-outline" size={44} color={colors.outline} />
+            </View>
+            <Text style={styles.emptyStateTitle}>No Past Bookings</Text>
+            <Text style={styles.emptyStateSubtitle}>
+              Completed movie bookings from previous visits will be archived here.
+            </Text>
+            {onBrowse && (
+              <TouchableOpacity
+                style={styles.emptyActionBtn}
+                onPress={() => {
+                  try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+                  onBrowse();
+                }}
+                activeOpacity={0.85}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel="Explore movies in theatres"
+              >
+                <Text style={styles.emptyActionBtnText}>Explore In Theatres</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )
       )}
     </ScrollView>
   );
@@ -1244,32 +1371,6 @@ function AccountView({ user, onLogout, onOpenGallery }) {
           Film posters, descriptions, and ratings provided by The Movie Database. This product uses the TMDB API but is not endorsed or certified by TMDB.
         </Text>
       </View>
-
-      {/* Developer & Design System Tools */}
-      {onOpenGallery && (
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionCardTitle}>Developer & Design System</Text>
-          <TouchableOpacity
-            style={styles.galleryLaunchBtn}
-            onPress={onOpenGallery}
-            activeOpacity={0.8}
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel="Open living design system component gallery"
-          >
-            <View style={styles.galleryBtnInner}>
-              <View style={styles.galleryIconCircle}>
-                <Ionicons name="color-palette" size={20} color={colors.primary} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.galleryBtnTitle}>Living Component Gallery</Text>
-                <Text style={styles.galleryBtnSub}>Inspect all 12 UI components, states, and 300-seat map</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.outline} />
-            </View>
-          </TouchableOpacity>
-        </View>
-      )}
 
       {/* Logout Action */}
       <TouchableOpacity

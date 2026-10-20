@@ -475,15 +475,6 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess, 
       try {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } catch (_) {}
-
-      if (onBookingSuccess) {
-        onBookingSuccess({
-          bookingRef: booking.bookingRef,
-          movieTitle: movie?.title || 'Selected Screening',
-          seats: selectedSeats.join(', '),
-          totalAmount: (booking.totalMinor || 0) / 100
-        });
-      }
     } catch (err) {
       setErrorMessage(err.message || 'Payment verification failed. Please try again.');
     } finally {
@@ -539,15 +530,6 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess, 
       }).start();
 
       try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (_) {}
-
-      if (onBookingSuccess) {
-        onBookingSuccess({
-          bookingRef: booking.bookingRef,
-          movieTitle: movie?.title || 'Selected Screening',
-          seats: selectedSeats.join(', '),
-          totalAmount: (booking.totalMinor || 0) / 100
-        });
-      }
     } catch (err) {
       setErrorMessage(err.message || 'Transfer verification failed. Please try again.');
     } finally {
@@ -591,20 +573,23 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess, 
       }).start();
 
       try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (_) {}
-
-      if (onBookingSuccess) {
-        onBookingSuccess({
-          bookingRef: booking.bookingRef,
-          movieTitle: movie?.title || 'Selected Screening',
-          seats: selectedSeats.join(', '),
-          totalAmount: (booking.totalMinor || 0) / 100
-        });
-      }
     } catch (err) {
       setErrorMessage(err.message || 'USSD verification failed. Please try again.');
     } finally {
       setIsProcessingPayment(false);
       setPaymentStepText('');
+    }
+  };
+
+  const handleFinishConfirmed = () => {
+    onClose();
+    if (onBookingSuccess && confirmedBooking) {
+      onBookingSuccess({
+        bookingRef: confirmedBooking.bookingRef,
+        movieTitle: movie?.title || 'Selected Screening',
+        seats: selectedSeats.join(', '),
+        totalAmount: (confirmedBooking.totalMinor || 0) / 100
+      });
     }
   };
 
@@ -622,6 +607,8 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess, 
             onPress={() => {
               if (step === 'CHECKOUT') {
                 handleAbandon();
+              } else if (step === 'CONFIRMED') {
+                handleFinishConfirmed();
               } else {
                 onClose();
               }
@@ -1331,7 +1318,7 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess, 
 
             <TouchableOpacity
               style={styles.closeConfirmedBtn}
-              onPress={onClose}
+              onPress={handleFinishConfirmed}
               activeOpacity={0.7}
               accessible={true}
               accessibilityRole="button"
@@ -1349,7 +1336,7 @@ export function SeatSelectionModal({ visible, movie, onClose, onBookingSuccess, 
               booking={confirmedBooking}
               onClose={() => {
                 setShowFullTicketModal(false);
-                onClose();
+                handleFinishConfirmed();
               }}
             />
           </Modal>
