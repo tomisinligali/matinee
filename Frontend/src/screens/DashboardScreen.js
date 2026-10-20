@@ -19,7 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
 import { api } from '../services/api';
-import { MovieGridSkeleton } from '../components/SkeletonLoader';
+import { MovieGridSkeleton, TicketPassSkeleton, CinemaShowtimesSkeleton } from '../components/SkeletonLoader';
 import { SeatSelectionModal } from '../components/SeatSelectionModal';
 import ComponentGalleryScreen from './ComponentGalleryScreen';
 import QRCode from '../components/QRCode';
@@ -1060,12 +1060,7 @@ function CinemasView({ onOpenTickets }) {
               </View>
 
               {loadingShowtimes ? (
-                <View style={{ paddingVertical: Spacing.xl, alignItems: 'center' }}>
-                  <ActivityIndicator size="large" color={colors.primary} />
-                  <Text style={{ marginTop: Spacing.sm, color: colors.onSurfaceVariant, fontSize: 13 }}>
-                    Fetching showtimes...
-                  </Text>
-                </View>
+                <CinemaShowtimesSkeleton />
               ) : cinemaMovieGroups.length === 0 ? (
                 <View style={{ paddingVertical: Spacing.xl, alignItems: 'center' }}>
                   <Ionicons name="film-outline" size={40} color={colors.outline} />
@@ -1261,11 +1256,8 @@ function TicketsView({ onBrowse, onViewTicket, refreshTrigger }) {
       </View>
 
       {loading && bookings.length === 0 ? (
-        <View style={{ paddingVertical: Spacing.xl, alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={{ marginTop: Spacing.sm, color: colors.onSurfaceVariant, fontSize: 13 }}>
-            Loading your passes...
-          </Text>
+        <View style={styles.ticketPassContainer}>
+          <TicketPassSkeleton />
         </View>
       ) : ticketTab === 'upcoming' ? (
         upcomingBookings.length > 0 ? (
