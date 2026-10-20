@@ -172,7 +172,8 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     minHeight: 48,
-    paddingVertical: 0
+    paddingVertical: 0,
+    letterSpacing: 0
   },
   iconLeading: {
     marginRight: Spacing.xs
