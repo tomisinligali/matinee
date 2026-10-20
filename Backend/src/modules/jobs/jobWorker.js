@@ -2,6 +2,7 @@ const prisma = require('../../config/db');
 const redis = require('../../config/redis');
 const flutterwaveAdapter = require('../payments/flutterwaveAdapter');
 const bookingService = require('../bookings/bookingService');
+const emailService = require('../identity/email.service');
 
 /**
  * ============================================================================
@@ -249,6 +250,18 @@ async function executeJobHandler(jobType, payload, job) {
       } else {
         throw new Error(`Refund initiation returned ${result.status}`);
       }
+      break;
+    }
+
+    case 'SEND_VERIFICATION_EMAIL': {
+      const { to, name, verificationCode, verificationUrl, token } = payload;
+      await emailService.sendVerificationEmail({
+        to,
+        name,
+        verificationCode,
+        verificationUrl,
+        token
+      });
       break;
     }
 

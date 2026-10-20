@@ -23,7 +23,11 @@ export default function SplashScreen({ onNavigate }) {
         // Verify token with backend
         const profile = await api.getProfile();
         if (profile?.user && isMounted) {
-          onNavigate('dashboard', profile.user);
+          if (!profile.user.emailVerified) {
+            onNavigate('verifyEmail', profile.user);
+          } else {
+            onNavigate('dashboard', profile.user);
+          }
         } else {
           await authStorage.clearSession();
           if (isMounted) onNavigate('auth');

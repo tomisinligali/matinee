@@ -259,7 +259,11 @@ export default function AuthScreen({ onNavigate }) {
     try {
       if (isLogin) {
         const res = await api.login({ email: finalEmail, password: finalPassword });
-        onNavigate('dashboard', res.user);
+        if (!res.user?.emailVerified) {
+          onNavigate('verifyEmail', res.user, { email: finalEmail });
+        } else {
+          onNavigate('dashboard', res.user);
+        }
       } else {
         const res = await api.register({
           email: finalEmail,
@@ -267,7 +271,7 @@ export default function AuthScreen({ onNavigate }) {
           name: finalName,
           role
         });
-        onNavigate('dashboard', res.user);
+        onNavigate('verifyEmail', res.user, { email: finalEmail });
       }
     } catch (err) {
       setGeneralError(err.message || 'Authentication failed. Please check your credentials.');

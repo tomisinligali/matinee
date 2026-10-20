@@ -266,6 +266,49 @@ class IdentityController {
     }
   }
 
+  async verifyCode(req, res, next) {
+    try {
+      const { email, code } = req.body || {};
+
+      if (!email || typeof email !== 'string' || !email.trim()) {
+        return res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            field: 'email',
+            message: 'Email Address is required'
+          }
+        });
+      }
+
+      if (!code || typeof code !== 'string' || !code.trim()) {
+        return res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            field: 'code',
+            message: 'Verification Code is required'
+          }
+        });
+      }
+
+      const result = await identityService.verifyCode({
+        email: email.trim().toLowerCase(),
+        code: code.trim()
+      });
+
+      return res.status(200).json(result);
+    } catch (err) {
+      if (err.status) {
+        return res.status(err.status).json({
+          error: {
+            code: err.code || 'VERIFICATION_FAILED',
+            message: err.message
+          }
+        });
+      }
+      next(err);
+    }
+  }
+
   async resendVerification(req, res, next) {
     try {
       const { email } = req.body || {};

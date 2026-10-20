@@ -143,8 +143,9 @@ class EmailService {
   /**
    * Sends a one-time verification link to the user
    */
-  async sendVerificationEmail({ to, name = 'Moviegoer', verificationUrl, token }) {
-    const subject = 'Verify your Matinee email address';
+  async sendVerificationEmail({ to, name = 'Moviegoer', verificationCode, verificationUrl, token }) {
+    const codeDisplay = verificationCode || 'N/A';
+    const subject = verificationCode ? `Your Matinee Verification Code: ${verificationCode}` : 'Verify your Matinee email address';
 
     const html = `
 <!DOCTYPE html>
@@ -200,21 +201,43 @@ class EmailService {
       color: #94A3B8;
       margin-bottom: 24px;
     }
+    .code-box {
+      text-align: center;
+      margin: 28px 0;
+      background-color: #0B0E14;
+      border: 2px dashed #E5A93C;
+      border-radius: 12px;
+      padding: 20px 16px;
+    }
+    .code-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #E5A93C;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .code-value {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: 8px;
+      color: #F8FAFC;
+      font-family: monospace;
+    }
     .btn-container {
       text-align: center;
-      margin: 32px 0;
+      margin: 24px 0 16px;
     }
     .btn {
       display: inline-block;
       background-color: #E5A93C;
       color: #000000 !important;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       text-decoration: none;
-      padding: 14px 36px;
+      padding: 12px 32px;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(229, 169, 60, 0.3);
-      transition: background-color 0.2s ease;
     }
     .notice {
       background-color: #0B0E14;
@@ -223,7 +246,7 @@ class EmailService {
       border-radius: 4px;
       font-size: 13px;
       color: #CBD5E1;
-      margin-bottom: 24px;
+      margin: 24px 0;
     }
     .link-alt {
       font-size: 12px;
@@ -250,20 +273,26 @@ class EmailService {
       <div class="logo">MATINEE</div>
     </div>
     <div class="content">
-      <h1>Confirm Your Email Address</h1>
+      <h1>Verify Your Email Address</h1>
       <p>Hello ${name},</p>
-      <p>Welcome to Matinee! To complete your registration and activate your account, please verify your email address by clicking the button below.</p>
+      <p>Welcome to Matinee! Please enter the 6-digit verification code below into your Matinee app to activate your account:</p>
       
-      <div class="btn-container">
-        <a href="${verificationUrl}" class="btn" target="_blank">Verify Email Address</a>
+      <div class="code-box">
+        <div class="code-label">Verification Code</div>
+        <div class="code-value">${codeDisplay}</div>
       </div>
 
       <div class="notice">
-        <strong>Important:</strong> This verification link is valid for <strong>24 hours</strong> and can only be used once. If you did not create a Matinee account, you can safely ignore this email.
+        <strong>Important:</strong> This verification code is valid for <strong>24 hours</strong> and can only be used once. Never share this code with anyone.
+      </div>
+
+      <p style="text-align: center; font-size: 14px; color: #94A3B8;">Or verify directly by clicking the button below:</p>
+      <div class="btn-container">
+        <a href="${verificationUrl}" class="btn" target="_blank">Verify Email Directly</a>
       </div>
 
       <p class="link-alt">
-        If the button above does not work, copy and paste this link into your browser:<br>
+        Direct link:<br>
         <a href="${verificationUrl}">${verificationUrl}</a>
       </p>
     </div>
@@ -278,19 +307,22 @@ class EmailService {
     const text = `
 Hello ${name},
 
-Welcome to Matinee! Please verify your email address by clicking the link below:
+Welcome to Matinee!
 
+YOUR VERIFICATION CODE: ${codeDisplay}
+
+Please enter this 6-digit code in your Matinee app to activate your account.
+This code is valid for 24 hours and can only be used once.
+
+Alternatively, you can verify directly using this link:
 ${verificationUrl}
-
-This link is valid for 24 hours and can only be used once.
-
-If you did not sign up for Matinee, you can safely ignore this message.
 
 — The Matinee Team
     `.trim();
 
     return this.sendEmail({ to, subject, html, text });
   }
+
 }
 
 module.exports = new EmailService();

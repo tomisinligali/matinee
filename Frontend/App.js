@@ -5,6 +5,7 @@ import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 const SafeContainer = (Platform.OS === 'web' || !SafeAreaView) ? View : SafeAreaView;
 import SplashScreen from './src/screens/SplashScreen';
 import AuthScreen from './src/screens/AuthScreen';
+import EmailVerificationScreen from './src/screens/EmailVerificationScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
 import CinemaOperatorScreen from './src/screens/CinemaOperatorScreen';
 import PlatformAdminScreen from './src/screens/PlatformAdminScreen';
@@ -12,12 +13,18 @@ import { api } from './src/services/api';
 
 function AppContent() {
   const { colors, isDark } = useTheme();
-  const [currentScreen, setCurrentScreen] = useState('splash'); // 'splash' | 'auth' | 'dashboard'
+  const [currentScreen, setCurrentScreen] = useState('splash'); // 'splash' | 'auth' | 'verifyEmail' | 'dashboard'
   const [currentUser, setCurrentUser] = useState(null);
+  const [pendingEmail, setPendingEmail] = useState('');
 
-  const handleNavigate = (screen, user = null) => {
+  const handleNavigate = (screen, user = null, extraData = null) => {
     if (user) {
       setCurrentUser(user);
+    }
+    if (extraData?.email) {
+      setPendingEmail(extraData.email);
+    } else if (user?.email) {
+      setPendingEmail(user.email);
     }
     setCurrentScreen(screen);
   };
@@ -25,6 +32,7 @@ function AppContent() {
   const handleLogout = async () => {
     await api.logout();
     setCurrentUser(null);
+    setPendingEmail('');
     setCurrentScreen('auth');
   };
 
@@ -55,6 +63,14 @@ function AppContent() {
       {currentScreen === 'auth' && (
         <AuthScreen onNavigate={handleNavigate} />
       )}
+      {currentScreen === 'verifyEmail' && (
+        <EmailVerificationScreen
+          email={pendingEmail || currentUser?.email}
+          user={currentUser}
+          onNavigate={handleNavigate}
+          onBackToAuth={() => setCurrentScreen('auth')}
+        />
+      )}
       {currentScreen === 'dashboard' && renderDashboardByRole()}
     </SafeContainer>
   );
@@ -73,4 +89,3 @@ const styles = StyleSheet.create({
     flex: 1
   }
 });
-

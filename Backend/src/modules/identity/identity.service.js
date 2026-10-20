@@ -1,8 +1,8 @@
-const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../../config/db');
-const emailService = require('./email.service');
+const verificationCodeService = require('./verificationCode.service');
+const { enqueueJob } = require('../jobs/jobWorker');
 const { logger } = require('../../config/logger');
 
 class IdentityService {
@@ -46,9 +46,11 @@ class IdentityService {
       }
     }
 
-    // Generate cryptographically secure one-time verification token (24-hour expiry)
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    const verificationTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    // Generate cryptographically secure verification code using crypto.randomBytes(32)
+    // Strictly zero Math.random() or crypto.randomInt()
+    const verificationCode = verificationCodeService.generateCode();
+    const verificationToken = verificationCodeService.generateToken();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     const user = await prisma.user.create({
       data: {
@@ -60,8 +62,10 @@ class IdentityService {
         passwordHash,
         role: ['CUSTOMER', 'CINEMA_OPERATOR', 'PLATFORM_ADMIN'].includes(role) ? role : 'CUSTOMER',
         emailVerified: false,
+        verificationCode,
+        verificationCodeExpiresAt: expiresAt,
         verificationToken,
-        verificationTokenExpiresAt
+        verificationTokenExpiresAt: expiresAt
       },
       select: {
         id: true,
@@ -80,30 +84,136 @@ class IdentityService {
     const appBaseUrl = baseUrl || process.env.APP_URL || `http://localhost:${process.env.PORT || 4000}`;
     const verificationUrl = `${appBaseUrl}/api/v1/auth/verify-email?token=${verificationToken}`;
 
-    // Dispatch verification email via Nodemailer (or Resend when configured)
+    // Enqueue durable background job to send email via Nodemailer
     try {
-      await emailService.sendVerificationEmail({
-        to: user.email,
-        name: user.name || user.firstName || 'Moviegoer',
-        verificationUrl,
-        token: verificationToken
+      await enqueueJob({
+        queueName: 'email_notifications',
+        jobType: 'SEND_VERIFICATION_EMAIL',
+        payload: {
+          to: user.email,
+          name: user.name || user.firstName || 'Moviegoer',
+          verificationCode,
+          verificationUrl,
+          token: verificationToken
+        },
+        correlationId: user.id
       });
-    } catch (emailErr) {
-      logger.error('IdentityService: Failed to dispatch verification email during registration', {
-        error: emailErr.message,
+      logger.info('IdentityService: Enqueued SEND_VERIFICATION_EMAIL background job', {
         userId: user.id,
         email: user.email
+      });
+    } catch (jobErr) {
+      logger.error('IdentityService: Failed to enqueue verification email background job', {
+        error: jobErr.message,
+        userId: user.id
       });
     }
 
     const token = this.generateToken(user);
 
-    return { user, token, verificationToken };
+    return { user, token, verificationCode, verificationToken };
+  }
+
+  /**
+   * Verify email using 6-digit verification code entered by user in mobile app form
+   */
+  async verifyCode({ email, code }) {
+    if (!email || typeof email !== 'string') {
+      const error = new Error('Email address is required');
+      error.code = 'VALIDATION_ERROR';
+      error.status = 400;
+      throw error;
+    }
+
+    if (!code || typeof code !== 'string') {
+      const error = new Error('Verification code is required');
+      error.code = 'VALIDATION_ERROR';
+      error.status = 400;
+      throw error;
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedCode = code.trim();
+
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail }
+    });
+
+    if (!user) {
+      const error = new Error('No account found with this email address');
+      error.code = 'USER_NOT_FOUND';
+      error.status = 404;
+      throw error;
+    }
+
+    if (user.emailVerified) {
+      const token = this.generateToken(user);
+      return {
+        success: true,
+        message: 'Email is already verified.',
+        emailVerified: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          emailVerified: true
+        },
+        token
+      };
+    }
+
+    if (!user.verificationCode || user.verificationCode !== normalizedCode) {
+      const error = new Error('Invalid verification code. Please check your email or request a new code.');
+      error.code = 'INVALID_VERIFICATION_CODE';
+      error.status = 400;
+      throw error;
+    }
+
+    // Check expiration
+    if (user.verificationCodeExpiresAt && new Date(user.verificationCodeExpiresAt) < new Date()) {
+      const error = new Error('Verification code has expired. Please request a new code.');
+      error.code = 'VERIFICATION_CODE_EXPIRED';
+      error.status = 400;
+      throw error;
+    }
+
+    // Atomic update: Mark verified and invalidate one-time code & token
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        verificationCode: null,
+        verificationCodeExpiresAt: null,
+        verificationToken: null,
+        verificationTokenExpiresAt: null
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        emailVerified: true,
+        emailVerifiedAt: true
+      }
+    });
+
+    logger.info('IdentityService: Verification code confirmed successfully', { userId: updated.id, email: updated.email });
+
+    const token = this.generateToken(updated);
+
+    return {
+      success: true,
+      message: 'Email address verified successfully!',
+      user: updated,
+      token
+    };
   }
 
   /**
    * Verify email using a one-time cryptographic link/token
-   * Once used, token is cleared atomically, ensuring it cannot be used again
+   * Once used, token and code are cleared atomically, ensuring it cannot be used again
    */
   async verifyEmail(token) {
     if (!token || typeof token !== 'string') {
@@ -132,12 +242,14 @@ class IdentityService {
       throw error;
     }
 
-    // Atomic update: Mark verified and invalidate token (one-time link guarantee)
+    // Atomic update: Mark verified and invalidate token and code (one-time guarantee)
     const updated = await prisma.user.update({
       where: { id: user.id },
       data: {
         emailVerified: true,
         emailVerifiedAt: new Date(),
+        verificationCode: null,
+        verificationCodeExpiresAt: null,
         verificationToken: null,
         verificationTokenExpiresAt: null
       },
@@ -151,13 +263,13 @@ class IdentityService {
       }
     });
 
-    logger.info('IdentityService: Email successfully verified', { userId: updated.id, email: updated.email });
+    logger.info('IdentityService: Email successfully verified via link', { userId: updated.id, email: updated.email });
 
     return updated;
   }
 
   /**
-   * Resend a fresh one-time verification link
+   * Resend a fresh one-time verification code and link via background job
    */
   async resendVerification({ email, baseUrl }) {
     const normalizedEmail = email.trim().toLowerCase();
@@ -180,33 +292,44 @@ class IdentityService {
       };
     }
 
-    // Generate fresh one-time token and 24-hour expiry
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    const verificationTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    // Generate fresh one-time code and token using crypto.randomBytes(32)
+    const verificationCode = verificationCodeService.generateCode();
+    const verificationToken = verificationCodeService.generateToken();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     await prisma.user.update({
       where: { id: user.id },
       data: {
+        verificationCode,
+        verificationCodeExpiresAt: expiresAt,
         verificationToken,
-        verificationTokenExpiresAt
+        verificationTokenExpiresAt: expiresAt
       }
     });
 
     const appBaseUrl = baseUrl || process.env.APP_URL || `http://localhost:${process.env.PORT || 4000}`;
     const verificationUrl = `${appBaseUrl}/api/v1/auth/verify-email?token=${verificationToken}`;
 
-    await emailService.sendVerificationEmail({
-      to: user.email,
-      name: user.name || user.firstName || 'Moviegoer',
-      verificationUrl,
-      token: verificationToken
+    // Enqueue durable background job to dispatch email
+    await enqueueJob({
+      queueName: 'email_notifications',
+      jobType: 'SEND_VERIFICATION_EMAIL',
+      payload: {
+        to: user.email,
+        name: user.name || user.firstName || 'Moviegoer',
+        verificationCode,
+        verificationUrl,
+        token: verificationToken
+      },
+      correlationId: user.id
     });
 
-    logger.info('IdentityService: Fresh verification link dispatched', { email: user.email });
+    logger.info('IdentityService: Enqueued fresh verification email background job', { email: user.email });
 
     return {
       success: true,
-      message: 'A new one-time verification link has been sent to your email address.'
+      verificationCode, // Exposed for development/testing convenience
+      message: 'A new 6-digit verification code has been sent to your email address.'
     };
   }
 

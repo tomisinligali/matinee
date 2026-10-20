@@ -125,6 +125,29 @@ export const api = {
     return data;
   },
 
+  async verifyCode({ email, code }) {
+    const data = await request('/api/v1/auth/verify-code', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: (email || '').trim().toLowerCase(),
+        code: (code || '').trim()
+      })
+    });
+    if (data?.token && data?.user) {
+      await authStorage.saveSession(data.token, data.user);
+    }
+    return data;
+  },
+
+  async resendVerification(email) {
+    return request('/api/v1/auth/resend-verification', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: (email || '').trim().toLowerCase()
+      })
+    });
+  },
+
   getProfile() {
     return request('/api/v1/auth/me');
   },
