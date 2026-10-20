@@ -447,7 +447,7 @@ export default function AuthScreen({ onNavigate }) {
                 onPress={() => setRegisterStep(2)}
                 activeOpacity={0.85}
               >
-                <Text style={styles.submitButtonText}>Continue to Enter Details</Text>
+                <Text style={styles.submitButtonText}>Continue to Register</Text>
               </TouchableOpacity>
             </View>
           ) : (
