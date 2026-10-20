@@ -21,7 +21,7 @@ export default function AuthScreen({ onNavigate }) {
 
   const [isLogin, setIsLogin] = useState(true);
   const [registerStep, setRegisterStep] = useState(1); // 1: Select User Type | 2: Enter Details
-  const [role, setRole] = useState('CUSTOMER'); // 'CUSTOMER' | 'CINEMA_OPERATOR' | 'PLATFORM_ADMIN'
+  const [role, setRole] = useState(null); // No account type selected by default
 
   // Input states
   const [name, setName] = useState('');
@@ -52,6 +52,7 @@ export default function AuthScreen({ onNavigate }) {
   const handleSwitchTab = (loginMode) => {
     setIsLogin(loginMode);
     setRegisterStep(1);
+    setRole(null);
     setGeneralError('');
     setNameError('');
     setEmailError('');
@@ -244,7 +245,7 @@ export default function AuthScreen({ onNavigate }) {
 
   const isButtonDisabled = isLogin
     ? (!isFormComplete || loading)
-    : (registerStep === 1 ? false : (!isFormComplete || loading));
+    : (registerStep === 1 ? (!role || loading) : (!isFormComplete || loading));
 
   /**
    * 5. Submission Handler
@@ -443,11 +444,23 @@ export default function AuthScreen({ onNavigate }) {
               </View>
 
               <TouchableOpacity
-                style={styles.submitButton}
-                onPress={() => setRegisterStep(2)}
+                style={[
+                  styles.submitButton,
+                  !role && styles.buttonDisabled
+                ]}
+                onPress={() => {
+                  if (role) setRegisterStep(2);
+                }}
+                disabled={!role}
                 activeOpacity={0.85}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: !role }}
+                accessibilityLabel="Continue to Register Button"
               >
-                <Text style={styles.submitButtonText}>Continue to Register</Text>
+                <Text style={[styles.submitButtonText, !role && styles.submitButtonTextDisabled]}>
+                  Continue to Register
+                </Text>
               </TouchableOpacity>
             </View>
           ) : (
