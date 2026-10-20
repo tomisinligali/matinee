@@ -15,9 +15,13 @@ model User {
   middleName   String?       @map("middle_name")
   lastName     String?       @map("last_name")
   passwordHash String        @map("password_hash")
-  role         String        @default("CUSTOMER")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
+  role                        String        @default("CUSTOMER")
+  emailVerified               Boolean       @default(false) @map("email_verified")
+  emailVerifiedAt             DateTime?     @map("email_verified_at")
+  verificationToken           String?       @unique @map("verification_token")
+  verificationTokenExpiresAt  DateTime?     @map("verification_token_expires_at")
+  createdAt                   DateTime      @default(now()) @map("created_at")
+  updatedAt                   DateTime      @updatedAt @map("updated_at")
 
   bookings     Booking[]
   seatHolds    SeatHold[]
