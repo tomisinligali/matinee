@@ -22,10 +22,32 @@ class IdentityService {
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
+    // Parse name components (handling 1, 2, 3, or more words)
+    let firstName = null;
+    let middleName = null;
+    let lastName = null;
+
+    if (name) {
+      const words = name.trim().split(/\s+/).filter(Boolean);
+      if (words.length === 1) {
+        firstName = words[0];
+      } else if (words.length === 2) {
+        firstName = words[0];
+        lastName = words[1];
+      } else if (words.length >= 3) {
+        firstName = words[0];
+        lastName = words[words.length - 1];
+        middleName = words.slice(1, -1).join(' '); // Handles compound/multiple middle names
+      }
+    }
+
     const user = await prisma.user.create({
       data: {
         email: normalizedEmail,
         name: name ? name.trim() : null,
+        firstName,
+        middleName,
+        lastName,
         passwordHash,
         role: ['CUSTOMER', 'CINEMA_OPERATOR', 'PLATFORM_ADMIN'].includes(role) ? role : 'CUSTOMER'
       },
@@ -33,6 +55,9 @@ class IdentityService {
         id: true,
         email: true,
         name: true,
+        firstName: true,
+        middleName: true,
+        lastName: true,
         role: true,
         createdAt: true
       }

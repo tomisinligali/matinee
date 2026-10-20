@@ -15,58 +15,293 @@ import { Colors, Spacing, Typography, BorderRadius } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
 import { api } from '../services/api';
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 export default function AuthScreen({ onNavigate }) {
   const { colors } = useTheme();
   const styles = getAuthStyles(colors);
+
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState('CUSTOMER'); // 'CUSTOMER' | 'CINEMA_OPERATOR' | 'PLATFORM_ADMIN'
+
+  // Input states
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
 
-  const validate = () => {
-    if (!email.trim() || !EMAIL_REGEX.test(email.trim())) {
-      setErrorMessage('Please enter a valid email address.');
-      return false;
-    }
-    if (!password || password.length < 8) {
-      setErrorMessage('Password must be at least 8 characters long.');
-      return false;
-    }
-    if (!isLogin && !name.trim()) {
-      setErrorMessage('Please enter your name.');
-      return false;
-    }
-    return true;
+  // Focused state (active focus highlight)
+  const [focusedField, setFocusedField] = useState(null);
+
+  // Field-specific error messages
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  // Field-specific success state (triggers very light background on successful completion upon blur)
+  const [nameSuccess, setNameSuccess] = useState(false);
+  const [emailSuccess, setEmailSuccess] = useState(false);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  // Password visibility toggle
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Submission states
+  const [loading, setLoading] = useState(false);
+  const [generalError, setGeneralError] = useState('');
+
+  // Reset form errors & success states when switching tabs
+  const handleSwitchTab = (loginMode) => {
+    setIsLogin(loginMode);
+    setGeneralError('');
+    setNameError('');
+    setEmailError('');
+    setPasswordError('');
+    setNameSuccess(false);
+    setEmailSuccess(false);
+    setPasswordSuccess(false);
   };
 
+  /**
+   * 1. Full Name Field Handlers (Create Account)
+   */
+  const handleNameChange = (text) => {
+    setName(text);
+
+    // DATA VALIDATION: Only alphabets and spaces allowed
+    const hasInvalidChars = /[^a-zA-Z\s]/.test(text);
+    if (hasInvalidChars) {
+      // Real-time error during typing
+      setNameError('Name Must Use Only Letters');
+      setNameSuccess(false);
+    } else {
+      if (nameError === 'Name Must Use Only Letters' || nameError === 'Full Name field cannot be empty') {
+        setNameError('');
+      }
+    }
+  };
+
+  const handleNameBlur = () => {
+    setFocusedField(null);
+
+    // TRIMMING: Trim trailing/leading empty spaces
+    const trimmed = name.trim();
+    setName(trimmed);
+
+    // EMPTY FIELD VALIDATION
+    if (!trimmed) {
+      setNameError('Full Name field cannot be empty');
+      setNameSuccess(false);
+      return;
+    }
+
+    // DATA VALIDATION: Only alphabets allowed
+    if (/[^a-zA-Z\s]/.test(trimmed)) {
+      setNameError('Name Must Use Only Letters');
+      setNameSuccess(false);
+      return;
+    }
+
+    // LENGTH VALIDATION: At least 2 names / words
+    // Checks for empty string after last character of first word and a new word following
+    const words = trimmed.split(/\s+/).filter(Boolean);
+    if (words.length < 2) {
+      setNameError('Please enter at least 2 words (e.g. First and Last name)');
+      setNameSuccess(false);
+      return;
+    }
+
+    // SUCCESS STATE: Valid input upon leaving the field
+    setNameError('');
+    setNameSuccess(true);
+  };
+
+  /**
+   * 2. Email Address Field Handlers
+   */
+  const handleEmailChange = (text) => {
+    setEmail(text);
+
+    if (!isLogin) {
+      // DATA TYPE VALIDATION (Create Account)
+      // Display real-time message when user starts typing
+      if (text.length > 0) {
+        // Stop displaying the error message the moment user types a domain after the @ symbol
+        const parts = text.split('@');
+        const hasDomainAfterAt = parts.length > 1 && parts[1].length > 0 && parts[1].includes('.') && parts[1].split('.')[1]?.length >= 2;
+
+        if (!hasDomainAfterAt) {
+          setEmailError('Enter A Valid Email Address');
+          setEmailSuccess(false);
+        } else {
+          setEmailError('');
+        }
+      } else {
+        setEmailError('');
+        setEmailSuccess(false);
+      }
+    } else {
+      if (emailError) setEmailError('');
+    }
+  };
+
+  const handleEmailBlur = () => {
+    setFocusedField(null);
+
+    // TRIMMING
+    const trimmed = email.trim();
+    setEmail(trimmed);
+
+    // EMPTY FIELD VALIDATION
+    if (!trimmed) {
+      setEmailError('Email Address field cannot be empty');
+      setEmailSuccess(false);
+      return;
+    }
+
+    // Check domain format
+    const parts = trimmed.split('@');
+    const hasDomainAfterAt = parts.length > 1 && parts[1].length > 0 && parts[1].includes('.') && parts[1].split('.')[1]?.length >= 2;
+
+    if (!hasDomainAfterAt) {
+      setEmailError('Enter A Valid Email Address');
+      setEmailSuccess(false);
+      return;
+    }
+
+    // SUCCESS STATE
+    setEmailError('');
+    setEmailSuccess(true);
+  };
+
+  /**
+   * 3. Password Field Handlers
+   */
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+
+    if (passwordError === 'Password field cannot be empty') {
+      setPasswordError('');
+    }
+    if (text.length >= 8 && passwordError === 'Password must be at least 8 characters long') {
+      setPasswordError('');
+    }
+  };
+
+  const handlePasswordBlur = () => {
+    setFocusedField(null);
+
+    // TRIMMING
+    const trimmed = password.trim();
+    setPassword(trimmed);
+
+    // EMPTY FIELD VALIDATION
+    if (!trimmed) {
+      setPasswordError('Password field cannot be empty');
+      setPasswordSuccess(false);
+      return;
+    }
+
+    // Minimum 8 characters validation
+    if (trimmed.length < 8) {
+      setPasswordError('Password must be at least 8 characters long');
+      setPasswordSuccess(false);
+      return;
+    }
+
+    // SUCCESS STATE
+    setPasswordError('');
+    setPasswordSuccess(true);
+  };
+
+  /**
+   * 4. Form Completeness Check (DISABLE INPUT CARD BUTTON)
+   */
+  const trimmedName = name.trim();
+  const trimmedEmail = email.trim();
+  const trimmedPassword = password.trim();
+
+  const isNameValid = !isLogin
+    ? (trimmedName.length > 0 &&
+       !/[^a-zA-Z\s]/.test(trimmedName) &&
+       trimmedName.split(/\s+/).filter(Boolean).length >= 2 &&
+       !nameError)
+    : true;
+
+  const emailParts = trimmedEmail.split('@');
+  const hasDomainAfterAt = emailParts.length > 1 && emailParts[1].length > 0 && emailParts[1].includes('.') && emailParts[1].split('.')[1]?.length >= 2;
+  const isEmailValid = trimmedEmail.length > 0 && hasDomainAfterAt && !emailError;
+
+  const isPasswordValid = trimmedPassword.length >= 8 && !passwordError;
+
+  // The button is only enabled the moment the user fills in the last valid piece of data
+  const isFormComplete = isLogin
+    ? (isEmailValid && isPasswordValid)
+    : (isNameValid && isEmailValid && isPasswordValid);
+
+  const isButtonDisabled = !isFormComplete || loading;
+
+  /**
+   * 5. Submission Handler
+   */
   const handleSubmit = async () => {
-    setErrorMessage('');
-    if (!validate()) return;
+    setGeneralError('');
+
+    // Final trim
+    const finalEmail = email.trim();
+    const finalPassword = password.trim();
+    const finalName = name.trim();
+
+    if (!isFormComplete) return;
 
     setLoading(true);
     try {
       if (isLogin) {
-        const res = await api.login({ email: email.trim(), password });
+        const res = await api.login({ email: finalEmail, password: finalPassword });
         onNavigate('dashboard', res.user);
       } else {
         const res = await api.register({
-          email: email.trim(),
-          password,
-          name: name.trim(),
+          email: finalEmail,
+          password: finalPassword,
+          name: finalName,
           role
         });
         onNavigate('dashboard', res.user);
       }
     } catch (err) {
-      setErrorMessage(err.message || 'Authentication failed. Please check your credentials.');
+      setGeneralError(err.message || 'Authentication failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper for dynamic input container styling (border color & background color)
+  const getInputStyle = (fieldName, hasError, hasSuccess) => {
+    const isFocused = focusedField === fieldName;
+
+    // Stroke / Border Color
+    let borderColor = colors.outline;
+    let borderWidth = 1;
+
+    if (hasError) {
+      borderColor = colors.error; // Design system error red color
+      borderWidth = 1.5;
+    } else if (isFocused) {
+      borderColor = colors.primary;
+      borderWidth = 1.5;
+    } else if (hasSuccess) {
+      borderColor = colors.outlineVariant;
+    }
+
+    // Background Color
+    // SUCCESS STATE: Very light background color from our design system
+    let backgroundColor = colors.surfaceContainerLowest;
+    if (hasSuccess && !hasError && !isFocused) {
+      backgroundColor = colors.surfaceContainerLow; // Very light tone from tokens
+    }
+
+    return {
+      borderColor,
+      borderWidth,
+      backgroundColor
+    };
   };
 
   return (
@@ -90,7 +325,7 @@ export default function AuthScreen({ onNavigate }) {
         <View style={styles.tabContainer}>
           <TouchableOpacity
             style={[styles.tab, isLogin && styles.activeTab]}
-            onPress={() => { setIsLogin(true); setErrorMessage(''); }}
+            onPress={() => handleSwitchTab(true)}
             activeOpacity={0.8}
             accessible={true}
             accessibilityRole="tab"
@@ -101,7 +336,7 @@ export default function AuthScreen({ onNavigate }) {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, !isLogin && styles.activeTab]}
-            onPress={() => { setIsLogin(false); setErrorMessage(''); }}
+            onPress={() => handleSwitchTab(false)}
             activeOpacity={0.8}
             accessible={true}
             accessibilityRole="tab"
@@ -112,10 +347,10 @@ export default function AuthScreen({ onNavigate }) {
           </TouchableOpacity>
         </View>
 
-        {/* Error Alert Banner */}
-        {errorMessage ? (
+        {/* General Error Banner */}
+        {generalError ? (
           <View style={styles.errorBox} accessible={true} accessibilityRole="alert">
-            <Text style={styles.errorText}>{errorMessage}</Text>
+            <Text style={styles.errorText}>{generalError}</Text>
           </View>
         ) : null}
 
@@ -123,6 +358,7 @@ export default function AuthScreen({ onNavigate }) {
         <View style={styles.form}>
           {!isLogin ? (
             <>
+              {/* Role Selection */}
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Select Your Role</Text>
                 <View style={styles.roleGrid}>
@@ -132,13 +368,13 @@ export default function AuthScreen({ onNavigate }) {
                     activeOpacity={0.7}
                     accessible={true}
                     accessibilityRole="radio"
-                    accessibilityLabel="Moviegoer role: Book films and seats"
+                    accessibilityLabel="Moviegoer role"
                     accessibilityState={{ selected: role === 'CUSTOMER' }}
                   >
                     <Ionicons
                       name="ticket-outline"
                       size={20}
-                      color={role === 'CUSTOMER' ? Colors.onPrimaryContainer : Colors.onSurface}
+                      color={role === 'CUSTOMER' ? colors.onPrimaryContainer : colors.onSurface}
                       style={{ marginBottom: Spacing.xxs }}
                     />
                     <Text style={[styles.roleTitle, role === 'CUSTOMER' && styles.activeRoleTitle]}>
@@ -153,13 +389,13 @@ export default function AuthScreen({ onNavigate }) {
                     activeOpacity={0.7}
                     accessible={true}
                     accessibilityRole="radio"
-                    accessibilityLabel="Cinema Operator role: Manage screens and showtimes"
+                    accessibilityLabel="Cinema Operator role"
                     accessibilityState={{ selected: role === 'CINEMA_OPERATOR' }}
                   >
                     <Ionicons
                       name="business-outline"
                       size={20}
-                      color={role === 'CINEMA_OPERATOR' ? Colors.onPrimaryContainer : Colors.onSurface}
+                      color={role === 'CINEMA_OPERATOR' ? colors.onPrimaryContainer : colors.onSurface}
                       style={{ marginBottom: Spacing.xxs }}
                     />
                     <Text style={[styles.roleTitle, role === 'CINEMA_OPERATOR' && styles.activeRoleTitle]}>
@@ -174,13 +410,13 @@ export default function AuthScreen({ onNavigate }) {
                     activeOpacity={0.7}
                     accessible={true}
                     accessibilityRole="radio"
-                    accessibilityLabel="Platform Admin role: Audits and network operations"
+                    accessibilityLabel="Platform Admin role"
                     accessibilityState={{ selected: role === 'PLATFORM_ADMIN' }}
                   >
                     <Ionicons
                       name="shield-checkmark-outline"
                       size={20}
-                      color={role === 'PLATFORM_ADMIN' ? Colors.onPrimaryContainer : Colors.onSurface}
+                      color={role === 'PLATFORM_ADMIN' ? colors.onPrimaryContainer : colors.onSurface}
                       style={{ marginBottom: Spacing.xxs }}
                     />
                     <Text style={[styles.roleTitle, role === 'PLATFORM_ADMIN' && styles.activeRoleTitle]}>
@@ -191,31 +427,42 @@ export default function AuthScreen({ onNavigate }) {
                 </View>
               </View>
 
+              {/* Full Name Field */}
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Full Name</Text>
                 <TextInput
-                  style={styles.input}
-                  placeholder="Jane Doe"
-                  placeholderTextColor={Colors.onSurfaceVariant}
+                  style={[styles.input, getInputStyle('name', !!nameError, nameSuccess)]}
+                  placeholder="e.g. Jane Mary Doe"
+                  placeholderTextColor={colors.onSurfaceVariant}
                   value={name}
-                  onChangeText={setName}
+                  onChangeText={handleNameChange}
+                  onFocus={() => setFocusedField('name')}
+                  onBlur={handleNameBlur}
                   autoCapitalize="words"
                   editable={!loading}
                   accessible={true}
                   accessibilityLabel="Full Name input"
                 />
+                {nameError ? (
+                  <Text style={styles.fieldErrorText} accessible={true} accessibilityRole="alert">
+                    {nameError}
+                  </Text>
+                ) : null}
               </View>
             </>
           ) : null}
 
+          {/* Email Address Field */}
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Email Address</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, getInputStyle('email', !!emailError, emailSuccess)]}
               placeholder="you@domain.com"
-              placeholderTextColor={Colors.onSurfaceVariant}
+              placeholderTextColor={colors.onSurfaceVariant}
               value={email}
-              onChangeText={setEmail}
+              onChangeText={handleEmailChange}
+              onFocus={() => setFocusedField('email')}
+              onBlur={handleEmailBlur}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -223,38 +470,74 @@ export default function AuthScreen({ onNavigate }) {
               accessible={true}
               accessibilityLabel="Email Address input"
             />
+            {emailError ? (
+              <Text style={styles.fieldErrorText} accessible={true} accessibilityRole="alert">
+                {emailError}
+              </Text>
+            ) : null}
           </View>
 
+          {/* Password Field with Conditional Visibility Toggle Icon */}
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Password (Min. 8 characters)</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="••••••••"
-              placeholderTextColor={Colors.onSurfaceVariant}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-              editable={!loading}
-              accessible={true}
-              accessibilityLabel="Password input"
-            />
+            <View style={[styles.passwordContainer, getInputStyle('password', !!passwordError, passwordSuccess)]}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="••••••••"
+                placeholderTextColor={colors.onSurfaceVariant}
+                value={password}
+                onChangeText={handlePasswordChange}
+                onFocus={() => setFocusedField('password')}
+                onBlur={handlePasswordBlur}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                editable={!loading}
+                accessible={true}
+                accessibilityLabel="Password input"
+              />
+              {/* Visibility toggle icon appears ONLY when user starts typing password */}
+              {password.length > 0 ? (
+                <TouchableOpacity
+                  style={styles.eyeIconButton}
+                  onPress={() => setShowPassword(prev => !prev)}
+                  activeOpacity={0.7}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={colors.onSurfaceVariant}
+                  />
+                </TouchableOpacity>
+              ) : null}
+            </View>
+            {passwordError ? (
+              <Text style={styles.fieldErrorText} accessible={true} accessibilityRole="alert">
+                {passwordError}
+              </Text>
+            ) : null}
           </View>
 
-          {/* Action Button */}
+          {/* Action Button: Disabled until all fields are filled & valid */}
           <TouchableOpacity
-            style={[styles.submitButton, loading && styles.buttonDisabled]}
+            style={[
+              styles.submitButton,
+              isButtonDisabled && styles.buttonDisabled
+            ]}
             onPress={handleSubmit}
-            disabled={loading}
+            disabled={isButtonDisabled}
             activeOpacity={0.85}
             accessible={true}
             accessibilityRole="button"
+            accessibilityState={{ disabled: isButtonDisabled }}
             accessibilityLabel={isLogin ? 'Sign In Button' : 'Create Account Button'}
           >
             {loading ? (
-              <ActivityIndicator color={Colors.onPrimary} size="small" />
+              <ActivityIndicator color={colors.onPrimary} size="small" />
             ) : (
-              <Text style={styles.submitButtonText}>
+              <Text style={[styles.submitButtonText, isButtonDisabled && styles.submitButtonTextDisabled]}>
                 {isLogin ? 'Sign In' : 'Create Account'}
               </Text>
             )}
@@ -346,6 +629,12 @@ const createAuthStyles = (colors = Colors) => StyleSheet.create({
     ...Typography.labelMedium,
     color: colors.onSurface
   },
+  fieldErrorText: {
+    ...Typography.bodySmall,
+    color: colors.error,
+    marginTop: 2,
+    fontWeight: '500'
+  },
   roleGrid: {
     gap: Spacing.xs,
     marginTop: Spacing.xxs
@@ -364,10 +653,6 @@ const createAuthStyles = (colors = Colors) => StyleSheet.create({
     borderColor: colors.primary,
     backgroundColor: colors.primaryContainer
   },
-  roleIcon: {
-    fontSize: 20,
-    marginBottom: Spacing.xxs
-  },
   roleTitle: {
     ...Typography.labelLarge,
     color: colors.onSurface,
@@ -383,15 +668,30 @@ const createAuthStyles = (colors = Colors) => StyleSheet.create({
     marginTop: Spacing.xxs
   },
   input: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderWidth: 1,
-    borderColor: colors.outline,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     minHeight: 48,
     fontSize: 16,
     color: colors.onSurface
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: BorderRadius.md,
+    minHeight: 48,
+    paddingHorizontal: Spacing.md
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 16,
+    color: colors.onSurface,
+    paddingVertical: Spacing.sm
+  },
+  eyeIconButton: {
+    padding: Spacing.xs,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   submitButton: {
     backgroundColor: colors.primary,
@@ -403,15 +703,18 @@ const createAuthStyles = (colors = Colors) => StyleSheet.create({
     justifyContent: 'center'
   },
   buttonDisabled: {
-    opacity: 0.7
+    backgroundColor: colors.surfaceContainerHighest,
+    opacity: 0.5
   },
   submitButtonText: {
     ...Typography.labelLarge,
     color: colors.onPrimary,
     fontSize: 16
+  },
+  submitButtonTextDisabled: {
+    color: colors.onSurfaceVariant
   }
 });
-
 
 const authStylesCache = new Map();
 const getAuthStyles = (colors = Colors) => {
@@ -420,5 +723,3 @@ const getAuthStyles = (colors = Colors) => {
   }
   return authStylesCache.get(colors);
 };
-
-const styles = getAuthStyles(Colors);
