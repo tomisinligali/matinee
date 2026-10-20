@@ -1353,7 +1353,8 @@ const createStyles = (colors = Colors) => StyleSheet.create({
     flex: 1,
     ...Typography.bodyMedium,
     color: colors.onSurface,
-    paddingVertical: Spacing.none
+    paddingVertical: Spacing.none,
+    letterSpacing: 0
   },
   clearSearchButton: {
     padding: Spacing.xxs,

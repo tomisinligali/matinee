@@ -538,7 +538,7 @@ export default function AuthScreen({ onNavigate }) {
 
               {/* Password Field with Conditional Visibility Toggle Icon */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Password (8 to 64 characters)</Text>
+                <Text style={styles.inputLabel}>Password</Text>
                 <View style={[styles.passwordContainer, getInputStyle('password', !!passwordError, passwordSuccess)]}>
                   <TextInput
                     style={styles.passwordInput}
@@ -745,7 +745,8 @@ const createAuthStyles = (colors = Colors) => StyleSheet.create({
     paddingVertical: Spacing.sm,
     minHeight: 48,
     fontSize: 16,
-    color: colors.onSurface
+    color: colors.onSurface,
+    letterSpacing: 0
   },
   passwordContainer: {
     flexDirection: 'row',
@@ -758,7 +759,8 @@ const createAuthStyles = (colors = Colors) => StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: colors.onSurface,
-    paddingVertical: Spacing.sm
+    paddingVertical: Spacing.sm,
+    letterSpacing: 0
   },
   eyeIconButton: {
     padding: Spacing.xs,
