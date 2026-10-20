@@ -51,7 +51,14 @@ export default function DashboardScreen({ user, onLogout }) {
               }}
             />
           )}
-          {activeTab === 'cinemas' && <CinemasView />}
+          {activeTab === 'cinemas' && (
+            <CinemasView
+              onOpenTickets={() => {
+                setActiveTab('tickets');
+                setTicketsRefreshKey(k => k + 1);
+              }}
+            />
+          )}
           {activeTab === 'tickets' && (
             <TicketsView
               refreshTrigger={ticketsRefreshKey}
@@ -863,15 +870,57 @@ const NIGERIAN_CINEMAS = [
   }
 ];
 
-function CinemasView() {
+function CinemasView({ onOpenTickets }) {
   const { colors } = useTheme();
   const styles = getDashboardStyles(colors);
   const [selectedState, setSelectedState] = useState('All');
+  const [selectedCinema, setSelectedCinema] = useState(null);
+  const [showtimes, setShowtimes] = useState([]);
+  const [loadingShowtimes, setLoadingShowtimes] = useState(false);
+  const [bookingMovie, setBookingMovie] = useState(null);
   const states = ['All', 'Lagos', 'Abuja', 'Enugu', 'Oyo', 'Rivers'];
+
+  useEffect(() => {
+    setLoadingShowtimes(true);
+    api.getShowtimes()
+      .then(res => {
+        const list = res?.data || (Array.isArray(res) ? res : []);
+        setShowtimes(list);
+      })
+      .catch(err => console.warn('[CinemasView fetch showtimes error]:', err.message))
+      .finally(() => setLoadingShowtimes(false));
+  }, []);
 
   const filteredCinemas = selectedState === 'All'
     ? NIGERIAN_CINEMAS
     : NIGERIAN_CINEMAS.filter(c => c.state === selectedState);
+
+  // Group showtimes by movie for the selected cinema
+  const getCinemaMovieGroups = () => {
+    if (!selectedCinema) return [];
+    // Match showtimes or fallback to all available scheduled showtimes
+    const matching = showtimes.filter(s =>
+      s.cinemaName && s.cinemaName.toLowerCase().includes(selectedCinema.name.toLowerCase().split(' ')[0])
+    );
+    const pool = matching.length > 0 ? matching : showtimes;
+
+    const movieMap = {};
+    for (const s of pool) {
+      if (!movieMap[s.movieTitle]) {
+        movieMap[s.movieTitle] = {
+          movieId: s.movieId,
+          title: s.movieTitle,
+          posterUrl: s.moviePoster,
+          screenName: s.screenName,
+          showtimes: []
+        };
+      }
+      movieMap[s.movieTitle].showtimes.push(s);
+    }
+    return Object.values(movieMap);
+  };
+
+  const cinemaMovieGroups = getCinemaMovieGroups();
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
@@ -907,7 +956,18 @@ function CinemasView() {
       {/* Cinema Cards */}
       <View style={styles.cinemaList}>
         {filteredCinemas.map(cinema => (
-          <View key={cinema.id} style={styles.cinemaItem}>
+          <TouchableOpacity
+            key={cinema.id}
+            style={styles.cinemaItem}
+            onPress={() => {
+              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+              setSelectedCinema(cinema);
+            }}
+            activeOpacity={0.8}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`View showtimes for ${cinema.name}`}
+          >
             <View style={styles.cinemaIconBox}>
               <Ionicons name="business-outline" size={22} color={colors.primary} />
             </View>
@@ -927,11 +987,183 @@ function CinemasView() {
                     <Text style={styles.formatBadgeText}>{fmt}</Text>
                   </View>
                 ))}
+                <View style={{ marginLeft: 'auto', flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: colors.primary, marginRight: 2 }}>
+                    Showtimes
+                  </Text>
+                  <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+                </View>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </View>
+
+      {/* Cinema Schedule & Movie Showtimes Modal */}
+      {selectedCinema && (
+        <Modal visible={true} animationType="slide" presentationStyle="pageSheet">
+          <SafeAreaView style={{ flex: 1, backgroundColor: colors.surface }}>
+            {/* Modal Header */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md, borderBottomWidth: 1, borderBottomColor: colors.outlineVariant }}>
+              <View style={{ flex: 1, marginRight: Spacing.md }}>
+                <Text style={{ ...Typography.labelSmall, color: colors.primary, fontWeight: '700', letterSpacing: 1 }}>
+                  CINEMA SHOWTIMES
+                </Text>
+                <Text style={{ ...Typography.titleMedium, color: colors.onSurface, fontWeight: '700' }} numberOfLines={1}>
+                  {selectedCinema.name}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setSelectedCinema(null)}
+                style={{ padding: Spacing.xxs, borderRadius: 20, backgroundColor: colors.surfaceContainer }}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel="Close cinema schedule"
+              >
+                <Ionicons name="close" size={22} color={colors.onSurface} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView contentContainerStyle={{ padding: Spacing.lg, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
+              {/* Cinema Overview Card */}
+              <View style={{ backgroundColor: colors.surfaceContainerLowest, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: colors.outlineVariant, padding: Spacing.md, marginBottom: Spacing.lg }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.xs }}>
+                  <Ionicons name="location" size={16} color={colors.primary} style={{ marginRight: 6 }} />
+                  <Text style={{ ...Typography.bodySmall, color: colors.onSurface, flex: 1, fontWeight: '600' }}>
+                    {selectedCinema.address} • {selectedCinema.city}, {selectedCinema.state}
+                  </Text>
+                </View>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: Spacing.xxs }}>
+                  <View style={{ backgroundColor: colors.surfaceContainer, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 }}>
+                    <Text style={{ fontSize: 11, fontWeight: '600', color: colors.onSurfaceVariant }}>
+                      {selectedCinema.screens} Screens
+                    </Text>
+                  </View>
+                  {selectedCinema.formats.map((fmt, i) => (
+                    <View key={i} style={{ backgroundColor: colors.primaryContainer, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 }}>
+                      <Text style={{ fontSize: 11, fontWeight: '700', color: colors.onPrimaryContainer }}>
+                        {fmt}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              {/* Today's Screenings Section */}
+              <View style={{ marginBottom: Spacing.md }}>
+                <Text style={{ ...Typography.titleSmall, color: colors.onSurface, fontWeight: '700', marginBottom: 4 }}>
+                  Now Showing Today
+                </Text>
+                <Text style={{ ...Typography.bodySmall, color: colors.onSurfaceVariant }}>
+                  Select a movie screening to pick your preferred seats
+                </Text>
+              </View>
+
+              {loadingShowtimes ? (
+                <View style={{ paddingVertical: Spacing.xl, alignItems: 'center' }}>
+                  <ActivityIndicator size="large" color={colors.primary} />
+                  <Text style={{ marginTop: Spacing.sm, color: colors.onSurfaceVariant, fontSize: 13 }}>
+                    Fetching showtimes...
+                  </Text>
+                </View>
+              ) : cinemaMovieGroups.length === 0 ? (
+                <View style={{ paddingVertical: Spacing.xl, alignItems: 'center' }}>
+                  <Ionicons name="film-outline" size={40} color={colors.outline} />
+                  <Text style={{ marginTop: Spacing.sm, ...Typography.bodyMedium, color: colors.onSurfaceVariant }}>
+                    No scheduled screenings for this venue today.
+                  </Text>
+                </View>
+              ) : (
+                cinemaMovieGroups.map((group, idx) => (
+                  <View key={idx} style={{ backgroundColor: colors.surfaceContainerLowest, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: colors.outlineVariant, padding: Spacing.md, marginBottom: Spacing.md }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.sm }}>
+                      {group.posterUrl ? (
+                        <ExpoImage
+                          source={{ uri: group.posterUrl }}
+                          style={{ width: 48, height: 70, borderRadius: BorderRadius.sm, marginRight: Spacing.sm }}
+                          contentFit="cover"
+                        />
+                      ) : (
+                        <View style={{ width: 48, height: 70, borderRadius: BorderRadius.sm, backgroundColor: colors.surfaceContainer, marginRight: Spacing.sm, alignItems: 'center', justifyContent: 'center' }}>
+                          <Ionicons name="film" size={20} color={colors.outline} />
+                        </View>
+                      )}
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ ...Typography.titleSmall, color: colors.onSurface, fontWeight: '700' }} numberOfLines={1}>
+                          {group.title}
+                        </Text>
+                        <Text style={{ ...Typography.bodySmall, color: colors.onSurfaceVariant, marginTop: 2 }}>
+                          {group.screenName || 'Screen 1'} • 2D Laser Cinema
+                        </Text>
+                        <Text style={{ fontSize: 11, fontWeight: '600', color: colors.primary, marginTop: 4 }}>
+                          Standard Admission: ₦4,500.00
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Showtimes Pills */}
+                    <Text style={{ ...Typography.labelSmall, color: colors.onSurfaceVariant, marginBottom: Spacing.xxs, fontWeight: '600' }}>
+                      AVAILABLE SHOWTIMES
+                    </Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                      {group.showtimes.map((st) => {
+                        const sDate = new Date(st.startTime);
+                        const timeLabel = sDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                        return (
+                          <TouchableOpacity
+                            key={st.id}
+                            style={{
+                              backgroundColor: colors.primary,
+                              paddingVertical: 8,
+                              paddingHorizontal: Spacing.md,
+                              borderRadius: BorderRadius.md,
+                              alignItems: 'center'
+                            }}
+                            onPress={() => {
+                              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+                              setBookingMovie({
+                                id: st.movieId,
+                                title: st.movieTitle,
+                                posterUrl: st.moviePoster,
+                                showtimeId: st.id,
+                                cinema: selectedCinema.name,
+                                screen: st.screenName
+                              });
+                            }}
+                            activeOpacity={0.85}
+                            accessible={true}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Book ${group.title} at ${timeLabel}`}
+                          >
+                            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.onPrimary }}>
+                              {timeLabel}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+                ))
+              )}
+            </ScrollView>
+          </SafeAreaView>
+
+          {/* Seat Selection Modal launched from Cinema Schedule */}
+          {bookingMovie && (
+            <SeatSelectionModal
+              visible={Boolean(bookingMovie)}
+              movie={bookingMovie}
+              isInline={false}
+              onClose={() => setBookingMovie(null)}
+              onBookingSuccess={() => {
+                setBookingMovie(null);
+                setSelectedCinema(null);
+                onOpenTickets?.();
+              }}
+            />
+          )}
+        </Modal>
+      )}
     </ScrollView>
   );
 }
@@ -968,15 +1200,15 @@ function TicketsView({ onBrowse, onViewTicket, refreshTrigger }) {
 
   const now = new Date();
   const upcomingBookings = bookings.filter(b => {
+    // If created recently (within last 24h) or showtime is upcoming/recent, show as upcoming pass
+    const isRecentPurchase = b.createdAt && (now.getTime() - new Date(b.createdAt).getTime() < 24 * 3600 * 1000);
     const startTime = b.showtime?.startTime || b.showtimeStart;
-    if (!startTime) return true;
-    return new Date(startTime).getTime() >= (now.getTime() - 4 * 3600 * 1000);
+    const isFuture = startTime ? new Date(startTime).getTime() >= (now.getTime() - 2 * 3600 * 1000) : false;
+    return isFuture || isRecentPurchase;
   });
 
   const pastBookings = bookings.filter(b => {
-    const startTime = b.showtime?.startTime || b.showtimeStart;
-    if (!startTime) return false;
-    return new Date(startTime).getTime() < (now.getTime() - 4 * 3600 * 1000);
+    return !upcomingBookings.includes(b);
   });
 
   return (
@@ -1199,17 +1431,74 @@ function TicketsView({ onBrowse, onViewTicket, refreshTrigger }) {
                 : (b.tickets?.map(t => t.seatLabel).join(', ') || 'Seats Reserved');
 
               return (
-                <View key={b.id || b.bookingRef} style={[styles.notchTicketCard, { marginBottom: Spacing.lg, opacity: 0.75 }]}>
+                <TouchableOpacity
+                  key={b.id || b.bookingRef}
+                  style={[styles.notchTicketCard, { marginBottom: Spacing.lg }]}
+                  onPress={() => {
+                    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
+                    onViewTicket && onViewTicket(b);
+                  }}
+                  activeOpacity={0.85}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel={`View full receipt for ${b.movie?.title || b.movieTitle}`}
+                >
+                  <View style={styles.notchLeft} />
+                  <View style={styles.notchRight} />
+
                   <View style={styles.ticketTopSection}>
                     <View style={styles.ticketHeaderBadgeRow}>
                       <View style={[styles.ticketStatusBadge, { backgroundColor: colors.surfaceContainerHighest }]}>
-                        <Text style={[styles.ticketStatusBadgeText, { color: colors.onSurfaceVariant }]}>{b.status}</Text>
+                        <Ionicons name="receipt-outline" size={13} color={colors.onSurfaceVariant} style={{ marginRight: Spacing.xxs }} />
+                        <Text style={[styles.ticketStatusBadgeText, { color: colors.onSurfaceVariant }]}>COMPLETED RECEIPT</Text>
+                      </View>
+                      <Text style={styles.ticketFormatText}>Archived Pass</Text>
+                    </View>
+
+                    <Text style={styles.ticketMovieTitle}>{b.movie?.title || b.movieTitle}</Text>
+                    <View style={styles.ticketVenueRow}>
+                      <Ionicons name="location-outline" size={13} color={colors.primary} style={{ marginRight: Spacing.xxs }} />
+                      <Text style={styles.ticketCinemaVenue}>{b.cinema?.name || b.cinemaName || 'Filmhouse Cinemas'}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.perforatedDivider}>
+                    <View style={styles.perforatedDashes} />
+                  </View>
+
+                  <View style={styles.ticketStubSection}>
+                    <View style={styles.ticketDataGrid}>
+                      <View style={styles.ticketDataCol}>
+                        <Text style={styles.ticketDataLabel}>DATE</Text>
+                        <Text style={styles.ticketDataValue}>{dateStr}</Text>
+                      </View>
+                      <View style={styles.ticketDataCol}>
+                        <Text style={styles.ticketDataLabel}>TIME</Text>
+                        <Text style={styles.ticketDataValue}>{timeStr}</Text>
+                      </View>
+                      <View style={styles.ticketDataCol}>
+                        <Text style={styles.ticketDataLabel}>HALL</Text>
+                        <Text style={styles.ticketDataValue}>{b.cinema?.screen || b.screenName || 'Screen 1'}</Text>
+                      </View>
+                      <View style={styles.ticketDataCol}>
+                        <Text style={styles.ticketDataLabel}>SEATS</Text>
+                        <Text style={styles.ticketDataValueHighlight}>{seatDisplay}</Text>
                       </View>
                     </View>
-                    <Text style={styles.ticketMovieTitle}>{b.movie?.title || b.movieTitle}</Text>
-                    <Text style={styles.ticketCinemaVenue}>{dateStr} • {timeStr} • {seatDisplay}</Text>
+
+                    <View style={{ marginTop: Spacing.md, paddingTop: Spacing.xs, borderTopWidth: 1, borderTopColor: colors.outlineVariant, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Text style={{ fontSize: 12, fontWeight: '600', color: colors.onSurfaceVariant }}>
+                        REF: {b.bookingRef}
+                      </Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 13, fontWeight: '700', color: colors.primary, marginRight: 4 }}>
+                          View Full Receipt & Pass
+                        </Text>
+                        <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+                      </View>
+                    </View>
                   </View>
-                </View>
+                </TouchableOpacity>
               );
             })}
           </View>
