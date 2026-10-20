@@ -20,6 +20,7 @@ export default function AuthScreen({ onNavigate }) {
   const styles = getAuthStyles(colors);
 
   const [isLogin, setIsLogin] = useState(true);
+  const [registerStep, setRegisterStep] = useState(1); // 1: Select User Type | 2: Enter Details
   const [role, setRole] = useState('CUSTOMER'); // 'CUSTOMER' | 'CINEMA_OPERATOR' | 'PLATFORM_ADMIN'
 
   // Input states
@@ -50,6 +51,7 @@ export default function AuthScreen({ onNavigate }) {
   // Reset form errors & success states when switching tabs
   const handleSwitchTab = (loginMode) => {
     setIsLogin(loginMode);
+    setRegisterStep(1);
     setGeneralError('');
     setNameError('');
     setEmailError('');
@@ -240,7 +242,9 @@ export default function AuthScreen({ onNavigate }) {
     ? (isEmailValid && isPasswordValid)
     : (isNameValid && isEmailValid && isPasswordValid);
 
-  const isButtonDisabled = !isFormComplete || loading;
+  const isButtonDisabled = isLogin
+    ? (!isFormComplete || loading)
+    : (registerStep === 1 ? false : (!isFormComplete || loading));
 
   /**
    * 5. Submission Handler
@@ -321,11 +325,17 @@ export default function AuthScreen({ onNavigate }) {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.appTitle}>MATINEE</Text>
-          <Text style={styles.formTitle}>{isLogin ? 'Sign In' : 'Create Account'}</Text>
+          <Text style={styles.formTitle}>
+            {isLogin
+              ? 'Sign In'
+              : (registerStep === 1 ? 'Choose Account Type' : 'Enter Your Details')}
+          </Text>
           <Text style={styles.formSubtitle}>
             {isLogin
               ? 'Enter your credentials to access your tickets'
-              : 'Register to start booking cinema screenings'}
+              : (registerStep === 1
+                  ? 'Step 1 of 2: Select your role to get started'
+                  : 'Step 2 of 2: Fill in your details to create your account')}
           </Text>
         </View>
 
@@ -364,192 +374,233 @@ export default function AuthScreen({ onNavigate }) {
 
         {/* Form Inputs */}
         <View style={styles.form}>
-          {!isLogin ? (
-            <>
-              {/* Role Selection */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Select Your Role</Text>
-                <View style={styles.roleGrid}>
-                  <TouchableOpacity
-                    style={[styles.roleCard, role === 'CUSTOMER' && styles.activeRoleCard]}
-                    onPress={() => setRole('CUSTOMER')}
-                    activeOpacity={0.7}
-                    accessible={true}
-                    accessibilityRole="radio"
-                    accessibilityLabel="Moviegoer role"
-                    accessibilityState={{ selected: role === 'CUSTOMER' }}
-                  >
-                    <Ionicons
-                      name="ticket-outline"
-                      size={20}
-                      color={role === 'CUSTOMER' ? colors.onPrimaryContainer : colors.onSurface}
-                      style={{ marginBottom: Spacing.xxs }}
-                    />
-                    <Text style={[styles.roleTitle, role === 'CUSTOMER' && styles.activeRoleTitle]}>
-                      Moviegoer
-                    </Text>
-                    <Text style={styles.roleDesc}>Book films & seats</Text>
-                  </TouchableOpacity>
+          {!isLogin && registerStep === 1 ? (
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Select Your Account Type</Text>
+              <View style={styles.roleGrid}>
+                <TouchableOpacity
+                  style={[styles.roleCard, role === 'CUSTOMER' && styles.activeRoleCard]}
+                  onPress={() => setRole('CUSTOMER')}
+                  activeOpacity={0.7}
+                  accessible={true}
+                  accessibilityRole="radio"
+                  accessibilityLabel="Moviegoer role"
+                  accessibilityState={{ selected: role === 'CUSTOMER' }}
+                >
+                  <Ionicons
+                    name="ticket-outline"
+                    size={22}
+                    color={role === 'CUSTOMER' ? colors.onPrimaryContainer : colors.onSurface}
+                    style={{ marginBottom: Spacing.xxs }}
+                  />
+                  <Text style={[styles.roleTitle, role === 'CUSTOMER' && styles.activeRoleTitle]}>
+                    Moviegoer
+                  </Text>
+                  <Text style={styles.roleDesc}>Book films, select seats & access digital tickets</Text>
+                </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={[styles.roleCard, role === 'CINEMA_OPERATOR' && styles.activeRoleCard]}
-                    onPress={() => setRole('CINEMA_OPERATOR')}
-                    activeOpacity={0.7}
-                    accessible={true}
-                    accessibilityRole="radio"
-                    accessibilityLabel="Cinema Operator role"
-                    accessibilityState={{ selected: role === 'CINEMA_OPERATOR' }}
-                  >
-                    <Ionicons
-                      name="business-outline"
-                      size={20}
-                      color={role === 'CINEMA_OPERATOR' ? colors.onPrimaryContainer : colors.onSurface}
-                      style={{ marginBottom: Spacing.xxs }}
-                    />
-                    <Text style={[styles.roleTitle, role === 'CINEMA_OPERATOR' && styles.activeRoleTitle]}>
-                      Cinema Operator
-                    </Text>
-                    <Text style={styles.roleDesc}>Manage screens & showtimes</Text>
-                  </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.roleCard, role === 'CINEMA_OPERATOR' && styles.activeRoleCard]}
+                  onPress={() => setRole('CINEMA_OPERATOR')}
+                  activeOpacity={0.7}
+                  accessible={true}
+                  accessibilityRole="radio"
+                  accessibilityLabel="Cinema Operator role"
+                  accessibilityState={{ selected: role === 'CINEMA_OPERATOR' }}
+                >
+                  <Ionicons
+                    name="business-outline"
+                    size={22}
+                    color={role === 'CINEMA_OPERATOR' ? colors.onPrimaryContainer : colors.onSurface}
+                    style={{ marginBottom: Spacing.xxs }}
+                  />
+                  <Text style={[styles.roleTitle, role === 'CINEMA_OPERATOR' && styles.activeRoleTitle]}>
+                    Cinema Operator
+                  </Text>
+                  <Text style={styles.roleDesc}>Manage screens, showtimes & live attendance</Text>
+                </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={[styles.roleCard, role === 'PLATFORM_ADMIN' && styles.activeRoleCard]}
-                    onPress={() => setRole('PLATFORM_ADMIN')}
-                    activeOpacity={0.7}
-                    accessible={true}
-                    accessibilityRole="radio"
-                    accessibilityLabel="Platform Admin role"
-                    accessibilityState={{ selected: role === 'PLATFORM_ADMIN' }}
-                  >
-                    <Ionicons
-                      name="shield-checkmark-outline"
-                      size={20}
-                      color={role === 'PLATFORM_ADMIN' ? colors.onPrimaryContainer : colors.onSurface}
-                      style={{ marginBottom: Spacing.xxs }}
-                    />
-                    <Text style={[styles.roleTitle, role === 'PLATFORM_ADMIN' && styles.activeRoleTitle]}>
-                      Platform Admin
-                    </Text>
-                    <Text style={styles.roleDesc}>Audits & network operations</Text>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  style={[styles.roleCard, role === 'PLATFORM_ADMIN' && styles.activeRoleCard]}
+                  onPress={() => setRole('PLATFORM_ADMIN')}
+                  activeOpacity={0.7}
+                  accessible={true}
+                  accessibilityRole="radio"
+                  accessibilityLabel="Platform Admin role"
+                  accessibilityState={{ selected: role === 'PLATFORM_ADMIN' }}
+                >
+                  <Ionicons
+                    name="shield-checkmark-outline"
+                    size={22}
+                    color={role === 'PLATFORM_ADMIN' ? colors.onPrimaryContainer : colors.onSurface}
+                    style={{ marginBottom: Spacing.xxs }}
+                  />
+                  <Text style={[styles.roleTitle, role === 'PLATFORM_ADMIN' && styles.activeRoleTitle]}>
+                    Platform Admin
+                  </Text>
+                  <Text style={styles.roleDesc}>Security audits & network operations</Text>
+                </TouchableOpacity>
               </View>
 
-              {/* Full Name Field */}
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={() => setRegisterStep(2)}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.submitButtonText}>Continue to Enter Details</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              {!isLogin && (
+                <View style={styles.roleSummaryBar}>
+                  <View style={styles.roleSummaryLeft}>
+                    <Ionicons
+                      name={role === 'CUSTOMER' ? 'ticket-outline' : role === 'CINEMA_OPERATOR' ? 'business-outline' : 'shield-checkmark-outline'}
+                      size={18}
+                      color={colors.primary}
+                    />
+                    <Text style={styles.roleSummaryText}>
+                      Account Type:{' '}
+                      <Text style={styles.roleSummaryHighlight}>
+                        {role === 'CUSTOMER' ? 'Moviegoer' : role === 'CINEMA_OPERATOR' ? 'Cinema Operator' : 'Platform Admin'}
+                      </Text>
+                    </Text>
+                  </View>
+                  <TouchableOpacity onPress={() => setRegisterStep(1)} style={styles.changeRoleBtn}>
+                    <Text style={styles.changeRoleBtnText}>Change</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Full Name Field (Create Account Only) */}
+              {!isLogin && (
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Full Name</Text>
+                  <TextInput
+                    style={[styles.input, getInputStyle('name', !!nameError, nameSuccess)]}
+                    placeholder="e.g. Jane Mary Doe"
+                    placeholderTextColor={colors.onSurfaceVariant}
+                    value={name}
+                    onChangeText={handleNameChange}
+                    onFocus={() => setFocusedField('name')}
+                    onBlur={handleNameBlur}
+                    autoCapitalize="words"
+                    editable={!loading}
+                    accessible={true}
+                    accessibilityLabel="Full Name input"
+                  />
+                  {nameError ? (
+                    <Text style={styles.fieldErrorText} accessible={true} accessibilityRole="alert">
+                      {nameError}
+                    </Text>
+                  ) : null}
+                </View>
+              )}
+
+              {/* Email Address Field */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Full Name</Text>
+                <Text style={styles.inputLabel}>Email Address</Text>
                 <TextInput
-                  style={[styles.input, getInputStyle('name', !!nameError, nameSuccess)]}
-                  placeholder="e.g. Jane Mary Doe"
+                  style={[styles.input, getInputStyle('email', !!emailError, emailSuccess)]}
+                  placeholder="you@domain.com"
                   placeholderTextColor={colors.onSurfaceVariant}
-                  value={name}
-                  onChangeText={handleNameChange}
-                  onFocus={() => setFocusedField('name')}
-                  onBlur={handleNameBlur}
-                  autoCapitalize="words"
+                  value={email}
+                  onChangeText={handleEmailChange}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={handleEmailBlur}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
                   editable={!loading}
                   accessible={true}
-                  accessibilityLabel="Full Name input"
+                  accessibilityLabel="Email Address input"
                 />
-                {nameError ? (
+                {emailError ? (
                   <Text style={styles.fieldErrorText} accessible={true} accessibilityRole="alert">
-                    {nameError}
+                    {emailError}
                   </Text>
                 ) : null}
               </View>
-            </>
-          ) : null}
 
-          {/* Email Address Field */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Email Address</Text>
-            <TextInput
-              style={[styles.input, getInputStyle('email', !!emailError, emailSuccess)]}
-              placeholder="you@domain.com"
-              placeholderTextColor={colors.onSurfaceVariant}
-              value={email}
-              onChangeText={handleEmailChange}
-              onFocus={() => setFocusedField('email')}
-              onBlur={handleEmailBlur}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              editable={!loading}
-              accessible={true}
-              accessibilityLabel="Email Address input"
-            />
-            {emailError ? (
-              <Text style={styles.fieldErrorText} accessible={true} accessibilityRole="alert">
-                {emailError}
-              </Text>
-            ) : null}
-          </View>
-
-          {/* Password Field with Conditional Visibility Toggle Icon */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Password (8 to 64 characters)</Text>
-            <View style={[styles.passwordContainer, getInputStyle('password', !!passwordError, passwordSuccess)]}>
-              <TextInput
-                style={styles.passwordInput}
-                placeholder="••••••••"
-                placeholderTextColor={colors.onSurfaceVariant}
-                value={password}
-                onChangeText={handlePasswordChange}
-                onFocus={() => setFocusedField('password')}
-                onBlur={handlePasswordBlur}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                editable={!loading}
-                accessible={true}
-                accessibilityLabel="Password input"
-              />
-              {/* Visibility toggle icon appears ONLY when user starts typing password */}
-              {password.length > 0 ? (
-                <TouchableOpacity
-                  style={styles.eyeIconButton}
-                  onPress={() => setShowPassword(prev => !prev)}
-                  activeOpacity={0.7}
-                  accessible={true}
-                  accessibilityRole="button"
-                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  <Ionicons
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={colors.onSurfaceVariant}
+              {/* Password Field with Conditional Visibility Toggle Icon */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Password (8 to 64 characters)</Text>
+                <View style={[styles.passwordContainer, getInputStyle('password', !!passwordError, passwordSuccess)]}>
+                  <TextInput
+                    style={styles.passwordInput}
+                    placeholder="••••••••"
+                    placeholderTextColor={colors.onSurfaceVariant}
+                    value={password}
+                    onChangeText={handlePasswordChange}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={handlePasswordBlur}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    editable={!loading}
+                    accessible={true}
+                    accessibilityLabel="Password input"
                   />
-                </TouchableOpacity>
-              ) : null}
-            </View>
-            {passwordError ? (
-              <Text style={styles.fieldErrorText} accessible={true} accessibilityRole="alert">
-                {passwordError}
-              </Text>
-            ) : null}
-          </View>
+                  {/* Visibility toggle icon appears ONLY when user starts typing password */}
+                  {password.length > 0 ? (
+                    <TouchableOpacity
+                      style={styles.eyeIconButton}
+                      onPress={() => setShowPassword(prev => !prev)}
+                      activeOpacity={0.7}
+                      accessible={true}
+                      accessibilityRole="button"
+                      accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      <Ionicons
+                        name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                        size={20}
+                        color={colors.onSurfaceVariant}
+                      />
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
+                {passwordError ? (
+                  <Text style={styles.fieldErrorText} accessible={true} accessibilityRole="alert">
+                    {passwordError}
+                  </Text>
+                ) : null}
+              </View>
 
-          {/* Action Button: Disabled until all fields are filled & valid */}
-          <TouchableOpacity
-            style={[
-              styles.submitButton,
-              isButtonDisabled && styles.buttonDisabled
-            ]}
-            onPress={handleSubmit}
-            disabled={isButtonDisabled}
-            activeOpacity={0.85}
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityState={{ disabled: isButtonDisabled }}
-            accessibilityLabel={isLogin ? 'Sign In Button' : 'Create Account Button'}
-          >
-            {loading ? (
-              <ActivityIndicator color={colors.onPrimary} size="small" />
-            ) : (
-              <Text style={[styles.submitButtonText, isButtonDisabled && styles.submitButtonTextDisabled]}>
-                {isLogin ? 'Sign In' : 'Create Account'}
-              </Text>
-            )}
-          </TouchableOpacity>
+              {/* Action Button: Disabled until all fields are filled & valid */}
+              <TouchableOpacity
+                style={[
+                  styles.submitButton,
+                  isButtonDisabled && styles.buttonDisabled
+                ]}
+                onPress={handleSubmit}
+                disabled={isButtonDisabled}
+                activeOpacity={0.85}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: isButtonDisabled }}
+                accessibilityLabel={isLogin ? 'Sign In Button' : 'Create Account Button'}
+              >
+                {loading ? (
+                  <ActivityIndicator color={colors.onPrimary} size="small" />
+                ) : (
+                  <Text style={[styles.submitButtonText, isButtonDisabled && styles.submitButtonTextDisabled]}>
+                    {isLogin ? 'Sign In' : 'Create Account'}
+                  </Text>
+                )}
+              </TouchableOpacity>
+
+              {!isLogin && (
+                <TouchableOpacity
+                  style={styles.secondaryBackButton}
+                  onPress={() => setRegisterStep(1)}
+                  disabled={loading}
+                >
+                  <Ionicons name="arrow-back" size={16} color={colors.onSurfaceVariant} />
+                  <Text style={styles.secondaryBackButtonText}>Back to Account Type</Text>
+                </TouchableOpacity>
+              )}
+            </>
+          )}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -720,6 +771,52 @@ const createAuthStyles = (colors = Colors) => StyleSheet.create({
     fontSize: 16
   },
   submitButtonTextDisabled: {
+    color: colors.onSurfaceVariant
+  },
+  roleSummaryBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.surfaceContainerLowest,
+    borderColor: colors.outlineVariant,
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    marginBottom: Spacing.xs
+  },
+  roleSummaryLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs
+  },
+  roleSummaryText: {
+    ...Typography.bodyMedium,
+    color: colors.onSurface
+  },
+  roleSummaryHighlight: {
+    color: colors.primary,
+    fontWeight: '700'
+  },
+  changeRoleBtn: {
+    paddingVertical: Spacing.xxs,
+    paddingHorizontal: Spacing.xs
+  },
+  changeRoleBtnText: {
+    ...Typography.labelMedium,
+    color: colors.primary,
+    fontWeight: '700'
+  },
+  secondaryBackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    paddingVertical: Spacing.sm,
+    marginTop: Spacing.xxs
+  },
+  secondaryBackButtonText: {
+    ...Typography.bodySmall,
     color: colors.onSurfaceVariant
   }
 });
