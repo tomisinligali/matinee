@@ -95,10 +95,15 @@ export const api = {
     return request('/health');
   },
 
-  async register({ email, password, name }) {
+  async register({ email, password, name, role }) {
     const data = await request('/api/v1/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ email, password, name })
+      body: JSON.stringify({
+        email: (email || '').trim().toLowerCase(),
+        password,
+        name,
+        role
+      })
     });
     if (data?.token && data?.user) {
       await authStorage.saveSession(data.token, data.user);
@@ -109,7 +114,10 @@ export const api = {
   async login({ email, password }) {
     const data = await request('/api/v1/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({
+        email: (email || '').trim().toLowerCase(),
+        password
+      })
     });
     if (data?.token && data?.user) {
       await authStorage.saveSession(data.token, data.user);

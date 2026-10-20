@@ -117,14 +117,16 @@ export default function AuthScreen({ onNavigate }) {
    * 2. Email Address Field Handlers
    */
   const handleEmailChange = (text) => {
-    setEmail(text);
+    // Bounce down all email addresses to lowercase to eliminate casing conflicts
+    const lowerEmail = text.toLowerCase();
+    setEmail(lowerEmail);
 
     if (!isLogin) {
       // DATA TYPE VALIDATION (Create Account)
       // Display real-time message when user starts typing
-      if (text.length > 0) {
+      if (lowerEmail.length > 0) {
         // Stop displaying the error message the moment user types a domain after the @ symbol
-        const parts = text.split('@');
+        const parts = lowerEmail.split('@');
         const hasDomainAfterAt = parts.length > 1 && parts[1].length > 0 && parts[1].includes('.') && parts[1].split('.')[1]?.length >= 2;
 
         if (!hasDomainAfterAt) {
@@ -145,8 +147,8 @@ export default function AuthScreen({ onNavigate }) {
   const handleEmailBlur = () => {
     setFocusedField(null);
 
-    // TRIMMING
-    const trimmed = email.trim();
+    // TRIMMING & LOWERCASE: Bounce down all emails to lowercase
+    const trimmed = email.trim().toLowerCase();
     setEmail(trimmed);
 
     // EMPTY FIELD VALIDATION
